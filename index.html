@@ -1,1 +1,200 @@
-This is a test
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aesthetic Portfolio | 极简美学</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #fafafa;
+            --text: #1a1a1a;
+            --accent: #555;
+            --transition: cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* 导航栏 */
+        nav {
+            padding: 2rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+
+        .logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text);
+            margin-left: 2.5rem;
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: var(--accent);
+        }
+
+        /* Hero 区域 */
+        header {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 0 10%;
+        }
+
+        .hero-title {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(3rem, 10vw, 8rem);
+            line-height: 1.1;
+            margin-bottom: 2rem;
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeIn 1.2s var(--transition) forwards;
+        }
+
+        .hero-title i {
+            font-weight: 400;
+        }
+
+        .hero-desc {
+            max-width: 500px;
+            font-weight: 300;
+            font-size: 1.1rem;
+            opacity: 0;
+            animation: fadeIn 1.2s var(--transition) 0.3s forwards;
+        }
+
+        /* 作品网格 */
+        .work-grid {
+            padding: 5rem 10%;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 4rem;
+        }
+
+        .work-item {
+            position: relative;
+            cursor: pointer;
+            overflow: hidden;
+        }
+
+        .work-img {
+            width: 100%;
+            aspect-ratio: 4/5;
+            background: #eee;
+            object-fit: cover;
+            transition: transform 0.8s var(--transition);
+        }
+
+        .work-item:hover .work-img {
+            transform: scale(1.05);
+        }
+
+        .work-info {
+            margin-top: 1.5rem;
+        }
+
+        .work-category {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #888;
+        }
+
+        .work-title {
+            font-size: 1.2rem;
+            margin-top: 0.5rem;
+        }
+
+        /* 动画 */
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .work-grid {
+                grid-template-columns: 1fr;
+            }
+            nav {
+                padding: 1.5rem 10%;
+            }
+            .nav-links {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="logo">Ethereal.</div>
+        <div class="nav-links">
+            <a href="#">WORKS</a>
+            <a href="#">ABOUT</a>
+            <a href="#">CONTACT</a>
+        </div>
+    </nav>
+
+    <header>
+        <h1 class="hero-title">
+            Creative<br><i>Simplicity.</i>
+        </h1>
+        <p class="hero-desc">
+            专注于通过极简的设计语言，构建具有持久生命力的数字体验。我们相信，少即是多，克制即是力量。
+        </p>
+    </header>
+
+    <main class="work-grid">
+        <div class="work-item">
+            <img src="https://images.unsplash.com/photo-1494438639946-1ebd1d20bf85?auto=format&fit=crop&w=800&q=80" alt="Work 1" class="work-img">
+            <div class="work-info">
+                <p class="work-category">INTERIOR / 2024</p>
+                <h3 class="work-title">静谧空间 (Serene Space)</h3>
+            </div>
+        </div>
+        <div class="work-item" style="margin-top: 100px;">
+            <img src="https://images.unsplash.com/photo-1507646227570-518a0da0264b?auto=format&fit=crop&w=800&q=80" alt="Work 2" class="work-img">
+            <div class="work-info">
+                <p class="work-category">IDENTITY / 2024</p>
+                <h3 class="work-title">虚无品牌 (Void Identity)</h3>
+            </div>
+        </div>
+    </main>
+
+    <footer style="padding: 100px 10%; text-align: center; font-size: 0.8rem; color: #888;">
+        © 2026 GEMINI DESIGN STUDIO. ALL RIGHTS RESERVED.
+    </footer>
+
+</body>
+</html>
