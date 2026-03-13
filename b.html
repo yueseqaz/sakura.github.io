@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>开源图片瀑布流</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { padding: 20px; background: #f5f5f5; font-family: system-ui; }
+    .title { text-align: center; margin-bottom: 24px; color: #333; }
+    .waterfall-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 16px;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    .waterfall-item {
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      transition: transform 0.2s;
+    }
+    .waterfall-item:hover { transform: translateY(-4px); }
+    .waterfall-item img { width: 100%; height: auto; display: block; }
+  </style>
+</head>
+<body>
+  <h1 class="title">开源免费图片瀑布流</h1>
+  <div class="waterfall-container" id="waterfall"></div>
+
+  <script>
+    const container=document.getElementById('waterfall');
+    const total=30;
+    // 可选：切换 source = 'picsum' / 'unsplash'
+    const source = 'picsum'; 
+
+    for (let i=1; i <= total; i++) {
+      const item=document.createElement('div');
+      item.className = 'waterfall-item';
+      const h=Math.floor(Math.random()*200)+200; // 随机高度
+      let imgUrl;
+      if (source === 'picsum') {
+        imgUrl = `https://picsum.photos/400/${h}?random=${i}`;
+      } else if (source === 'unsplash') {
+        imgUrl = `https://source.unsplash.com/random/400x${h}/?nature`;
+      }
+      item.innerHTML = `<img loading="lazy" src="${imgUrl}" alt="开源图片${i}">`;
+      container.appendChild(item);
+    }
+  </script>
+</body>
+</html>
