@@ -1,200 +1,614 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aesthetic Portfolio | 极简美学</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --bg: #fafafa;
-            --text: #1a1a1a;
-            --accent: #555;
-            --transition: cubic-bezier(0.23, 1, 0.32, 1);
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+<title>Studio — AI Powered</title>
 
-        body {
-            background-color: var(--bg);
-            color: var(--text);
-            font-family: 'Inter', sans-serif;
-            line-height: 1.6;
-            overflow-x: hidden;
-        }
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-        /* 导航栏 */
-        nav {
-            padding: 2rem 5%;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: fixed;
-            width: 100%;
-            top: 0;
-            z-index: 100;
-            backdrop-filter: blur(10px);
-        }
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
 
-        .logo {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.5rem;
-            font-weight: 700;
-        }
+<script src="https://cdn.jsdelivr.net/npm/hls.js@1"></script>
 
-        .nav-links a {
-            text-decoration: none;
-            color: var(--text);
-            margin-left: 2.5rem;
-            font-size: 0.9rem;
-            letter-spacing: 1px;
-            transition: color 0.3s;
-        }
 
-        .nav-links a:hover {
-            color: var(--accent);
-        }
+<style>
 
-        /* Hero 区域 */
-        header {
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            padding: 0 10%;
-        }
 
-        .hero-title {
-            font-family: 'Playfair Display', serif;
-            font-size: clamp(3rem, 10vw, 8rem);
-            line-height: 1.1;
-            margin-bottom: 2rem;
-            opacity: 0;
-            transform: translateY(30px);
-            animation: fadeIn 1.2s var(--transition) forwards;
-        }
+/* ================= RESET ================= */
 
-        .hero-title i {
-            font-weight: 400;
-        }
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
 
-        .hero-desc {
-            max-width: 500px;
-            font-weight: 300;
-            font-size: 1.1rem;
-            opacity: 0;
-            animation: fadeIn 1.2s var(--transition) 0.3s forwards;
-        }
+body{
+background:#000;
+color:#fff;
+font-family:'Barlow',sans-serif;
+overflow-x:hidden;
+}
 
-        /* 作品网格 */
-        .work-grid {
-            padding: 5rem 10%;
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 4rem;
-        }
 
-        .work-item {
-            position: relative;
-            cursor: pointer;
-            overflow: hidden;
-        }
+/* ================= SCROLL BAR ================= */
 
-        .work-img {
-            width: 100%;
-            aspect-ratio: 4/5;
-            background: #eee;
-            object-fit: cover;
-            transition: transform 0.8s var(--transition);
-        }
+#scrollBar{
 
-        .work-item:hover .work-img {
-            transform: scale(1.05);
-        }
+position:fixed;
+top:0;
+left:0;
 
-        .work-info {
-            margin-top: 1.5rem;
-        }
+height:3px;
+width:0%;
 
-        .work-category {
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            color: #888;
-        }
+z-index:9999;
 
-        .work-title {
-            font-size: 1.2rem;
-            margin-top: 0.5rem;
-        }
+background:linear-gradient(
+90deg,
+#fff,
+#aaa,
+#fff
+);
 
-        /* 动画 */
-        @keyframes fadeIn {
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
+}
 
-        @media (max-width: 768px) {
-            .work-grid {
-                grid-template-columns: 1fr;
-            }
-            nav {
-                padding: 1.5rem 10%;
-            }
-            .nav-links {
-                display: none;
-            }
-        }
-    </style>
+
+
+/* ================= CURSOR GLOW ================= */
+
+#cursorGlow{
+
+position:fixed;
+
+width:400px;
+height:400px;
+
+border-radius:50%;
+
+pointer-events:none;
+
+background:
+radial-gradient(
+circle,
+rgba(255,255,255,0.08),
+rgba(255,255,255,0.02),
+transparent 70%
+);
+
+filter:blur(40px);
+
+transform:translate(-50%,-50%);
+
+z-index:0;
+
+}
+
+
+
+/* ================= PARTICLES ================= */
+
+#bgParticles{
+
+position:fixed;
+
+inset:0;
+
+z-index:-1;
+
+}
+
+
+
+/* ================= GLASS ================= */
+
+.liquid-glass{
+
+background:rgba(255,255,255,0.03);
+
+backdrop-filter:blur(10px);
+
+border-radius:999px;
+
+border:1px solid rgba(255,255,255,0.1);
+
+}
+
+
+
+/* ================= NAV ================= */
+
+.nav{
+
+position:fixed;
+
+top:10px;
+
+left:0;
+right:0;
+
+display:flex;
+justify-content:center;
+
+z-index:50;
+
+}
+
+.nav-inner{
+
+display:flex;
+
+gap:20px;
+
+padding:8px 20px;
+
+}
+
+
+
+.nav a{
+
+color:#fff;
+
+font-size:14px;
+
+padding:6px 12px;
+
+border-radius:999px;
+
+}
+
+
+
+.nav a:hover{
+
+background:rgba(255,255,255,0.1);
+
+}
+
+
+
+/* ================= HERO ================= */
+
+.hero{
+
+height:100vh;
+
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+
+text-align:center;
+
+position:relative;
+
+}
+
+
+
+.hero video{
+
+position:absolute;
+
+inset:0;
+
+width:100%;
+height:100%;
+
+object-fit:cover;
+
+z-index:-1;
+
+opacity:.5;
+
+}
+
+
+
+.hero h1{
+
+font-size:70px;
+
+font-family:'Instrument Serif',serif;
+
+font-style:italic;
+
+}
+
+
+
+.hero p{
+
+margin-top:20px;
+
+color:#aaa;
+
+}
+
+
+
+/* ================= BUTTON ================= */
+
+.btn{
+
+padding:10px 20px;
+
+border-radius:999px;
+
+border:1px solid rgba(255,255,255,0.2);
+
+margin-top:20px;
+
+display:inline-block;
+
+}
+
+
+
+/* ================= SECTION ================= */
+
+.section{
+
+padding:120px 20px;
+
+text-align:center;
+
+}
+
+
+
+/* ================= CARD ================= */
+
+.card{
+
+max-width:900px;
+
+margin:40px auto;
+
+padding:40px;
+
+border-radius:20px;
+
+background:rgba(255,255,255,0.03);
+
+transition:.4s;
+
+}
+
+
+
+.card:hover{
+
+transform:translateY(-6px);
+
+box-shadow:
+0 20px 60px rgba(0,0,0,0.6);
+
+}
+
+
+
+</style>
+
 </head>
 <body>
 
-    <nav>
-        <div class="logo">Ethereal.</div>
-        <div class="nav-links">
-            <a href="#">WORKS</a>
-            <a href="#">ABOUT</a>
-            <a href="#">CONTACT</a>
-        </div>
-    </nav>
 
-    <header>
-        <h1 class="hero-title">
-            Creative<br><i>Simplicity.</i>
-        </h1>
-        <p class="hero-desc">
-            专注于通过极简的设计语言，构建具有持久生命力的数字体验。我们相信，少即是多，克制即是力量。
-        </p>
-    </header>
 
-    <main class="work-grid">
-        <div class="work-item">
-            <img src="https://images.unsplash.com/photo-1494438639946-1ebd1d20bf85?auto=format&fit=crop&w=800&q=80" alt="Work 1" class="work-img">
-            <div class="work-info">
-                <p class="work-category">INTERIOR / 2024</p>
-                <h3 class="work-title">静谧空间 (Serene Space)</h3>
-            </div>
-        </div>
-        <div class="work-item" style="margin-top: 100px;">
-            <img src="https://images.unsplash.com/photo-1507646227570-518a0da0264b?auto=format&fit=crop&w=800&q=80" alt="Work 2" class="work-img">
-            <div class="work-info">
-                <p class="work-category">IDENTITY / 2024</p>
-                <h3 class="work-title">虚无品牌 (Void Identity)</h3>
-            </div>
-        </div>
-    </main>
+<!-- scroll bar -->
+<div id="scrollBar"></div>
 
-    <footer style="padding: 100px 10%; text-align: center; font-size: 0.8rem; color: #888;">
-        © 2026 GEMINI DESIGN STUDIO. ALL RIGHTS RESERVED.
-    </footer>
+
+<!-- glow -->
+<div id="cursorGlow"></div>
+
+
+<!-- particles -->
+<canvas id="bgParticles"></canvas>
+
+
+
+<!-- NAV -->
+
+<div class="nav">
+
+<div class="nav-inner liquid-glass">
+
+<a href="#">Home</a>
+<a href="#">Services</a>
+<a href="#">Work</a>
+<a href="#">Contact</a>
+
+</div>
+
+</div>
+
+
+
+<!-- HERO -->
+
+<section class="hero">
+
+<video autoplay loop muted playsinline
+src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260307_083826_e938b29f-a43a-41ec-a153-3d4730578ab8.mp4">
+</video>
+
+
+<h1>The Website<br>Your Brand Deserves</h1>
+
+<p>
+AI powered design studio
+</p>
+
+<div class="btn liquid-glass">
+Get Started
+</div>
+
+</section>
+
+
+
+
+<!-- SERVICES -->
+
+<section class="section">
+
+<h2>How it works</h2>
+
+<div class="card">
+
+You dream it<br>
+We build it<br>
+AI ships it
+
+</div>
+
+</section>
+<script>
+
+
+/* ===========================
+SCROLL BAR
+=========================== */
+
+window.addEventListener("scroll", () => {
+
+const scrollTop = window.scrollY;
+
+const height =
+document.body.scrollHeight -
+window.innerHeight;
+
+const percent =
+scrollTop / height * 100;
+
+document.getElementById("scrollBar").style.width =
+percent + "%";
+
+});
+
+
+
+/* ===========================
+CURSOR GLOW
+=========================== */
+
+const glow =
+document.getElementById("cursorGlow");
+
+window.addEventListener("mousemove", e => {
+
+glow.style.left =
+e.clientX + "px";
+
+glow.style.top =
+e.clientY + "px";
+
+});
+
+
+
+/* ===========================
+PARTICLES
+=========================== */
+
+const canvas =
+document.getElementById("bgParticles");
+
+const ctx =
+canvas.getContext("2d");
+
+
+function resize(){
+
+canvas.width =
+window.innerWidth;
+
+canvas.height =
+window.innerHeight;
+
+}
+
+resize();
+
+window.addEventListener("resize", resize);
+
+
+let particles = [];
+
+
+for(let i=0;i<80;i++){
+
+particles.push({
+
+x:Math.random()*canvas.width,
+
+y:Math.random()*canvas.height,
+
+r:Math.random()*2,
+
+v:Math.random()*0.3 + 0.1
+
+});
+
+}
+
+
+
+function draw(){
+
+ctx.clearRect(
+0,
+0,
+canvas.width,
+canvas.height
+);
+
+ctx.fillStyle =
+"rgba(255,255,255,0.3)";
+
+
+particles.forEach(p=>{
+
+ctx.beginPath();
+
+ctx.arc(
+p.x,
+p.y,
+p.r,
+0,
+Math.PI*2
+);
+
+ctx.fill();
+
+p.y += p.v;
+
+if(p.y > canvas.height){
+
+p.y = 0;
+
+p.x =
+Math.random()*canvas.width;
+
+}
+
+});
+
+
+requestAnimationFrame(draw);
+
+}
+
+
+draw();
+
+
+
+/* ===========================
+FADE IN
+=========================== */
+
+const observer =
+new IntersectionObserver(entries => {
+
+entries.forEach(entry => {
+
+if(entry.isIntersecting){
+
+entry.target.classList.add("show");
+
+}
+
+});
+
+});
+
+
+document
+.querySelectorAll(".card")
+.forEach(el=>observer.observe(el));
+
+
+
+/* ===========================
+HLS SUPPORT
+=========================== */
+
+function initHls(video, src){
+
+if(src.includes(".m3u8")){
+
+if(Hls.isSupported()){
+
+const hls = new Hls();
+
+hls.loadSource(src);
+
+hls.attachMedia(video);
+
+}
+
+}else{
+
+video.src = src;
+
+}
+
+}
+
+
+
+/* ===========================
+SMOOTH BUTTON HOVER
+=========================== */
+
+document
+.querySelectorAll(".btn")
+.forEach(btn=>{
+
+btn.addEventListener("mouseenter",()=>{
+
+btn.style.transform="scale(1.05)";
+
+});
+
+btn.addEventListener("mouseleave",()=>{
+
+btn.style.transform="scale(1)";
+
+});
+
+});
+
+
+
+/* ===========================
+PARALLAX HERO
+=========================== */
+
+window.addEventListener(
+"scroll",
+()=>{
+
+const y =
+window.scrollY * 0.3;
+
+document
+.querySelector(".hero video")
+.style.transform =
+"translateY(" + y + "px)";
+
+}
+);
+
+
+
+</script>
+
 
 </body>
 </html>
