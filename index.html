@@ -1,992 +1,1482 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>图片水印工具</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --bg: #0a0f14;
-      --bg-secondary: #111820;
-      --fg: #e8edf3;
-      --muted: #6b7a8f;
-      --accent: #00d4aa;
-      --accent-dim: rgba(0, 212, 170, 0.15);
-      --card: #151d27;
-      --border: #1e2a38;
-      --danger: #ff5c5c;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SakuraWallpaper - macOS 动态壁纸应用</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Source+Serif+4:wght@300;400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0f0f12;
+            --bg-gradient: linear-gradient(135deg, #0f0f12 0%, #1a1a24 50%, #0f0f12 100%);
+            --surface: #1a1a24;
+            --surface-light: #252532;
+            --surface-hover: #2a2a38;
+            --accent: #ffb7c5;
+            --accent-dark: #ff8fa3;
+            --accent-light: rgba(255, 183, 197, 0.1);
+            --accent-glow: rgba(255, 183, 197, 0.06);
+            --text-primary: #f0ece4;
+            --text-muted: #8a8a9a;
+            --text-accent: #ffb7c5;
+            --border: rgba(255, 183, 197, 0.12);
+            --border-strong: rgba(255, 183, 197, 0.25);
+            --shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            --glow: 0 0 60px rgba(255, 183, 197, 0.12);
+            --radius: 16px;
+            --radius-lg: 24px;
+        }
 
-    * {
-      box-sizing: border-box;
-    }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
-    body {
-      font-family: 'Space Grotesk', sans-serif;
-      background: var(--bg);
-      color: var(--fg);
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
+        body {
+            font-family: 'Source Serif 4', serif;
+            background: var(--bg-gradient);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+            line-height: 1.7;
+        }
 
-    .mono {
-      font-family: 'JetBrains Mono', monospace;
-    }
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: 
+                radial-gradient(ellipse at 15% 50%, rgba(255, 183, 197, 0.04) 0%, transparent 50%),
+                radial-gradient(ellipse at 85% 15%, rgba(255, 143, 163, 0.03) 0%, transparent 40%),
+                radial-gradient(ellipse at 50% 80%, rgba(255, 183, 197, 0.02) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
 
-    /* Background grid pattern */
-    .bg-grid {
-      background-image: 
-        linear-gradient(rgba(0, 212, 170, 0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0, 212, 170, 0.03) 1px, transparent 1px);
-      background-size: 50px 50px;
-    }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 40px;
+            position: relative;
+            z-index: 1;
+        }
 
-    /* Glow orbs */
-    .glow-orb {
-      position: fixed;
-      border-radius: 50%;
-      filter: blur(100px);
-      pointer-events: none;
-      z-index: 0;
-    }
+        /* ===== NAV ===== */
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 28px 0;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 80px;
+        }
 
-    .glow-orb-1 {
-      width: 400px;
-      height: 400px;
-      background: rgba(0, 212, 170, 0.12);
-      top: -100px;
-      right: -100px;
-    }
+        .logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.6rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            letter-spacing: -0.5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
 
-    .glow-orb-2 {
-      width: 300px;
-      height: 300px;
-      background: rgba(0, 180, 216, 0.1);
-      bottom: -50px;
-      left: -50px;
-    }
+        .logo-icon {
+            font-size: 1.3rem;
+        }
 
-    /* Custom scrollbar */
-    ::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
-    }
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 36px;
+        }
 
-    ::-webkit-scrollbar-track {
-      background: var(--bg-secondary);
-    }
+        .nav-links {
+            display: flex;
+            gap: 32px;
+            list-style: none;
+        }
 
-    ::-webkit-scrollbar-thumb {
-      background: var(--border);
-      border-radius: 3px;
-    }
+        .nav-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 400;
+            transition: color 0.3s ease;
+            position: relative;
+            letter-spacing: 0.3px;
+        }
 
-    ::-webkit-scrollbar-thumb:hover {
-      background: var(--muted);
-    }
+        .nav-links a:hover { color: var(--text-accent); }
 
-    /* Upload zone */
-    .upload-zone {
-      border: 2px dashed var(--border);
-      transition: all 0.3s ease;
-      position: relative;
-      overflow: hidden;
-    }
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 1.5px;
+            background: var(--accent);
+            transition: width 0.3s ease;
+        }
 
-    .upload-zone::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(135deg, transparent 40%, var(--accent-dim) 100%);
-      opacity: 0;
-      transition: opacity 0.3s ease;
-    }
+        .nav-links a:hover::after { width: 100%; }
 
-    .upload-zone:hover,
-    .upload-zone.drag-over {
-      border-color: var(--accent);
-      background: var(--card);
-    }
+        /* Lang Toggle */
+        .lang-toggle {
+            display: flex;
+            background: var(--surface);
+            border-radius: 50px;
+            padding: 4px;
+            border: 1px solid var(--border);
+            cursor: pointer;
+        }
 
-    .upload-zone:hover::before,
-    .upload-zone.drag-over::before {
-      opacity: 1;
-    }
+        .lang-btn {
+            padding: 6px 14px;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Source Serif 4', serif;
+            letter-spacing: 0.5px;
+        }
 
-    /* Buttons */
-    .btn-primary {
-      background: var(--accent);
-      color: var(--bg);
-      font-weight: 600;
-      padding: 12px 24px;
-      border-radius: 8px;
-      border: none;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      position: relative;
-      overflow: hidden;
-    }
+        .lang-btn.active {
+            background: var(--accent);
+            color: #0f0f12;
+            box-shadow: 0 2px 10px rgba(255, 183, 197, 0.3);
+        }
 
-    .btn-primary::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(180deg, rgba(255,255,255,0.2) 0%, transparent 50%);
-      opacity: 0;
-      transition: opacity 0.2s ease;
-    }
+        .lang-btn:hover:not(.active) {
+            color: var(--text-primary);
+        }
 
-    .btn-primary:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 24px rgba(0, 212, 170, 0.3);
-    }
+        /* ===== HERO ===== */
+        .hero {
+            text-align: center;
+            margin-bottom: 120px;
+            position: relative;
+        }
 
-    .btn-primary:hover::after {
-      opacity: 1;
-    }
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 700px;
+            height: 700px;
+            background: radial-gradient(circle, rgba(255, 183, 197, 0.06) 0%, transparent 70%);
+            border-radius: 50%;
+            z-index: -1;
+            animation: pulse 8s infinite alternate;
+        }
 
-    .btn-primary:active {
-      transform: translateY(0);
-    }
+        @keyframes pulse {
+            0% { opacity: 0.4; transform: translate(-50%, -50%) scale(1); }
+            100% { opacity: 0.7; transform: translate(-50%, -50%) scale(1.15); }
+        }
 
-    .btn-secondary {
-      background: var(--card);
-      color: var(--fg);
-      font-weight: 500;
-      padding: 12px 24px;
-      border-radius: 8px;
-      border: 1px solid var(--border);
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--accent-light);
+            border: 1px solid var(--border);
+            border-radius: 50px;
+            padding: 8px 20px;
+            font-size: 0.85rem;
+            color: var(--text-accent);
+            margin-bottom: 32px;
+            letter-spacing: 0.3px;
+        }
 
-    .btn-secondary:hover {
-      background: var(--bg-secondary);
-      border-color: var(--accent);
-    }
+        .hero-badge .dot {
+            width: 6px;
+            height: 6px;
+            background: var(--accent);
+            border-radius: 50%;
+            animation: blink 2s infinite;
+        }
 
-    /* Input fields */
-    .input-field {
-      background: var(--bg-secondary);
-      border: 1px solid var(--border);
-      color: var(--fg);
-      padding: 10px 14px;
-      border-radius: 6px;
-      width: 100%;
-      transition: all 0.2s ease;
-    }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
 
-    .input-field:focus {
-      outline: none;
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px var(--accent-dim);
-    }
+        .hero h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 4.2rem;
+            font-weight: 700;
+            margin-bottom: 24px;
+            letter-spacing: -2px;
+            background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.15;
+        }
 
-    /* Range slider */
-    .range-slider {
-      -webkit-appearance: none;
-      appearance: none;
-      width: 100%;
-      height: 6px;
-      background: var(--border);
-      border-radius: 3px;
-      outline: none;
-    }
+        .hero-subtitle {
+            font-size: 1.25rem;
+            color: var(--text-muted);
+            max-width: 650px;
+            margin: 0 auto 48px;
+            font-weight: 300;
+            line-height: 1.8;
+        }
 
-    .range-slider::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      appearance: none;
-      width: 18px;
-      height: 18px;
-      background: var(--accent);
-      border-radius: 50%;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
+        .hero-buttons {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
 
-    .range-slider::-webkit-slider-thumb:hover {
-      transform: scale(1.2);
-      box-shadow: 0 0 12px rgba(0, 212, 170, 0.5);
-    }
+        .btn {
+            padding: 15px 32px;
+            border-radius: 50px;
+            font-family: 'Source Serif 4', serif;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            border: none;
+        }
 
-    /* Position grid */
-    .position-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 4px;
-      width: 100%;
-      max-width: 120px;
-    }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-dark) 0%, var(--accent) 100%);
+            color: #0f0f12;
+            box-shadow: 0 8px 30px rgba(255, 143, 163, 0.25);
+        }
 
-    .position-btn {
-      aspect-ratio: 1;
-      background: var(--bg-secondary);
-      border: 1px solid var(--border);
-      border-radius: 4px;
-      cursor: pointer;
-      transition: all 0.15s ease;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 14px 40px rgba(255, 143, 163, 0.35);
+        }
 
-    .position-btn:hover {
-      background: var(--card);
-      border-color: var(--accent);
-    }
+        .btn-secondary {
+            background: transparent;
+            color: var(--text-primary);
+            border: 1px solid var(--border-strong);
+        }
 
-    .position-btn.active {
-      background: var(--accent);
-      border-color: var(--accent);
-    }
+        .btn-secondary:hover {
+            background: var(--accent-light);
+            border-color: var(--accent);
+            color: var(--accent);
+        }
 
-    .position-btn.active .dot {
-      background: var(--bg);
-    }
+        .hero-meta {
+            color: var(--text-muted);
+            margin-top: 20px;
+            font-size: 0.85rem;
+        }
 
-    .dot {
-      width: 6px;
-      height: 6px;
-      background: var(--muted);
-      border-radius: 50%;
-      transition: background 0.15s ease;
-    }
+        /* ===== SECTION COMMON ===== */
+        .section-header {
+            text-align: center;
+            margin-bottom: 64px;
+        }
 
-    /* Canvas container */
-    .canvas-container {
-      background: var(--bg-secondary);
-      border-radius: 12px;
-      overflow: hidden;
-      position: relative;
-      min-height: 300px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
+        .section-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.6rem;
+            font-weight: 600;
+            margin-bottom: 14px;
+            letter-spacing: -1px;
+        }
 
-    .canvas-container canvas {
-      max-width: 100%;
-      max-height: 500px;
-      object-fit: contain;
-    }
+        .section-subtitle {
+            color: var(--text-muted);
+            font-size: 1.05rem;
+            max-width: 550px;
+            margin: 0 auto;
+            line-height: 1.7;
+        }
 
-    /* Tab buttons */
-    .tab-btn {
-      padding: 10px 20px;
-      background: transparent;
-      border: none;
-      color: var(--muted);
-      font-weight: 500;
-      cursor: pointer;
-      position: relative;
-      transition: color 0.2s ease;
-    }
+        /* ===== FEATURES ===== */
+        .features { margin-bottom: 120px; }
 
-    .tab-btn::after {
-      content: '';
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      height: 2px;
-      background: var(--accent);
-      transform: scaleX(0);
-      transition: transform 0.2s ease;
-    }
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+        }
 
-    .tab-btn:hover {
-      color: var(--fg);
-    }
+        .feature-card {
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            padding: 36px;
+            border: 1px solid var(--border);
+            transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+            position: relative;
+            overflow: hidden;
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeInUp 0.7s ease forwards;
+        }
 
-    .tab-btn.active {
-      color: var(--accent);
-    }
+        .feature-card:nth-child(1) { animation-delay: 0.05s; }
+        .feature-card:nth-child(2) { animation-delay: 0.1s; }
+        .feature-card:nth-child(3) { animation-delay: 0.15s; }
+        .feature-card:nth-child(4) { animation-delay: 0.2s; }
+        .feature-card:nth-child(5) { animation-delay: 0.25s; }
+        .feature-card:nth-child(6) { animation-delay: 0.3s; }
 
-    .tab-btn.active::after {
-      transform: scaleX(1);
-    }
+        @keyframes fadeInUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
 
-    /* Section label */
-    .section-label {
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 1.5px;
-      color: var(--muted);
-      margin-bottom: 8px;
-    }
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, var(--accent-glow) 0%, transparent 100%);
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
 
-    /* Fade in animation */
-    @keyframes fadeInUp {
-      from {
-        opacity: 0;
-        transform: translateY(20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
+        .feature-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--glow);
+            border-color: var(--border-strong);
+        }
 
-    .animate-in {
-      animation: fadeInUp 0.5s ease forwards;
-    }
+        .feature-card:hover::before { opacity: 1; }
 
-    .delay-1 { animation-delay: 0.1s; opacity: 0; }
-    .delay-2 { animation-delay: 0.2s; opacity: 0; }
-    .delay-3 { animation-delay: 0.3s; opacity: 0; }
+        .feature-icon {
+            width: 52px;
+            height: 52px;
+            background: var(--accent-light);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 22px;
+            font-size: 1.5rem;
+            border: 1px solid var(--border);
+            position: relative;
+            z-index: 1;
+        }
 
-    /* Watermark preview animation */
-    @keyframes watermarkPulse {
-      0%, 100% { opacity: 0.6; }
-      50% { opacity: 0.9; }
-    }
+        .feature-card h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+            position: relative;
+            z-index: 1;
+        }
 
-    /* Color picker wrapper */
-    .color-picker-wrapper {
-      position: relative;
-      width: 40px;
-      height: 40px;
-      border-radius: 6px;
-      overflow: hidden;
-      border: 2px solid var(--border);
-    }
+        .feature-card p {
+            color: var(--text-muted);
+            font-size: 0.92rem;
+            line-height: 1.7;
+            position: relative;
+            z-index: 1;
+        }
 
-    .color-picker-wrapper input[type="color"] {
-      position: absolute;
-      inset: -8px;
-      width: calc(100% + 16px);
-      height: calc(100% + 16px);
-      cursor: pointer;
-      border: none;
-    }
+        /* ===== PREVIEW ===== */
+        .preview-section {
+            margin-bottom: 120px;
+        }
 
-    /* Preview placeholder */
-    .preview-placeholder {
-      color: var(--muted);
-      text-align: center;
-      padding: 60px 20px;
-    }
+        .preview-container {
+            display: flex;
+            gap: 60px;
+            align-items: center;
+        }
 
-    .preview-placeholder svg {
-      margin-bottom: 16px;
-      opacity: 0.5;
-    }
+        .preview-image { flex: 1.1; }
 
-    /* Reduced motion */
-    @media (prefers-reduced-motion: reduce) {
-      * {
-        animation: none !important;
-        transition-duration: 0.01ms !important;
-      }
-    }
+        .app-window {
+            background: var(--surface);
+            border-radius: var(--radius);
+            padding: 20px;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+        }
 
-    /* Responsive */
-    @media (max-width: 1024px) {
-      .main-grid {
-        grid-template-columns: 1fr;
-      }
-    }
-  </style>
+        .window-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 18px;
+            padding-bottom: 14px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .window-dots {
+            display: flex;
+            gap: 7px;
+            margin-right: 16px;
+        }
+
+        .dot { width: 11px; height: 11px; border-radius: 50%; }
+        .dot.red { background: #ff5f57; }
+        .dot.yellow { background: #ffbd2e; }
+        .dot.green { background: #28c840; }
+
+        .window-title {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .app-interface {
+            background: linear-gradient(145deg, #1a1a24, #22222e);
+            border-radius: 12px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .interface-row {
+            display: flex;
+            gap: 14px;
+            align-items: center;
+        }
+
+        .interface-label {
+            color: var(--text-muted);
+            font-size: 0.82rem;
+            min-width: 90px;
+            font-weight: 400;
+        }
+
+        .interface-select {
+            flex: 1;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 10px 14px;
+            color: var(--text-primary);
+            font-family: 'Source Serif 4', serif;
+            font-size: 0.85rem;
+        }
+
+        .preview-placeholder {
+            flex: 1;
+            background: linear-gradient(135deg, rgba(255, 183, 197, 0.08) 0%, rgba(255, 143, 163, 0.03) 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px dashed rgba(255, 183, 197, 0.25);
+            min-height: 180px;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .preview-content { flex: 1; }
+
+        .preview-content h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.2rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            line-height: 1.25;
+            letter-spacing: -0.5px;
+        }
+
+        .preview-content > p {
+            color: var(--text-muted);
+            margin-bottom: 28px;
+            font-size: 1rem;
+            line-height: 1.8;
+        }
+
+        .feature-list {
+            list-style: none;
+        }
+
+        .feature-list li {
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            margin-bottom: 16px;
+            padding: 14px 16px;
+            background: rgba(255, 255, 255, 0.015);
+            border-radius: 12px;
+            border-left: 3px solid var(--accent);
+            transition: all 0.3s ease;
+        }
+
+        .feature-list li:hover {
+            background: var(--accent-light);
+            transform: translateX(4px);
+        }
+
+        .feature-list .icon {
+            color: var(--accent);
+            font-size: 1.1rem;
+            min-width: 22px;
+            margin-top: 2px;
+        }
+
+        .feature-list .text strong {
+            display: block;
+            margin-bottom: 3px;
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        .feature-list .text span {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            line-height: 1.6;
+        }
+
+        /* ===== FORMATS ===== */
+        .formats-section {
+            margin-bottom: 120px;
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            padding: 56px;
+            border: 1px solid var(--border);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .formats-section::before {
+            content: '';
+            position: absolute;
+            top: -100px;
+            right: -100px;
+            width: 350px;
+            height: 350px;
+            background: radial-gradient(circle, rgba(255, 183, 197, 0.08) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        .formats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 40px;
+            margin-top: 40px;
+        }
+
+        .format-category h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.4rem;
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .format-category h3::before {
+            content: '';
+            width: 7px;
+            height: 7px;
+            background: var(--accent);
+            border-radius: 50%;
+        }
+
+        .format-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .format-tag {
+            background: var(--accent-light);
+            color: var(--text-accent);
+            padding: 8px 18px;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            border: 1px solid var(--border);
+            transition: all 0.3s ease;
+        }
+
+        .format-tag:hover {
+            background: rgba(255, 183, 197, 0.18);
+            transform: translateY(-2px);
+        }
+
+        /* ===== Q&A SECTION ===== */
+        .qa-section { margin-bottom: 120px; }
+
+        .qa-list {
+            max-width: 820px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .qa-item {
+            background: var(--surface);
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .qa-item:hover {
+            border-color: var(--border-strong);
+        }
+
+        .qa-question {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 22px 28px;
+            background: transparent;
+            border: none;
+            color: var(--text-primary);
+            font-family: 'Source Serif 4', serif;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            text-align: left;
+            gap: 16px;
+            transition: background 0.3s ease;
+        }
+
+        .qa-question:hover {
+            background: rgba(255, 255, 255, 0.015);
+        }
+
+        .qa-question .q-icon {
+            min-width: 32px;
+            height: 32px;
+            background: var(--accent-light);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--accent);
+            border: 1px solid var(--border);
+        }
+
+        .qa-question .q-text { flex: 1; }
+
+        .qa-question .q-arrow {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            transition: transform 0.3s ease;
+            min-width: 20px;
+            text-align: center;
+        }
+
+        .qa-item.open .q-arrow {
+            transform: rotate(180deg);
+        }
+
+        .qa-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s cubic-bezier(0.23, 1, 0.32, 1), padding 0.3s ease;
+        }
+
+        .qa-item.open .qa-answer {
+            max-height: 600px;
+        }
+
+        .qa-answer-inner {
+            padding: 0 28px 24px 76px;
+            color: var(--text-muted);
+            font-size: 0.92rem;
+            line-height: 1.8;
+        }
+
+        .qa-answer-inner code {
+            font-family: 'JetBrains Mono', monospace;
+            background: rgba(255, 183, 197, 0.1);
+            color: var(--text-accent);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.82rem;
+            border: 1px solid var(--border);
+        }
+
+        .qa-answer-inner .cmd-block {
+            background: #111118;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px 20px;
+            margin: 12px 0;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.82rem;
+            color: var(--text-accent);
+            line-height: 1.8;
+            overflow-x: auto;
+        }
+
+        .qa-answer-inner .cmd-block .prompt {
+            color: var(--text-muted);
+            user-select: none;
+        }
+
+        .qa-answer-inner .cmd-block .cmd {
+            color: var(--text-primary);
+        }
+
+        .qa-answer-inner .note {
+            background: rgba(255, 183, 197, 0.06);
+            border-left: 3px solid var(--accent);
+            padding: 12px 16px;
+            border-radius: 0 8px 8px 0;
+            margin: 12px 0;
+            font-size: 0.88rem;
+        }
+
+        .qa-answer-inner ol,
+        .qa-answer-inner ul {
+            padding-left: 20px;
+            margin: 8px 0;
+        }
+
+        .qa-answer-inner li {
+            margin-bottom: 6px;
+        }
+
+        /* ===== FOOTER ===== */
+        footer {
+            text-align: center;
+            padding: 48px 0 40px;
+            border-top: 1px solid var(--border);
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 28px;
+            margin-bottom: 18px;
+            flex-wrap: wrap;
+        }
+
+        .footer-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-links a:hover { color: var(--accent); }
+
+        .footer-copy {
+            font-size: 0.8rem;
+            margin-top: 8px;
+            opacity: 0.6;
+        }
+
+        /* ===== SAKURA PETALS ===== */
+        .sakura {
+            position: fixed;
+            top: -50px;
+            z-index: 0;
+            pointer-events: none;
+            animation: fall linear forwards;
+        }
+
+        @keyframes fall {
+            to {
+                transform: translateY(110vh) rotate(720deg);
+            }
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 1024px) {
+            .features-grid { grid-template-columns: repeat(2, 1fr); }
+            .preview-container { flex-direction: column; }
+            .hero h1 { font-size: 3.2rem; }
+        }
+
+        @media (max-width: 768px) {
+            .container { padding: 0 20px; }
+            nav { flex-direction: column; gap: 16px; text-align: center; }
+            .nav-right { flex-direction: column; gap: 16px; }
+            .nav-links { gap: 20px; }
+            .hero h1 { font-size: 2.4rem; }
+            .hero-buttons { flex-direction: column; align-items: center; }
+            .features-grid { grid-template-columns: 1fr; }
+            .formats-grid { grid-template-columns: 1fr; }
+            .section-title { font-size: 2rem; }
+            .formats-section { padding: 32px 24px; }
+            .qa-answer-inner { padding-left: 28px; }
+        }
+
+        /* Hidden helper */
+        [data-lang] { display: none; }
+        [data-lang].visible { display: block; }
+        [data-lang-inline].visible { display: inline; }
+        [data-lang-inline] { display: none; }
+    </style>
 </head>
-<body class="bg-grid">
-  <!-- Glow orbs -->
-  <div class="glow-orb glow-orb-1"></div>
-  <div class="glow-orb glow-orb-2"></div>
+<body>
+    <div id="sakura-container"></div>
 
-  <div class="relative z-10 min-h-screen p-4 md:p-8">
-    <!-- Header -->
-    <header class="max-w-7xl mx-auto mb-8 animate-in">
-      <div class="flex items-center gap-3 mb-2">
-        <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background: var(--accent-dim);">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-            <path d="M12 8v4"/>
-            <path d="M10 10h4"/>
-          </svg>
-        </div>
-        <h1 class="text-2xl md:text-3xl font-bold tracking-tight">Watermark Studio</h1>
-      </div>
-      <p class="text-sm md:text-base" style="color: var(--muted);">快速为图片添加自定义水印，支持文字与图片水印</p>
-    </header>
-
-    <!-- Main content -->
-    <main class="max-w-7xl mx-auto">
-      <div class="main-grid grid lg:grid-cols-[380px_1fr] gap-6">
-        <!-- Control Panel -->
-        <aside class="animate-in delay-1">
-          <div class="rounded-xl p-5" style="background: var(--card); border: 1px solid var(--border);">
-            <!-- Upload -->
-            <div class="mb-6">
-              <p class="section-label">上传图片</p>
-              <label class="upload-zone block rounded-lg p-6 cursor-pointer text-center" id="uploadZone">
-                <input type="file" accept="image/*" class="hidden" id="imageInput">
-                <svg class="mx-auto mb-3" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color: var(--muted);">
-                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                  <polyline points="17 8 12 3 7 8"/>
-                  <line x1="12" y1="3" x2="12" y2="15"/>
-                </svg>
-                <p class="text-sm" style="color: var(--muted);">点击或拖拽图片到此处</p>
-              </label>
+    <div class="container">
+        <!-- NAV -->
+        <nav>
+            <div class="logo">
+                <span class="logo-icon">🌸</span>
+                <span>SakuraWallpaper</span>
             </div>
-
-            <!-- Watermark Type Tabs -->
-            <div class="mb-6">
-              <p class="section-label">水印类型</p>
-              <div class="flex border-b" style="border-color: var(--border);">
-                <button class="tab-btn active" data-type="text">文字水印</button>
-                <button class="tab-btn" data-type="image">图片水印</button>
-              </div>
-            </div>
-
-            <!-- Text Watermark Settings -->
-            <div id="textSettings" class="space-y-5">
-              <div>
-                <p class="section-label">水印文字</p>
-                <input type="text" id="watermarkText" class="input-field mono" placeholder="输入水印文字..." value="WATERMARK">
-              </div>
-
-              <div class="grid grid-cols-2 gap-4">
-                <div>
-                  <p class="section-label">字体大小</p>
-                  <div class="flex items-center gap-3">
-                    <input type="range" id="fontSize" class="range-slider flex-1" min="12" max="120" value="32">
-                    <span class="mono text-sm w-10 text-right" id="fontSizeValue">32</span>
-                  </div>
+            <div class="nav-right">
+                <ul class="nav-links">
+                    <li><a href="#features" data-nav="features">功能</a></li>
+                    <li><a href="#preview" data-nav="preview">预览</a></li>
+                    <li><a href="#formats" data-nav="formats">格式</a></li>
+                    <li><a href="#qa" data-nav="qa">Q&A</a></li>
+                </ul>
+                <div class="lang-toggle" id="langToggle">
+                    <button class="lang-btn active" data-set-lang="zh">中文</button>
+                    <button class="lang-btn" data-set-lang="en">EN</button>
                 </div>
-                <div>
-                  <p class="section-label">透明度</p>
-                  <div class="flex items-center gap-3">
-                    <input type="range" id="opacity" class="range-slider flex-1" min="10" max="100" value="60">
-                    <span class="mono text-sm w-10 text-right" id="opacityValue">60%</span>
-                  </div>
-                </div>
-              </div>
-
-              <div class="grid grid-cols-2 gap-4">
-                <div>
-                  <p class="section-label">文字颜色</p>
-                  <div class="flex items-center gap-3">
-                    <div class="color-picker-wrapper">
-                      <input type="color" id="textColor" value="#ffffff">
-                    </div>
-                    <span class="mono text-sm" id="textColorValue">#ffffff</span>
-                  </div>
-                </div>
-                <div>
-                  <p class="section-label">旋转角度</p>
-                  <div class="flex items-center gap-3">
-                    <input type="range" id="rotation" class="range-slider flex-1" min="-180" max="180" value="-30">
-                    <span class="mono text-sm w-10 text-right" id="rotationValue">-30°</span>
-                  </div>
-                </div>
-              </div>
             </div>
+        </nav>
 
-            <!-- Image Watermark Settings -->
-            <div id="imageSettings" class="space-y-5 hidden">
-              <div>
-                <p class="section-label">水印图片</p>
-                <label class="upload-zone block rounded-lg p-4 cursor-pointer text-center">
-                  <input type="file" accept="image/*" class="hidden" id="watermarkImageInput">
-                  <div id="watermarkImagePreview">
-                    <svg class="mx-auto mb-2" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color: var(--muted);">
-                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                      <circle cx="8.5" cy="8.5" r="1.5"/>
-                      <polyline points="21 15 16 10 5 21"/>
-                    </svg>
-                    <p class="text-xs" style="color: var(--muted);">选择水印图片</p>
-                  </div>
-                </label>
-              </div>
-
-              <div class="grid grid-cols-2 gap-4">
-                <div>
-                  <p class="section-label">缩放比例</p>
-                  <div class="flex items-center gap-3">
-                    <input type="range" id="scale" class="range-slider flex-1" min="10" max="100" value="30">
-                    <span class="mono text-sm w-10 text-right" id="scaleValue">30%</span>
-                  </div>
-                </div>
-                <div>
-                  <p class="section-label">透明度</p>
-                  <div class="flex items-center gap-3">
-                    <input type="range" id="imgOpacity" class="range-slider flex-1" min="10" max="100" value="70">
-                    <span class="mono text-sm w-10 text-right" id="imgOpacityValue">70%</span>
-                  </div>
-                </div>
-              </div>
+        <!-- HERO -->
+        <section class="hero">
+            <div class="hero-badge">
+                <span class="dot"></span>
+                <span data-i18n="hero_badge" class="visible">macOS 动态壁纸应用</span>
             </div>
-
-            <!-- Position -->
-            <div class="mt-6">
-              <p class="section-label">水印位置</p>
-              <div class="flex items-start gap-6">
-                <div class="position-grid" id="positionGrid">
-                  <button class="position-btn" data-position="top-left"><span class="dot"></span></button>
-                  <button class="position-btn" data-position="top-center"><span class="dot"></span></button>
-                  <button class="position-btn" data-position="top-right"><span class="dot"></span></button>
-                  <button class="position-btn" data-position="middle-left"><span class="dot"></span></button>
-                  <button class="position-btn active" data-position="center"><span class="dot"></span></button>
-                  <button class="position-btn" data-position="middle-right"><span class="dot"></span></button>
-                  <button class="position-btn" data-position="bottom-left"><span class="dot"></span></button>
-                  <button class="position-btn" data-position="bottom-center"><span class="dot"></span></button>
-                  <button class="position-btn" data-position="bottom-right"><span class="dot"></span></button>
-                </div>
-                <div class="flex-1">
-                  <label class="flex items-center gap-2 cursor-pointer">
-                    <input type="checkbox" id="tileMode" class="w-4 h-4 accent-current" style="accent-color: var(--accent);">
-                    <span class="text-sm">平铺水印</span>
-                  </label>
-                </div>
-              </div>
+            <h1>
+                <span data-i18n="hero_title_1">为你的桌面</span><br>
+                <span data-i18n="hero_title_2">注入动态生命力</span>
+            </h1>
+            <p class="hero-subtitle" data-i18n="hero_subtitle">
+                SakuraWallpaper 是一款优雅的 macOS 动态壁纸应用，支持将视频、GIF 和图片设置为桌面壁纸，让你的屏幕焕发新生。
+            </p>
+            <div class="hero-buttons">
+                <a href="https://github.com/yueseqaz/SakuraWallpaper/releases/tag/v0.1.0" class="btn btn-primary">
+                    <span data-i18n="btn_download">立即下载</span>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                </a>
+                <a href="#features" class="btn btn-secondary" data-i18n="btn_learn">了解更多功能</a>
             </div>
-
-            <!-- Actions -->
-            <div class="mt-8 flex gap-3">
-              <button class="btn-primary flex-1" id="downloadBtn" disabled>
-                <span class="flex items-center justify-center gap-2">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                    <polyline points="7 10 12 15 17 10"/>
-                    <line x1="12" y1="15" x2="12" y2="3"/>
-                  </svg>
-                  下载图片
-                </span>
-              </button>
-              <button class="btn-secondary" id="resetBtn">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
-                  <path d="M3 3v5h5"/>
-                </svg>
-              </button>
-            </div>
-          </div>
-        </aside>
-
-        <!-- Preview -->
-        <section class="animate-in delay-2">
-          <div class="rounded-xl overflow-hidden" style="background: var(--card); border: 1px solid var(--border);">
-            <div class="px-5 py-3 flex items-center justify-between" style="border-bottom: 1px solid var(--border);">
-              <span class="text-sm font-medium">预览</span>
-              <div class="flex items-center gap-3">
-                <span class="mono text-xs" style="color: var(--muted);" id="imageInfo">等待上传...</span>
-              </div>
-            </div>
-            <div class="canvas-container p-4" id="canvasContainer">
-              <div class="preview-placeholder" id="placeholder">
-                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
-                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                  <circle cx="8.5" cy="8.5" r="1.5"/>
-                  <polyline points="21 15 16 10 5 21"/>
-                </svg>
-                <p>上传图片开始添加水印</p>
-              </div>
-              <canvas id="canvas" class="hidden rounded-lg"></canvas>
-            </div>
-          </div>
-
-          <!-- Tips -->
-          <div class="mt-4 p-4 rounded-lg" style="background: var(--accent-dim); border: 1px solid rgba(0, 212, 170, 0.2);">
-            <div class="flex gap-3">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" class="flex-shrink-0 mt-0.5">
-                <circle cx="12" cy="12" r="10"/>
-                <line x1="12" y1="16" x2="12" y2="12"/>
-                <line x1="12" y1="8" x2="12.01" y2="8"/>
-              </svg>
-              <div class="text-sm" style="color: var(--fg);">
-                <p class="font-medium mb-1">使用提示</p>
-                <p style="color: var(--muted);">支持 PNG、JPG、WebP 格式。平铺模式适合全图水印保护，单点模式适合角落署名。</p>
-              </div>
-            </div>
-          </div>
+            <p class="hero-meta" data-i18n="hero_meta">v1.0.0 · 免费 · 无广告 · macOS 12+</p>
         </section>
-      </div>
-    </main>
-  </div>
 
-  <script>
-    // State
-    let state = {
-      image: null,
-      watermarkImage: null,
-      type: 'text',
-      position: 'center',
-      text: 'WATERMARK',
-      fontSize: 32,
-      opacity: 60,
-      textColor: '#ffffff',
-      rotation: -30,
-      scale: 30,
-      imgOpacity: 70,
-      tileMode: false
-    };
+        <!-- FEATURES -->
+        <section class="features" id="features">
+            <div class="section-header">
+                <h2 class="section-title" data-i18n="features_title">核心功能</h2>
+                <p class="section-subtitle" data-i18n="features_subtitle">精心设计的功能，让你的桌面体验更加出色</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🎬</div>
+                    <h3 data-i18n="f1_title">动态壁纸支持</h3>
+                    <p data-i18n="f1_desc">支持 MP4、MOV、GIF、M4V 等视频格式，视频在桌面循环播放，为工作空间增添活力。</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🖥️</div>
+                    <h3 data-i18n="f2_title">多显示器管理</h3>
+                    <p data-i18n="f2_desc">完美支持多显示器，为每个屏幕设置不同壁纸，"Apply to All" 一键应用到所有屏幕。</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">⏸️</div>
+                    <h3 data-i18n="f3_title">独立暂停控制</h3>
+                    <p data-i18n="f3_desc">通过状态栏菜单单独暂停/恢复每个屏幕的壁纸，全局控制与精细管理兼得。</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔄</div>
+                    <h3 data-i18n="f4_title">自动循环播放</h3>
+                    <p data-i18n="f4_desc">视频壁纸自动循环播放，静音模式确保不影响工作，无缝衔接的播放体验。</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🚀</div>
+                    <h3 data-i18n="f5_title">开机自启动</h3>
+                    <p data-i18n="f5_desc">支持开机自动启动，登录后即刻享受动态壁纸，无需每次手动设置。</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📁</div>
+                    <h3 data-i18n="f6_title">历史记录</h3>
+                    <p data-i18n="f6_desc">自动保存最近使用的壁纸历史（最多 10 条），方便快速切换和管理。</p>
+                </div>
+            </div>
+        </section>
 
-    // DOM Elements
-    const canvas = document.getElementById('canvas');
-    const ctx = canvas.getContext('2d');
-    const imageInput = document.getElementById('imageInput');
-    const watermarkImageInput = document.getElementById('watermarkImageInput');
-    const uploadZone = document.getElementById('uploadZone');
-    const placeholder = document.getElementById('placeholder');
-    const downloadBtn = document.getElementById('downloadBtn');
-    const resetBtn = document.getElementById('resetBtn');
-    const imageInfo = document.getElementById('imageInfo');
+        <!-- PREVIEW -->
+        <section class="preview-section" id="preview">
+            <div class="preview-container">
+                <div class="preview-image">
+                    <div class="app-window">
+                        <div class="window-header">
+                            <div class="window-dots">
+                                <div class="dot red"></div>
+                                <div class="dot yellow"></div>
+                                <div class="dot green"></div>
+                            </div>
+                            <span class="window-title">SakuraWallpaper</span>
+                        </div>
+                        <div class="app-interface">
+                            <div class="interface-row">
+                                <span class="interface-label" data-i18n="ui_screen">选择屏幕</span>
+                                <select class="interface-select">
+                                    <option data-i18n="ui_builtin">内置显示器 (Built-in)</option>
+                                    <option data-i18n="ui_ext1">外接显示器 1</option>
+                                    <option data-i18n="ui_ext2">外接显示器 2</option>
+                                </select>
+                            </div>
+                            <div class="interface-row">
+                                <span class="interface-label" data-i18n="ui_current">当前壁纸</span>
+                                <div class="preview-placeholder" data-i18n="ui_preview_area">🌸 动态壁纸预览区域</div>
+                            </div>
+                            <div class="interface-row">
+                                <span class="interface-label" data-i18n="ui_info">文件信息</span>
+                                <div style="color: var(--text-muted); font-size: 0.85rem;">cherry_blossom.mp4 · Video · 1920×1080</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="preview-content">
+                    <h2 data-i18n="preview_title">直观优雅的用户界面</h2>
+                    <p data-i18n="preview_desc">SakuraWallpaper 采用精心设计的 macOS 原生界面，操作简单直观，轻松管理桌面壁纸。</p>
+                    <ul class="feature-list">
+                        <li>
+                            <span class="icon">🎯</span>
+                            <div class="text">
+                                <strong data-i18n="pf1_title">一键设置壁纸</strong>
+                                <span data-i18n="pf1_desc">选择文件后即可立即将视频或图片设置为桌面壁纸</span>
+                            </div>
+                        </li>
+                        <li>
+                            <span class="icon">📊</span>
+                            <div class="text">
+                                <strong data-i18n="pf2_title">实时状态指示</strong>
+                                <span data-i18n="pf2_desc">标题栏状态指示器显示应用活跃状态（绿色=活跃 / 灰色=未激活）</span>
+                            </div>
+                        </li>
+                        <li>
+                            <span class="icon">📱</span>
+                            <div class="text">
+                                <strong data-i18n="pf3_title">状态栏快捷控制</strong>
+                                <span data-i18n="pf3_desc">通过菜单栏图标快速访问所有功能，无需打开主窗口</span>
+                            </div>
+                        </li>
+                        <li>
+                            <span class="icon">⌨️</span>
+                            <div class="text">
+                                <strong data-i18n="pf4_title">键盘快捷键支持</strong>
+                                <span data-i18n="pf4_desc">Cmd+O 打开窗口 · Cmd+P 暂停壁纸 · Cmd+Q 退出应用</span>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
 
-    // Tab buttons
-    const tabBtns = document.querySelectorAll('.tab-btn');
-    const textSettings = document.getElementById('textSettings');
-    const imageSettings = document.getElementById('imageSettings');
+        <!-- FORMATS -->
+        <section class="formats-section" id="formats">
+            <div class="section-header">
+                <h2 class="section-title" data-i18n="formats_title">广泛的格式支持</h2>
+                <p class="section-subtitle" data-i18n="formats_subtitle">支持主流视频和图片格式，满足你的各种需求</p>
+            </div>
+            <div class="formats-grid">
+                <div class="format-category">
+                    <h3 data-i18n="fmt_video">视频格式</h3>
+                    <div class="format-tags">
+                        <span class="format-tag">MP4</span>
+                        <span class="format-tag">MOV</span>
+                        <span class="format-tag">GIF</span>
+                        <span class="format-tag">M4V</span>
+                    </div>
+                </div>
+                <div class="format-category">
+                    <h3 data-i18n="fmt_image">图片格式</h3>
+                    <div class="format-tags">
+                        <span class="format-tag">PNG</span>
+                        <span class="format-tag">JPG</span>
+                        <span class="format-tag">JPEG</span>
+                        <span class="format-tag">HEIC</span>
+                        <span class="format-tag">WebP</span>
+                        <span class="format-tag">BMP</span>
+                        <span class="format-tag">TIFF</span>
+                    </div>
+                </div>
+            </div>
+        </section>
 
-    // Position buttons
-    const positionBtns = document.querySelectorAll('.position-btn');
+        <!-- DOWNLOAD CTA -->
+        <section class="hero" id="download" style="margin-bottom: 100px;">
+            <h2 style="font-family: 'Playfair Display', serif; font-size: 2.6rem; margin-bottom: 18px; letter-spacing: -1px;" data-i18n="dl_title">准备好美化你的桌面了吗？</h2>
+            <p class="hero-subtitle" style="margin-bottom: 36px;" data-i18n="dl_subtitle">立即下载 SakuraWallpaper，为你的 macOS 桌面注入动态生命力</p>
+            <div class="hero-buttons" style="justify-content: center;">
+                <a href="#" class="btn btn-primary" style="font-size: 1.05rem; padding: 17px 38px;">
+                    <span data-i18n="dl_btn">下载 macOS 版本</span>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                </a>
+            </div>
+            <p class="hero-meta" data-i18n="dl_meta">v1.0.0 · 免费下载 · 无广告 · 隐私安全</p>
+        </section>
 
-    // Input elements
-    const watermarkText = document.getElementById('watermarkText');
-    const fontSize = document.getElementById('fontSize');
-    const opacity = document.getElementById('opacity');
-    const textColor = document.getElementById('textColor');
-    const rotation = document.getElementById('rotation');
-    const scale = document.getElementById('scale');
-    const imgOpacity = document.getElementById('imgOpacity');
-    const tileMode = document.getElementById('tileMode');
+        <!-- Q&A -->
+        <section class="qa-section" id="qa">
+            <div class="section-header">
+                <h2 class="section-title" data-i18n="qa_title">常见问题 Q&A</h2>
+                <p class="section-subtitle" data-i18n="qa_subtitle">遇到问题？在这里找到解决方案</p>
+            </div>
+            <div class="qa-list">
+                <!-- Q1 -->
+                <div class="qa-item">
+                    <button class="qa-question">
+                        <span class="q-icon">Q</span>
+                        <span class="q-text" data-i18n="q1">打开应用提示"已损坏，无法打开"怎么办？</span>
+                        <span class="q-arrow">▾</span>
+                    </button>
+                    <div class="qa-answer">
+                        <div class="qa-answer-inner" data-i18n="a1">
+                            <p>这是 macOS Gatekeeper 安全机制导致的，解决方法如下：</p>
+                            <ol>
+                                <li>打开 <strong>终端 (Terminal)</strong></li>
+                                <li>输入以下命令并回车：</li>
+                            </ol>
+                            <div class="cmd-block">
+                                <span class="prompt">$ </span><span class="cmd">sudo xattr -rd com.apple.quarantine /Applications/SakuraWallpaper.app</span>
+                            </div>
+                            <ol start="3">
+                                <li>输入你的 Mac 登录密码（输入时不会显示字符），按回车</li>
+                                <li>重新打开 SakuraWallpaper 即可正常使用</li>
+                            </ol>
+                            <div class="note">💡 如果仍无法打开，请前往 <strong>系统设置 → 隐私与安全性 → 安全性</strong>，点击"仍要打开"。</div>
+                        </div>
+                    </div>
+                </div>
 
-    // Value displays
-    const fontSizeValue = document.getElementById('fontSizeValue');
-    const opacityValue = document.getElementById('opacityValue');
-    const textColorValue = document.getElementById('textColorValue');
-    const rotationValue = document.getElementById('rotationValue');
-    const scaleValue = document.getElementById('scaleValue');
-    const imgOpacityValue = document.getElementById('imgOpacityValue');
+                <!-- Q2 -->
+                <div class="qa-item">
+                    <button class="qa-question">
+                        <span class="q-icon">Q</span>
+                        <span class="q-text" data-i18n="q2">壁纸设置后没有显示怎么办？</span>
+                        <span class="q-arrow">▾</span>
+                    </button>
+                    <div class="qa-answer">
+                        <div class="qa-answer-inner" data-i18n="a2">
+                            <p>请尝试以下排查步骤：</p>
+                            <ol>
+                                <li>确认状态栏图标显示为<strong>绿色</strong>（表示壁纸正在运行）</li>
+                                <li>检查是否在状态栏菜单中意外暂停了壁纸</li>
+                                <li>尝试点击 <strong>Stop Wallpaper</strong> 后重新选择壁纸</li>
+                                <li>如果是外接显示器，请在下拉框中确认选择了正确的屏幕</li>
+                                <li>重启应用：退出后重新打开 SakuraWallpaper</li>
+                            </ol>
+                            <div class="note">💡 确保你的 macOS 版本 ≥ 12.0，较旧系统可能不兼容。</div>
+                        </div>
+                    </div>
+                </div>
 
-    // Tab switching
-    tabBtns.forEach(btn => {
-      btn.addEventListener('click', () => {
-        tabBtns.forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        state.type = btn.dataset.type;
-        
-        if (state.type === 'text') {
-          textSettings.classList.remove('hidden');
-          imageSettings.classList.add('hidden');
-        } else {
-          textSettings.classList.add('hidden');
-          imageSettings.classList.remove('hidden');
-        }
-        
-        render();
-      });
-    });
+                <!-- Q3 -->
+                <div class="qa-item">
+                    <button class="qa-question">
+                        <span class="q-icon">Q</span>
+                        <span class="q-text" data-i18n="q3">为什么视频壁纸没有声音？</span>
+                        <span class="q-arrow">▾</span>
+                    </button>
+                    <div class="qa-answer">
+                        <div class="qa-answer-inner" data-i18n="a3">
+                            <p>这是 <strong>设计如此</strong>，不是 bug。SakuraWallpaper 的视频壁纸默认以<strong>静音模式</strong>播放，以避免干扰你的工作和通知声音。如果你需要带声音的体验，建议使用其他媒体播放器。</p>
+                        </div>
+                    </div>
+                </div>
 
-    // Position selection
-    positionBtns.forEach(btn => {
-      btn.addEventListener('click', () => {
-        positionBtns.forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        state.position = btn.dataset.position;
-        render();
-      });
-    });
+                <!-- Q4 -->
+                <div class="qa-item">
+                    <button class="qa-question">
+                        <span class="q-icon">Q</span>
+                        <span class="q-text" data-i18n="q4">如何让应用开机自动启动？</span>
+                        <span class="q-arrow">▾</span>
+                    </button>
+                    <div class="qa-answer">
+                        <div class="qa-answer-inner" data-i18n="a4">
+                            <ol>
+                                <li>打开 SakuraWallpaper 主窗口</li>
+                                <li>勾选底部的 <strong>"开机自启动"</strong> 复选框</li>
+                                <li>设置会自动保存，下次开机时应用会自动运行并恢复上次的壁纸</li>
+                            </ol>
+                            <p>你也可以在 <strong>系统设置 → 通用 → 登录项</strong> 中管理开机启动项。</p>
+                        </div>
+                    </div>
+                </div>
 
-    // Drag and drop
-    uploadZone.addEventListener('dragover', (e) => {
-      e.preventDefault();
-      uploadZone.classList.add('drag-over');
-    });
+                <!-- Q5 -->
+                <div class="qa-item">
+                    <button class="qa-question">
+                        <span class="q-icon">Q</span>
+                        <span class="q-text" data-i18n="q5">多显示器如何设置不同壁纸？</span>
+                        <span class="q-arrow">▾</span>
+                    </button>
+                    <div class="qa-answer">
+                        <div class="qa-answer-inner" data-i18n="a5">
+                            <ol>
+                                <li>在主窗口的<strong>屏幕选择下拉框</strong>中选择目标显示器</li>
+                                <li>点击 <strong>Choose Wallpaper</strong> 为该屏幕设置壁纸</li>
+                                <li>切换到另一个显示器，重复上述操作</li>
+                                <li>如需所有屏幕使用同一壁纸，点击 <strong>"Apply to All"</strong> 按钮</li>
+                            </ol>
+                            <p>每个屏幕的壁纸配置会独立保存，重启应用后自动恢复。</p>
+                        </div>
+                    </div>
+                </div>
 
-    uploadZone.addEventListener('dragleave', () => {
-      uploadZone.classList.remove('drag-over');
-    });
+                <!-- Q6 -->
+                <div class="qa-item">
+                    <button class="qa-question">
+                        <span class="q-icon">Q</span>
+                        <span class="q-text" data-i18n="q6">壁纸会影响系统性能和电池续航吗？</span>
+                        <span class="q-arrow">▾</span>
+                    </button>
+                    <div class="qa-answer">
+                        <div class="qa-answer-inner" data-i18n="a6">
+                            <p>视频壁纸会占用一定的 GPU 和 CPU 资源。以下建议可以帮助降低影响：</p>
+                            <ul>
+                                <li>使用分辨率适中的视频（推荐 1080p），避免 4K 视频</li>
+                                <li>不使用时通过状态栏菜单<strong>暂停壁纸</strong></li>
+                                <li>笔记本用户建议在接电源时使用动态壁纸</li>
+                                <li>图片壁纸对性能几乎没有影响</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
 
-    uploadZone.addEventListener('drop', (e) => {
-      e.preventDefault();
-      uploadZone.classList.remove('drag-over');
-      const file = e.dataTransfer.files[0];
-      if (file && file.type.startsWith('image/')) {
-        loadImage(file);
-      }
-    });
+                <!-- Q7 -->
+                <div class="qa-item">
+                    <button class="qa-question">
+                        <span class="q-icon">Q</span>
+                        <span class="q-text" data-i18n="q7">如何完全卸载 SakuraWallpaper？</span>
+                        <span class="q-arrow">▾</span>
+                    </button>
+                    <div class="qa-answer">
+                        <div class="qa-answer-inner" data-i18n="a7">
+                            <ol>
+                                <li>先点击 <strong>Stop Wallpaper</strong> 停止所有壁纸</li>
+                                <li>在状态栏菜单中选择 <strong>Quit</strong> 退出应用</li>
+                                <li>将 <code>/Applications/SakuraWallpaper.app</code> 移到废纸篓</li>
+                                <li>（可选）清除配置文件：</li>
+                            </ol>
+                            <div class="cmd-block">
+                                <span class="prompt">$ </span><span class="cmd">rm -rf ~/Library/Preferences/com.sakura.wallpaper.plist</span><br>
+                                <span class="prompt">$ </span><span class="cmd">rm -rf ~/Library/Caches/com.sakura.wallpaper</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-    // File input handlers
-    imageInput.addEventListener('change', (e) => {
-      const file = e.target.files[0];
-      if (file) loadImage(file);
-    });
+                <!-- Q8 -->
+                <div class="qa-item">
+                    <button class="qa-question">
+                        <span class="q-icon">Q</span>
+                        <span class="q-text" data-i18n="q8">支持哪些 macOS 版本？</span>
+                        <span class="q-arrow">▾</span>
+                    </button>
+                    <div class="qa-answer">
+                        <div class="qa-answer-inner" data-i18n="a8">
+                            <p>SakuraWallpaper 需要 <strong>macOS 12.0 (Monterey)</strong> 或更高版本。支持的系统包括：</p>
+                            <ul>
+                                <li>macOS 12 Monterey</li>
+                                <li>macOS 13 Ventura</li>
+                                <li>macOS 14 Sonoma</li>
+                                <li>macOS 15 Sequoia</li>
+                            </ul>
+                            <p>同时支持 Intel 和 Apple Silicon (M1/M2/M3/M4) 芯片的 Mac。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
 
-    watermarkImageInput.addEventListener('change', (e) => {
-      const file = e.target.files[0];
-      if (file) loadWatermarkImage(file);
-    });
+        <!-- FOOTER -->
+        <footer>
+            <div class="footer-links">
+                <a href="#" data-i18n="ft_features">功能说明</a>
+                <a href="#qa" data-i18n="ft_qa">常见问题</a>
+                <a href="#" data-i18n="ft_privacy">隐私政策</a>
+                <a href="#" data-i18n="ft_contact">联系我们</a>
+            </div>
+            <p>© 2026 SakuraWallpaper</p>
+            <p class="footer-copy" data-i18n="ft_tagline">🌸 让每一个像素都充满生命力</p>
+        </footer>
+    </div>
 
-    // Load main image
-    function loadImage(file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const img = new Image();
-        img.onload = () => {
-          state.image = img;
-          placeholder.classList.add('hidden');
-          canvas.classList.remove('hidden');
-          downloadBtn.disabled = false;
-          imageInfo.textContent = `${img.width} × ${img.height}px`;
-          render();
+    <script>
+        // ===== i18n =====
+        const i18n = {
+            zh: {
+                // Nav
+                nav_features: '功能',
+                nav_preview: '预览',
+                nav_formats: '格式',
+                nav_qa: 'Q&A',
+                // Hero
+                hero_badge: 'macOS 动态壁纸应用',
+                hero_title_1: '为你的桌面',
+                hero_title_2: '注入动态生命力',
+                hero_subtitle: 'SakuraWallpaper 是一款优雅的 macOS 动态壁纸应用，支持将视频、GIF 和图片设置为桌面壁纸，让你的屏幕焕发新生。',
+                btn_download: '立即下载',
+                btn_learn: '了解更多功能',
+                hero_meta: 'v1.0.0 · 免费 · 无广告 · macOS 12+',
+                // Features
+                features_title: '核心功能',
+                features_subtitle: '精心设计的功能，让你的桌面体验更加出色',
+                f1_title: '动态壁纸支持',
+                f1_desc: '支持 MP4、MOV、GIF、M4V 等视频格式，视频在桌面循环播放，为工作空间增添活力。',
+                f2_title: '多显示器管理',
+                f2_desc: '完美支持多显示器，为每个屏幕设置不同壁纸，"Apply to All" 一键应用到所有屏幕。',
+                f3_title: '独立暂停控制',
+                f3_desc: '通过状态栏菜单单独暂停/恢复每个屏幕的壁纸，全局控制与精细管理兼得。',
+                f4_title: '自动循环播放',
+                f4_desc: '视频壁纸自动循环播放，静音模式确保不影响工作，无缝衔接的播放体验。',
+                f5_title: '开机自启动',
+                f5_desc: '支持开机自动启动，登录后即刻享受动态壁纸，无需每次手动设置。',
+                f6_title: '历史记录',
+                f6_desc: '自动保存最近使用的壁纸历史（最多 10 条），方便快速切换和管理。',
+                // Preview
+                ui_screen: '选择屏幕',
+                ui_builtin: '内置显示器 (Built-in)',
+                ui_ext1: '外接显示器 1',
+                ui_ext2: '外接显示器 2',
+                ui_current: '当前壁纸',
+                ui_preview_area: '🌸 动态壁纸预览区域',
+                ui_info: '文件信息',
+                preview_title: '直观优雅的用户界面',
+                preview_desc: 'SakuraWallpaper 采用精心设计的 macOS 原生界面，操作简单直观，轻松管理桌面壁纸。',
+                pf1_title: '一键设置壁纸',
+                pf1_desc: '选择文件后即可立即将视频或图片设置为桌面壁纸',
+                pf2_title: '实时状态指示',
+                pf2_desc: '标题栏状态指示器显示应用活跃状态（绿色=活跃 / 灰色=未激活）',
+                pf3_title: '状态栏快捷控制',
+                pf3_desc: '通过菜单栏图标快速访问所有功能，无需打开主窗口',
+                pf4_title: '键盘快捷键支持',
+                pf4_desc: 'Cmd+O 打开窗口 · Cmd+P 暂停壁纸 · Cmd+Q 退出应用',
+                // Formats
+                formats_title: '广泛的格式支持',
+                formats_subtitle: '支持主流视频和图片格式，满足你的各种需求',
+                fmt_video: '视频格式',
+                fmt_image: '图片格式',
+                // Download
+                dl_title: '准备好美化你的桌面了吗？',
+                dl_subtitle: '立即下载 SakuraWallpaper，为你的 macOS 桌面注入动态生命力',
+                dl_btn: '下载 macOS 版本',
+                dl_meta: 'v1.0.0 · 免费下载 · 无广告 · 隐私安全',
+                // Q&A
+                qa_title: '常见问题 Q&A',
+                qa_subtitle: '遇到问题？在这里找到解决方案',
+                q1: '打开应用提示"已损坏，无法打开"怎么办？',
+                a1: `<p>这是 macOS Gatekeeper 安全机制导致的，解决方法如下：</p>
+                     <ol><li>打开 <strong>终端 (Terminal)</strong></li><li>输入以下命令并回车：</li></ol>
+                     <div class="cmd-block"><span class="prompt">$ </span><span class="cmd">sudo xattr -rd com.apple.quarantine /Applications/SakuraWallpaper.app</span></div>
+                     <ol start="3"><li>输入你的 Mac 登录密码（输入时不会显示字符），按回车</li><li>重新打开 SakuraWallpaper 即可正常使用</li></ol>
+                     <div class="note">💡 如果仍无法打开，请前往 <strong>系统设置 → 隐私与安全性 → 安全性</strong>，点击"仍要打开"。</div>`,
+                q2: '壁纸设置后没有显示怎么办？',
+                a2: `<p>请尝试以下排查步骤：</p>
+                     <ol><li>确认状态栏图标显示为<strong>绿色</strong>（表示壁纸正在运行）</li><li>检查是否在状态栏菜单中意外暂停了壁纸</li><li>尝试点击 <strong>Stop Wallpaper</strong> 后重新选择壁纸</li><li>如果是外接显示器，请在下拉框中确认选择了正确的屏幕</li><li>重启应用：退出后重新打开 SakuraWallpaper</li></ol>
+                     <div class="note">💡 确保你的 macOS 版本 ≥ 12.0，较旧系统可能不兼容。</div>`,
+                q3: '为什么视频壁纸没有声音？',
+                a3: `<p>这是 <strong>设计如此</strong>，不是 bug。SakuraWallpaper 的视频壁纸默认以<strong>静音模式</strong>播放，以避免干扰你的工作和通知声音。如果你需要带声音的体验，建议使用其他媒体播放器。</p>`,
+                q4: '如何让应用开机自动启动？',
+                a4: `<ol><li>打开 SakuraWallpaper 主窗口</li><li>勾选底部的 <strong>"开机自启动"</strong> 复选框</li><li>设置会自动保存，下次开机时应用会自动运行并恢复上次的壁纸</li></ol>
+                     <p>你也可以在 <strong>系统设置 → 通用 → 登录项</strong> 中管理开机启动项。</p>`,
+                q5: '多显示器如何设置不同壁纸？',
+                a5: `<ol><li>在主窗口的<strong>屏幕选择下拉框</strong>中选择目标显示器</li><li>点击 <strong>Choose Wallpaper</strong> 为该屏幕设置壁纸</li><li>切换到另一个显示器，重复上述操作</li><li>如需所有屏幕使用同一壁纸，点击 <strong>"Apply to All"</strong> 按钮</li></ol>
+                     <p>每个屏幕的壁纸配置会独立保存，重启应用后自动恢复。</p>`,
+                q6: '壁纸会影响系统性能和电池续航吗？',
+                a6: `<p>视频壁纸会占用一定的 GPU 和 CPU 资源。以下建议可以帮助降低影响：</p>
+                     <ul><li>使用分辨率适中的视频（推荐 1080p），避免 4K 视频</li><li>不使用时通过状态栏菜单<strong>暂停壁纸</strong></li><li>笔记本用户建议在接电源时使用动态壁纸</li><li>图片壁纸对性能几乎没有影响</li></ul>`,
+                q7: '如何完全卸载 SakuraWallpaper？',
+                a7: `<ol><li>先点击 <strong>Stop Wallpaper</strong> 停止所有壁纸</li><li>在状态栏菜单中选择 <strong>Quit</strong> 退出应用</li><li>将 <code>/Applications/SakuraWallpaper.app</code> 移到废纸篓</li><li>（可选）清除配置文件：</li></ol>
+                     <div class="cmd-block"><span class="prompt">$ </span><span class="cmd">rm -rf ~/Library/Preferences/com.sakura.wallpaper.plist</span><br><span class="prompt">$ </span><span class="cmd">rm -rf ~/Library/Caches/com.sakura.wallpaper</span></div>`,
+                q8: '支持哪些 macOS 版本？',
+                a8: `<p>SakuraWallpaper 需要 <strong>macOS 12.0 (Monterey)</strong> 或更高版本。支持的系统包括：</p>
+                     <ul><li>macOS 12 Monterey</li><li>macOS 13 Ventura</li><li>macOS 14 Sonoma</li><li>macOS 15 Sequoia</li></ul>
+                     <p>同时支持 Intel 和 Apple Silicon (M1/M2/M3/M4) 芯片的 Mac。</p>`,
+                // Footer
+                ft_features: '功能说明',
+                ft_qa: '常见问题',
+                ft_privacy: '隐私政策',
+                ft_contact: '联系我们',
+                ft_tagline: '🌸 让每一个像素都充满生命力',
+            },
+            en: {
+                nav_features: 'Features',
+                nav_preview: 'Preview',
+                nav_formats: 'Formats',
+                nav_qa: 'Q&A',
+                hero_badge: 'macOS Dynamic Wallpaper App',
+                hero_title_1: 'Bring Your Desktop',
+                hero_title_2: 'to Life',
+                hero_subtitle: 'SakuraWallpaper is an elegant macOS dynamic wallpaper app that lets you set videos, GIFs, and images as your desktop wallpaper — breathing new life into your screen.',
+                btn_download: 'Download Now',
+                btn_learn: 'Learn More',
+                hero_meta: 'v1.0.0 · Free · No Ads · macOS 12+',
+                features_title: 'Core Features',
+                features_subtitle: 'Thoughtfully designed features for a better desktop experience',
+                f1_title: 'Dynamic Wallpaper',
+                f1_desc: 'Supports MP4, MOV, GIF, M4V and more. Videos loop seamlessly on your desktop, adding energy to your workspace.',
+                f2_title: 'Multi-Display Support',
+                f2_desc: 'Full multi-monitor support — set different wallpapers for each screen. "Apply to All" sets one wallpaper across all displays instantly.',
+                f3_title: 'Independent Pause',
+                f3_desc: 'Pause or resume wallpapers individually per screen via the menu bar, with global pause/resume for all screens at once.',
+                f4_title: 'Auto Loop Playback',
+                f4_desc: 'Videos loop automatically in silent mode so they never interrupt your work — a seamless playback experience.',
+                f5_title: 'Launch at Login',
+                f5_desc: 'Auto-start on boot so your dynamic wallpaper is ready the moment you log in — no manual setup needed.',
+                f6_title: 'Recent History',
+                f6_desc: 'Automatically saves your recently used wallpapers (up to 10) for quick switching and easy management.',
+                ui_screen: 'Screen',
+                ui_builtin: 'Built-in Display',
+                ui_ext1: 'External Display 1',
+                ui_ext2: 'External Display 2',
+                ui_current: 'Current Wallpaper',
+                ui_preview_area: '🌸 Wallpaper Preview Area',
+                ui_info: 'File Info',
+                preview_title: 'Intuitive & Elegant UI',
+                preview_desc: 'SakuraWallpaper features a beautifully crafted native macOS interface — simple, intuitive, and powerful.',
+                pf1_title: 'One-Click Setup',
+                pf1_desc: 'Select a file and instantly set it as your desktop wallpaper',
+                pf2_title: 'Live Status Indicator',
+                pf2_desc: 'Title bar shows app status at a glance (green = active / gray = inactive)',
+                pf3_title: 'Menu Bar Quick Control',
+                pf3_desc: 'Access all features from the menu bar icon — no need to open the main window',
+                pf4_title: 'Keyboard Shortcuts',
+                pf4_desc: 'Cmd+O to open · Cmd+P to pause · Cmd+Q to quit',
+                formats_title: 'Wide Format Support',
+                formats_subtitle: 'Supports mainstream video and image formats for all your needs',
+                fmt_video: 'Video Formats',
+                fmt_image: 'Image Formats',
+                dl_title: 'Ready to Beautify Your Desktop?',
+                dl_subtitle: 'Download SakuraWallpaper now and bring your macOS desktop to life',
+                dl_btn: 'Download for macOS',
+                dl_meta: 'v1.0.0 · Free Download · No Ads · Privacy Safe',
+                qa_title: 'Frequently Asked Questions',
+                qa_subtitle: 'Having issues? Find your answers here',
+                q1: 'App shows "damaged and can\'t be opened" — what do I do?',
+                a1: `<p>This is caused by macOS Gatekeeper. Here's how to fix it:</p>
+                     <ol><li>Open <strong>Terminal</strong></li><li>Run this command:</li></ol>
+                     <div class="cmd-block"><span class="prompt">$ </span><span class="cmd">sudo xattr -rd com.apple.quarantine /Applications/SakuraWallpaper.app</span></div>
+                     <ol start="3"><li>Enter your Mac password (characters won't show) and press Return</li><li>Reopen SakuraWallpaper — it should work now</li></ol>
+                     <div class="note">💡 If it still won't open, go to <strong>System Settings → Privacy & Security → Security</strong> and click "Open Anyway".</div>`,
+                q2: 'Wallpaper is set but not showing — what should I check?',
+                a2: `<p>Try these troubleshooting steps:</p>
+                     <ol><li>Make sure the menu bar icon is <strong>green</strong> (wallpaper is running)</li><li>Check if you accidentally paused the wallpaper from the menu bar</li><li>Click <strong>Stop Wallpaper</strong> and re-select a wallpaper</li><li>For external displays, make sure the correct screen is selected in the dropdown</li><li>Restart the app: quit and reopen SakuraWallpaper</li></ol>
+                     <div class="note">💡 Ensure your macOS version is ≥ 12.0. Older systems may not be compatible.</div>`,
+                q3: 'Why is there no sound on video wallpapers?',
+                a3: `<p>This is <strong>by design</strong>, not a bug. Video wallpapers play in <strong>silent mode</strong> by default to avoid interfering with your work and notification sounds. If you need audio, consider using a media player instead.</p>`,
+                q4: 'How do I enable launch at login?',
+                a4: `<ol><li>Open the SakuraWallpaper main window</li><li>Check the <strong>"Launch at Login"</strong> checkbox at the bottom</li><li>The setting saves automatically — the app will start on next boot and restore your wallpaper</li></ol>
+                     <p>You can also manage login items in <strong>System Settings → General → Login Items</strong>.</p>`,
+                q5: 'How do I set different wallpapers on multiple displays?',
+                a5: `<ol><li>Select the target display from the <strong>screen dropdown</strong> in the main window</li><li>Click <strong>Choose Wallpaper</strong> to set a wallpaper for that screen</li><li>Switch to another display and repeat</li><li>To use the same wallpaper on all screens, click <strong>"Apply to All"</strong></li></ol>
+                     <p>Each screen's wallpaper config is saved independently and restored on app restart.</p>`,
+                q6: 'Does it affect system performance or battery life?',
+                a6: `<p>Video wallpapers use some GPU and CPU resources. Here are tips to reduce the impact:</p>
+                     <ul><li>Use moderate resolution videos (1080p recommended) — avoid 4K</li><li><strong>Pause wallpapers</strong> from the menu bar when not needed</li><li>Laptop users: use dynamic wallpapers while plugged in</li><li>Image wallpapers have virtually no performance impact</li></ul>`,
+                q7: 'How do I completely uninstall SakuraWallpaper?',
+                a7: `<ol><li>Click <strong>Stop Wallpaper</strong> to stop all wallpapers</li><li>Select <strong>Quit</strong> from the menu bar</li><li>Move <code>/Applications/SakuraWallpaper.app</code> to Trash</li><li>(Optional) Clear config files:</li></ol>
+                     <div class="cmd-block"><span class="prompt">$ </span><span class="cmd">rm -rf ~/Library/Preferences/com.sakura.wallpaper.plist</span><br><span class="prompt">$ </span><span class="cmd">rm -rf ~/Library/Caches/com.sakura.wallpaper</span></div>`,
+                q8: 'Which macOS versions are supported?',
+                a8: `<p>SakuraWallpaper requires <strong>macOS 12.0 (Monterey)</strong> or later. Supported systems:</p>
+                     <ul><li>macOS 12 Monterey</li><li>macOS 13 Ventura</li><li>macOS 14 Sonoma</li><li>macOS 15 Sequoia</li></ul>
+                     <p>Supports both Intel and Apple Silicon (M1/M2/M3/M4) Macs.</p>`,
+                ft_features: 'Features',
+                ft_qa: 'FAQ',
+                ft_privacy: 'Privacy Policy',
+                ft_contact: 'Contact Us',
+                ft_tagline: '🌸 Every pixel, alive with beauty',
+            }
         };
-        img.src = e.target.result;
-      };
-      reader.readAsDataURL(file);
-    }
 
-    // Load watermark image
-    function loadWatermarkImage(file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const img = new Image();
-        img.onload = () => {
-          state.watermarkImage = img;
-          const preview = document.getElementById('watermarkImagePreview');
-          preview.innerHTML = `<img src="${e.target.result}" class="max-h-16 mx-auto rounded">`;
-          render();
-        };
-        img.src = e.target.result;
-      };
-      reader.readAsDataURL(file);
-    }
+        let currentLang = 'zh';
 
-    // Input event listeners
-    watermarkText.addEventListener('input', (e) => {
-      state.text = e.target.value || 'WATERMARK';
-      render();
-    });
+        function setLang(lang) {
+            currentLang = lang;
+            const dict = i18n[lang];
 
-    fontSize.addEventListener('input', (e) => {
-      state.fontSize = parseInt(e.target.value);
-      fontSizeValue.textContent = state.fontSize;
-      render();
-    });
+            // Update all data-i18n elements
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (dict[key] !== undefined) {
+                    if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+                        el.placeholder = dict[key];
+                    } else {
+                        el.innerHTML = dict[key];
+                    }
+                }
+            });
 
-    opacity.addEventListener('input', (e) => {
-      state.opacity = parseInt(e.target.value);
-      opacityValue.textContent = state.opacity + '%';
-      render();
-    });
+            // Update nav links
+            document.querySelectorAll('.nav-links a').forEach(a => {
+                const key = a.getAttribute('data-nav');
+                if (key && dict['nav_' + key]) {
+                    a.textContent = dict['nav_' + key];
+                }
+            });
 
-    textColor.addEventListener('input', (e) => {
-      state.textColor = e.target.value;
-      textColorValue.textContent = e.target.value;
-      render();
-    });
+            // Update lang toggle buttons
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.getAttribute('data-set-lang') === lang);
+            });
 
-    rotation.addEventListener('input', (e) => {
-      state.rotation = parseInt(e.target.value);
-      rotationValue.textContent = state.rotation + '°';
-      render();
-    });
-
-    scale.addEventListener('input', (e) => {
-      state.scale = parseInt(e.target.value);
-      scaleValue.textContent = state.scale + '%';
-      render();
-    });
-
-    imgOpacity.addEventListener('input', (e) => {
-      state.imgOpacity = parseInt(e.target.value);
-      imgOpacityValue.textContent = state.imgOpacity + '%';
-      render();
-    });
-
-    tileMode.addEventListener('change', (e) => {
-      state.tileMode = e.target.checked;
-      render();
-    });
-
-    // Reset button
-    resetBtn.addEventListener('click', () => {
-      state = {
-        image: null,
-        watermarkImage: null,
-        type: 'text',
-        position: 'center',
-        text: 'WATERMARK',
-        fontSize: 32,
-        opacity: 60,
-        textColor: '#ffffff',
-        rotation: -30,
-        scale: 30,
-        imgOpacity: 70,
-        tileMode: false
-      };
-      
-      // Reset UI
-      watermarkText.value = 'WATERMARK';
-      fontSize.value = 32;
-      fontSizeValue.textContent = '32';
-      opacity.value = 60;
-      opacityValue.textContent = '60%';
-      textColor.value = '#ffffff';
-      textColorValue.textContent = '#ffffff';
-      rotation.value = -30;
-      rotationValue.textContent = '-30°';
-      scale.value = 30;
-      scaleValue.textContent = '30%';
-      imgOpacity.value = 70;
-      imgOpacityValue.textContent = '70%';
-      tileMode.checked = false;
-      
-      positionBtns.forEach(btn => {
-        btn.classList.remove('active');
-        if (btn.dataset.position === 'center') btn.classList.add('active');
-      });
-      
-      placeholder.classList.remove('hidden');
-      canvas.classList.add('hidden');
-      downloadBtn.disabled = true;
-      imageInfo.textContent = '等待上传...';
-    });
-
-    // Download button
-    downloadBtn.addEventListener('click', () => {
-      const link = document.createElement('a');
-      link.download = 'watermarked-image.png';
-      link.href = canvas.toDataURL('image/png');
-      link.click();
-    });
-
-    // Render canvas
-    function render() {
-      if (!state.image) return;
-
-      // Set canvas size
-      canvas.width = state.image.width;
-      canvas.height = state.image.height;
-
-      // Draw original image
-      ctx.drawImage(state.image, 0, 0);
-
-      // Apply watermark
-      if (state.type === 'text') {
-        drawTextWatermark();
-      } else if (state.watermarkImage) {
-        drawImageWatermark();
-      }
-    }
-
-    function drawTextWatermark() {
-      ctx.save();
-      
-      const alpha = state.opacity / 100;
-      ctx.font = `bold ${state.fontSize}px "Space Grotesk", sans-serif`;
-      ctx.fillStyle = hexToRgba(state.textColor, alpha);
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-
-      if (state.tileMode) {
-        drawTiledWatermark();
-      } else {
-        drawSingleTextWatermark();
-      }
-      
-      ctx.restore();
-    }
-
-    function drawSingleTextWatermark() {
-      const pos = getPosition();
-      ctx.translate(pos.x, pos.y);
-      ctx.rotate(state.rotation * Math.PI / 180);
-      ctx.fillText(state.text, 0, 0);
-    }
-
-    function drawTiledWatermark() {
-      const gap = state.fontSize * 3;
-      const diagonal = Math.sqrt(canvas.width ** 2 + canvas.height ** 2);
-      
-      for (let y = -diagonal; y < diagonal; y += gap) {
-        for (let x = -diagonal; x < diagonal; x += gap) {
-          ctx.save();
-          ctx.translate(x, y);
-          ctx.rotate(state.rotation * Math.PI / 180);
-          ctx.fillText(state.text, 0, 0);
-          ctx.restore();
+            // Update html lang attribute
+            document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en';
         }
-      }
-    }
 
-    function drawImageWatermark() {
-      if (!state.watermarkImage) return;
-      
-      ctx.save();
-      
-      const alpha = state.imgOpacity / 100;
-      ctx.globalAlpha = alpha;
-      
-      const scaleRatio = state.scale / 100;
-      const wmWidth = state.watermarkImage.width * scaleRatio;
-      const wmHeight = state.watermarkImage.height * scaleRatio;
-      
-      if (state.tileMode) {
-        const gapX = wmWidth * 1.5;
-        const gapY = wmHeight * 1.5;
-        
-        for (let y = 0; y < canvas.height + gapY; y += gapY) {
-          for (let x = 0; x < canvas.width + gapX; x += gapX) {
-            ctx.drawImage(state.watermarkImage, x - wmWidth / 2, y - wmHeight / 2, wmWidth, wmHeight);
-          }
+        // Lang toggle click
+        document.querySelectorAll('.lang-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                setLang(btn.getAttribute('data-set-lang'));
+            });
+        });
+
+        // ===== Q&A Accordion =====
+        document.querySelectorAll('.qa-question').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const item = btn.parentElement;
+                const wasOpen = item.classList.contains('open');
+                // Close all
+                document.querySelectorAll('.qa-item').forEach(i => i.classList.remove('open'));
+                // Toggle current
+                if (!wasOpen) item.classList.add('open');
+            });
+        });
+
+        // ===== Smooth Scroll =====
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+
+        // ===== Sakura Petals =====
+        function createSakura() {
+            const petal = document.createElement('div');
+            petal.className = 'sakura';
+            const petals = ['🌸', '🩷', '✿', '❀'];
+            petal.innerHTML = petals[Math.floor(Math.random() * petals.length)];
+            petal.style.left = Math.random() * 100 + 'vw';
+            petal.style.fontSize = (Math.random() * 8 + 10) + 'px';
+            petal.style.opacity = Math.random() * 0.4 + 0.15;
+            petal.style.animationDuration = (Math.random() * 12 + 12) + 's';
+            document.body.appendChild(petal);
+            setTimeout(() => petal.remove(), 25000);
         }
-      } else {
-        const pos = getPosition(wmWidth, wmHeight);
-        ctx.drawImage(state.watermarkImage, pos.x, pos.y, wmWidth, wmHeight);
-      }
-      
-      ctx.restore();
-    }
 
-    function getPosition(wmWidth = 0, wmHeight = 0) {
-      const padding = 20;
-      let x = canvas.width / 2;
-      let y = canvas.height / 2;
-      
-      switch (state.position) {
-        case 'top-left':
-          x = padding + wmWidth / 2;
-          y = padding + wmHeight / 2;
-          break;
-        case 'top-center':
-          y = padding + wmHeight / 2;
-          break;
-        case 'top-right':
-          x = canvas.width - padding - wmWidth / 2;
-          y = padding + wmHeight / 2;
-          break;
-        case 'middle-left':
-          x = padding + wmWidth / 2;
-          break;
-        case 'middle-right':
-          x = canvas.width - padding - wmWidth / 2;
-          break;
-        case 'bottom-left':
-          x = padding + wmWidth / 2;
-          y = canvas.height - padding - wmHeight / 2;
-          break;
-        case 'bottom-center':
-          y = canvas.height - padding - wmHeight / 2;
-          break;
-        case 'bottom-right':
-          x = canvas.width - padding - wmWidth / 2;
-          y = canvas.height - padding - wmHeight / 2;
-          break;
-      }
-      
-      return { x, y };
-    }
+        setInterval(createSakura, 3500);
+        for (let i = 0; i < 4; i++) setTimeout(createSakura, i * 800);
 
-    function hexToRgba(hex, alpha) {
-      const r = parseInt(hex.slice(1, 3), 16);
-      const g = parseInt(hex.slice(3, 5), 16);
-      const b = parseInt(hex.slice(5, 7), 16);
-      return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-    }
-  </script>
+        // Init
+        setLang('zh');
+    </script>
 </body>
 </html>
