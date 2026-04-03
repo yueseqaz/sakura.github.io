@@ -121,6 +121,12 @@
     height: 100%;
   }
 
+  .nav-right {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+  }
+
   .nav-links {
     display: flex;
     gap: 2.5rem;
@@ -152,6 +158,58 @@
 
   .nav-links a:hover { color: var(--ink); }
   .nav-links a:hover::after { width: 100%; }
+
+  /* ===== Language Toggle ===== */
+  .lang-toggle {
+    display: flex;
+    align-items: center;
+    background: rgba(200, 180, 170, 0.12);
+    border-radius: 100px;
+    padding: 3px;
+    position: relative;
+    cursor: pointer;
+    border: 1px solid rgba(200, 180, 170, 0.2);
+    transition: border-color 0.3s ease;
+    flex-shrink: 0;
+  }
+
+  .lang-toggle:hover {
+    border-color: var(--sakura-light);
+  }
+
+  .lang-toggle-bg {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: calc(50% - 3px);
+    height: calc(100% - 6px);
+    background: var(--surface);
+    border-radius: 100px;
+    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 1px 4px rgba(44, 36, 32, 0.08);
+  }
+
+  .lang-toggle[data-lang="en"] .lang-toggle-bg {
+    transform: translateX(100%);
+  }
+
+  .lang-option {
+    position: relative;
+    z-index: 1;
+    padding: 0.28rem 0.85rem;
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    color: var(--ink-muted);
+    transition: color 0.3s ease;
+    user-select: none;
+    white-space: nowrap;
+  }
+
+  .lang-toggle[data-lang="zh"] .lang-option[data-lang="zh"],
+  .lang-toggle[data-lang="en"] .lang-option[data-lang="en"] {
+    color: var(--ink);
+  }
 
   /* ===== Hero ===== */
   .hero {
@@ -251,6 +309,7 @@
     border-radius: 100px;
     transition: all 0.3s ease;
     border: 1.5px solid var(--ink);
+    cursor: pointer;
   }
 
   .btn-primary:hover {
@@ -816,12 +875,19 @@
     </span>
     Sakura Software Studio
   </a>
-  <ul class="nav-links">
-    <li><a href="#services">服务</a></li>
-    <li><a href="#works">作品</a></li>
-    <li><a href="#philosophy">理念</a></li>
-    <li><a href="#contact">联系</a></li>
-  </ul>
+  <div class="nav-right">
+    <ul class="nav-links">
+      <li><a href="#services" data-i18n="nav.services">服务</a></li>
+      <li><a href="#works" data-i18n="nav.works">作品</a></li>
+      <li><a href="#philosophy" data-i18n="nav.philosophy">理念</a></li>
+      <li><a href="#contact" data-i18n="nav.contact">联系</a></li>
+    </ul>
+    <div class="lang-toggle" id="langToggle" data-lang="zh" onclick="toggleLang()">
+      <div class="lang-toggle-bg"></div>
+      <span class="lang-option" data-lang="zh">中</span>
+      <span class="lang-option" data-lang="en">EN</span>
+    </div>
+  </div>
 </nav>
 
 <!-- Hero -->
@@ -829,22 +895,25 @@
   <div class="hero-inner">
     <div class="hero-badge">
       <span class="dot"></span>
-      用心创造，以美为名
+      <span data-i18n="hero.badge">用心创造，以美为名</span>
     </div>
-    <h1>用代码<br>书写<em>优雅</em></h1>
-    <p class="hero-desc">
+    <h1>
+      <span data-i18n="hero.title.line1">用代码</span><br>
+      <span data-i18n="hero.title.line2">书写</span><em data-i18n="hero.title.accent">优雅</em>
+    </h1>
+    <p class="hero-desc" data-i18n="hero.desc">
       Sakura Software Studio — 专注于打造兼具美感与功能的数字体验。每一行代码，都是一次对完美的追求。
     </p>
     <div class="hero-actions">
       <a href="#works" class="btn-primary">
-        浏览作品
+        <span data-i18n="hero.btn1">浏览作品</span>
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
       </a>
-      <a href="#contact" class="btn-secondary">开始合作</a>
+      <a href="#contact" class="btn-secondary" data-i18n="hero.btn2">开始合作</a>
     </div>
   </div>
   <div class="hero-scroll">
-    <span>Scroll</span>
+    <span data-i18n="hero.scroll">Scroll</span>
     <div class="scroll-line"></div>
   </div>
 </section>
@@ -853,10 +922,10 @@
 <section class="services" id="services">
   <div class="services-header">
     <div>
-      <div class="section-label reveal">What We Do</div>
-      <h2 class="section-title reveal reveal-delay-1">精心打磨<br>每一个细节</h2>
+      <div class="section-label reveal" data-i18n="services.label">What We Do</div>
+      <h2 class="section-title reveal reveal-delay-1" data-i18n="services.title">精心打磨<br>每一个细节</h2>
     </div>
-    <p class="section-desc reveal reveal-delay-2">
+    <p class="section-desc reveal reveal-delay-2" data-i18n="services.desc">
       从构思到落地，我们提供全链路的软件开发服务，让技术成为连接创意与用户的桥梁。
     </p>
   </div>
@@ -865,48 +934,48 @@
       <div class="service-icon">
         <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
       </div>
-      <h3>Web 应用开发</h3>
-      <p>构建高性能、响应式的现代 Web 应用。从管理后台到面向用户的产品前端，我们追求极致的交互体验。</p>
+      <h3 data-i18n="services.card1.title">Web 应用开发</h3>
+      <p data-i18n="services.card1.desc">构建高性能、响应式的现代 Web 应用。从管理后台到面向用户的产品前端，我们追求极致的交互体验。</p>
       <span class="service-tag">React / Vue / Next.js</span>
     </div>
     <div class="service-card reveal reveal-delay-2">
       <div class="service-icon">
         <svg viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12" y2="18.01" stroke-width="2"/></svg>
       </div>
-      <h3>移动端开发</h3>
-      <p>原生与跨平台并行，打造流畅自然的移动端体验。让产品在每一次滑动和点击中都恰到好处。</p>
+      <h3 data-i18n="services.card2.title">移动端开发</h3>
+      <p data-i18n="services.card2.desc">原生与跨平台并行，打造流畅自然的移动端体验。让产品在每一次滑动和点击中都恰到好处。</p>
       <span class="service-tag">iOS / Android / Flutter</span>
     </div>
     <div class="service-card reveal reveal-delay-3">
       <div class="service-icon">
         <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
       </div>
-      <h3>系统架构设计</h3>
-      <p>从零搭建可扩展的技术架构。注重系统的稳定性与可维护性，为业务的长期增长奠定坚实基础。</p>
+      <h3 data-i18n="services.card3.title">系统架构设计</h3>
+      <p data-i18n="services.card3.desc">从零搭建可扩展的技术架构。注重系统的稳定性与可维护性，为业务的长期增长奠定坚实基础。</p>
       <span class="service-tag">Microservices / Cloud</span>
     </div>
     <div class="service-card reveal reveal-delay-1">
       <div class="service-icon">
         <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
       </div>
-      <h3>UI/UX 设计</h3>
-      <p>以用户为中心的设计思维，将美学与可用性完美融合。每一个像素都有它存在的理由。</p>
+      <h3 data-i18n="services.card4.title">UI/UX 设计</h3>
+      <p data-i18n="services.card4.desc">以用户为中心的设计思维，将美学与可用性完美融合。每一个像素都有它存在的理由。</p>
       <span class="service-tag">Figma / Prototype</span>
     </div>
     <div class="service-card reveal reveal-delay-2">
       <div class="service-icon">
         <svg viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/><line x1="14" y1="4" x2="10" y2="20"/></svg>
       </div>
-      <h3>技术咨询</h3>
-      <p>提供专业的技术评审与战略建议。帮助团队做出正确的技术决策，避开弯路，加速前行。</p>
+      <h3 data-i18n="services.card5.title">技术咨询</h3>
+      <p data-i18n="services.card5.desc">提供专业的技术评审与战略建议。帮助团队做出正确的技术决策，避开弯路，加速前行。</p>
       <span class="service-tag">Review / Strategy</span>
     </div>
     <div class="service-card reveal reveal-delay-3">
       <div class="service-icon">
         <svg viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
       </div>
-      <h3>定制工具开发</h3>
-      <p>为特定场景打造专属工具与自动化方案。提升效率，释放创造力，让重复工作成为过去。</p>
+      <h3 data-i18n="services.card6.title">定制工具开发</h3>
+      <p data-i18n="services.card6.desc">为特定场景打造专属工具与自动化方案。提升效率，释放创造力，让重复工作成为过去。</p>
       <span class="service-tag">CLI / Automation</span>
     </div>
   </div>
@@ -917,7 +986,7 @@
   <div class="philosophy-inner reveal">
     <div class="section-label" style="text-align:center">Our Philosophy</div>
     <div class="divider"></div>
-    <blockquote class="philosophy-quote">
+    <blockquote class="philosophy-quote" data-i18n="philosophy.quote">
       技术的温度，源于对美的执着。<br>
       我们相信，好的软件如同樱花——<br>
       绽放时令人惊叹，凋零前已孕育新生。
@@ -931,43 +1000,42 @@
 <section class="works" id="works">
   <div class="works-header">
     <div>
-      <div class="section-label reveal">Selected Works</div>
-      <h2 class="section-title reveal reveal-delay-1">精选作品</h2>
+      <div class="section-label reveal" data-i18n="works.label">Selected Works</div>
+      <h2 class="section-title reveal reveal-delay-1" data-i18n="works.title">精选作品</h2>
     </div>
   </div>
-  <div class="works-grid">
-    <div class="work-card reveal reveal-delay-1">
+ <a href="https://github.com/your-username/SakuraWallpaper" target="_blank" rel="noopener noreferrer" class="work-card reveal reveal-delay-1">
       <div class="work-thumb work-thumb-1">
         <div class="work-thumb-inner"></div>
-        <span class="work-thumb-label">Macos application</span>
+        <span class="work-thumb-label">macOS application</span>
       </div>
       <div class="work-info">
         <h3>SakuraWallpaper</h3>
-        <p>A lightweight macOS video wallpaper app (open-source)</p>
+        <p data-i18n="works.card1.desc">一款轻量级 macOS 视频壁纸应用（开源）</p>
         <div class="work-tags">
-          <span>swift Native</span>
+          <span>Swift Native</span>
         </div>
       </div>
-    </div>
+    </a>
 </section>
 
 <!-- Contact -->
 <section class="contact" id="contact">
   <div class="contact-inner">
     <div class="section-label reveal" style="text-align:center">Get In Touch</div>
-    <h2 class="section-title reveal reveal-delay-1" style="text-align:center">一起创造<br>美好的事物</h2>
-    <p class="section-desc reveal reveal-delay-2" style="text-align:center;margin:0 auto 3rem">
+    <h2 class="section-title reveal reveal-delay-1" style="text-align:center" data-i18n="contact.title">一起创造<br>美好的事物</h2>
+    <p class="section-desc reveal reveal-delay-2" style="text-align:center;margin:0 auto 3rem" data-i18n="contact.desc">
       无论是一个大胆的想法，还是一个需要打磨的项目，我们都期待与你聊聊。
     </p>
-    <form class="contact-form reveal reveal-delay-3" onsubmit="event.preventDefault(); alert('感谢你的留言！我们会尽快回复。');">
+    <form class="contact-form reveal reveal-delay-3" onsubmit="event.preventDefault(); alert(currentLang === 'zh' ? '感谢你的留言！我们会尽快回复。' : 'Thank you for your message! We will reply soon.');">
       <div class="form-row">
-        <input type="text" placeholder="你的名字" required>
-        <input type="email" placeholder="邮箱地址" required>
+        <input type="text" data-i18n-placeholder="contact.name" placeholder="你的名字" required>
+        <input type="email" data-i18n-placeholder="contact.email" placeholder="邮箱地址" required>
       </div>
-      <input type="text" placeholder="项目类型（可选）">
-      <textarea placeholder="简单描述你的想法..."></textarea>
+      <input type="text" data-i18n-placeholder="contact.project" placeholder="项目类型（可选）">
+      <textarea data-i18n-placeholder="contact.message" placeholder="简单描述你的想法..."></textarea>
       <button type="submit" class="btn-primary">
-        发送消息
+        <span data-i18n="contact.btn">发送消息</span>
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
       </button>
     </form>
@@ -979,7 +1047,7 @@
   <div class="footer-inner">
     <div class="footer-left">
       <span class="footer-brand">Sakura Software Studio</span>
-      <span class="footer-copy">&copy; 2026 Sakura Software Studio. Crafted with care.</span>
+      <span class="footer-copy">&copy; 2026 Sakura Software Studio. <span data-i18n="footer.copy">Crafted with care.</span></span>
     </div>
     <div class="footer-links">
       <a href="#">GitHub</a>
@@ -990,6 +1058,127 @@
 </footer>
 
 <script>
+  // ===== i18n Translations =====
+  const translations = {
+    zh: {
+      'nav.services': '服务',
+      'nav.works': '作品',
+      'nav.philosophy': '理念',
+      'nav.contact': '联系',
+      'hero.badge': '用心创造，以美为名',
+      'hero.title.line1': '用代码',
+      'hero.title.line2': '书写',
+      'hero.title.accent': '优雅',
+      'hero.desc': 'Sakura Software Studio — 专注于打造兼具美感与功能的数字体验。每一行代码，都是一次对完美的追求。',
+      'hero.btn1': '浏览作品',
+      'hero.btn2': '开始合作',
+      'hero.scroll': 'Scroll',
+      'services.label': 'What We Do',
+      'services.title': '精心打磨<br>每一个细节',
+      'services.desc': '从构思到落地，我们提供全链路的软件开发服务，让技术成为连接创意与用户的桥梁。',
+      'services.card1.title': 'Web 应用开发',
+      'services.card1.desc': '构建高性能、响应式的现代 Web 应用。从管理后台到面向用户的产品前端，我们追求极致的交互体验。',
+      'services.card2.title': '移动端开发',
+      'services.card2.desc': '原生与跨平台并行，打造流畅自然的移动端体验。让产品在每一次滑动和点击中都恰到好处。',
+      'services.card3.title': '系统架构设计',
+      'services.card3.desc': '从零搭建可扩展的技术架构。注重系统的稳定性与可维护性，为业务的长期增长奠定坚实基础。',
+      'services.card4.title': 'UI/UX 设计',
+      'services.card4.desc': '以用户为中心的设计思维，将美学与可用性完美融合。每一个像素都有它存在的理由。',
+      'services.card5.title': '技术咨询',
+      'services.card5.desc': '提供专业的技术评审与战略建议。帮助团队做出正确的技术决策，避开弯路，加速前行。',
+      'services.card6.title': '定制工具开发',
+      'services.card6.desc': '为特定场景打造专属工具与自动化方案。提升效率，释放创造力，让重复工作成为过去。',
+      'philosophy.quote': '技术的温度，源于对美的执着。<br>我们相信，好的软件如同樱花——<br>绽放时令人惊叹，凋零前已孕育新生。',
+      'works.label': 'Selected Works',
+      'works.title': '精选作品',
+      'works.card1.desc': '一款轻量级 macOS 视频壁纸应用（开源）',
+      'contact.title': '一起创造<br>美好的事物',
+      'contact.desc': '无论是一个大胆的想法，还是一个需要打磨的项目，我们都期待与你聊聊。',
+      'contact.name': '你的名字',
+      'contact.email': '邮箱地址',
+      'contact.project': '项目类型（可选）',
+      'contact.message': '简单描述你的想法...',
+      'contact.btn': '发送消息',
+      'footer.copy': 'Crafted with care.',
+    },
+    en: {
+      'nav.services': 'Services',
+      'nav.works': 'Works',
+      'nav.philosophy': 'Philosophy',
+      'nav.contact': 'Contact',
+      'hero.badge': 'Crafted with heart, named after beauty',
+      'hero.title.line1': 'Write',
+      'hero.title.line2': '',
+      'hero.title.accent': 'Elegance',
+      'hero.desc': 'Sakura Software Studio — Dedicated to crafting digital experiences that blend aesthetics with functionality. Every line of code is a pursuit of perfection.',
+      'hero.btn1': 'Browse Works',
+      'hero.btn2': 'Start a Project',
+      'hero.scroll': 'Scroll',
+      'services.label': 'What We Do',
+      'services.title': 'Polishing<br>Every Detail',
+      'services.desc': 'From concept to launch, we provide end-to-end software development services, making technology the bridge between creativity and users.',
+      'services.card1.title': 'Web Development',
+      'services.card1.desc': 'Building high-performance, responsive modern web applications. From admin dashboards to user-facing products, we pursue the ultimate interaction experience.',
+      'services.card2.title': 'Mobile Development',
+      'services.card2.desc': 'Native and cross-platform development in parallel, delivering fluid and natural mobile experiences. Every swipe and tap feels just right.',
+      'services.card3.title': 'System Architecture',
+      'services.card3.desc': 'Building scalable technical architectures from the ground up. Focusing on stability and maintainability to lay a solid foundation for long-term growth.',
+      'services.card4.title': 'UI/UX Design',
+      'services.card4.desc': 'User-centered design thinking that perfectly blends aesthetics with usability. Every pixel has a reason for being there.',
+      'services.card5.title': 'Tech Consulting',
+      'services.card5.desc': 'Providing professional technical reviews and strategic advice. Helping teams make the right decisions, avoid detours, and accelerate forward.',
+      'services.card6.title': 'Custom Tooling',
+      'services.card6.desc': 'Building specialized tools and automation solutions for specific scenarios. Improving efficiency, unleashing creativity, and making repetitive work a thing of the past.',
+      'philosophy.quote': 'The warmth of technology stems from a devotion to beauty.<br>We believe great software is like cherry blossoms —<br>stunning in bloom, already nurturing new life before they fall.',
+      'works.label': 'Selected Works',
+      'works.title': 'Selected Works',
+      'works.card1.desc': 'A lightweight macOS video wallpaper app (open-source)',
+      'contact.title': 'Let\'s Create<br>Something Beautiful',
+      'contact.desc': 'Whether it\'s a bold idea or a project that needs polishing, we look forward to hearing from you.',
+      'contact.name': 'Your Name',
+      'contact.email': 'Email Address',
+      'contact.project': 'Project Type (optional)',
+      'contact.message': 'Briefly describe your idea...',
+      'contact.btn': 'Send Message',
+      'footer.copy': 'Crafted with care.',
+    }
+  };
+
+  let currentLang = 'zh';
+
+  function toggleLang() {
+    currentLang = currentLang === 'zh' ? 'en' : 'zh';
+    const toggle = document.getElementById('langToggle');
+    toggle.dataset.lang = currentLang;
+
+    // Update all text content
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const key = el.getAttribute('data-i18n');
+      if (translations[currentLang][key]) {
+        el.innerHTML = translations[currentLang][key];
+      }
+    });
+
+    // Update placeholders
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+      const key = el.getAttribute('data-i18n-placeholder');
+      if (translations[currentLang][key]) {
+        el.placeholder = translations[currentLang][key];
+      }
+    });
+
+    // Update hero title structure
+    const heroH1 = document.querySelector('.hero h1');
+    if (currentLang === 'en') {
+      heroH1.innerHTML = '<span data-i18n="hero.title.line1">Write</span> <em data-i18n="hero.title.accent">Elegance</em><br><span data-i18n="hero.title.line2">with Code</span>';
+    } else {
+      heroH1.innerHTML = '<span data-i18n="hero.title.line1">用代码</span><br><span data-i18n="hero.title.line2">书写</span><em data-i18n="hero.title.accent">优雅</em>';
+    }
+
+    // Update html lang attribute
+    document.documentElement.lang = currentLang === 'zh' ? 'zh-CN' : 'en';
+  }
+
   // Nav scroll effect
   const nav = document.getElementById('nav');
   window.addEventListener('scroll', () => {
