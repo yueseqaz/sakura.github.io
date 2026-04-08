@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>简历编辑器</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700&family=Noto+Serif+SC:wght@400;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<style>
+  :root {
+    --bg: #0f0f12; --surface: #1a1a20; --surface-2: #22222a;
+    --border: #2e2e38; --border-focus: #6c8cff; --accent: #6c8cff;
+    --accent-dim: rgba(108,140,255,0.12); --text: #e8e6e3;
+    --text-muted: #8a8890; --text-dim: #5a5860; --danger: #ff6b6b;
+    --resume-bg: #ffffff; --resume-text: #1a1a1a; --resume-heading: #2c3e50;
+    --resume-accent: #2c5282; --resume-line: #e2e8f0;
+    --resume-muted: #718096; --resume-light: #f7fafc;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Noto Sans SC',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; overflow-x:hidden; }
+
+  .header { position:fixed; top:0; left:0; right:0; z-index:100; display:flex; align-items:center; justify-content:space-between; padding:0 28px; height:56px; background:rgba(15,15,18,0.85); backdrop-filter:blur(20px); border-bottom:1px solid var(--border); }
+  .logo { font-family:'DM Mono',monospace; font-size:15px; font-weight:500; color:var(--accent); letter-spacing:-0.5px; }
+  .logo span { color:var(--text-muted); font-weight:400; }
+  .header-actions { display:flex; align-items:center; gap:10px; }
+
+  .btn { display:inline-flex; align-items:center; gap:7px; padding:8px 18px; border-radius:8px; font-family:'Noto Sans SC',sans-serif; font-size:13px; font-weight:500; cursor:pointer; border:none; transition:all 0.2s ease; }
+  .btn-ghost { background:transparent; color:var(--text-muted); border:1px solid var(--border); }
+  .btn-ghost:hover { color:var(--text); border-color:var(--text-dim); background:var(--surface); }
+  .btn-primary { background:var(--accent); color:#fff; }
+  .btn-primary:hover { filter:brightness(1.15); transform:translateY(-1px); }
+  .btn-danger { background:transparent; color:var(--danger); border:1px solid rgba(255,107,107,0.2); }
+  .btn-danger:hover { background:rgba(255,107,107,0.08); }
+  .btn svg { width:16px; height:16px; }
+
+  .main { display:flex; margin-top:56px; height:calc(100vh - 56px); }
+  .editor-panel { width:420px; min-width:380px; overflow-y:auto; background:var(--bg); border-right:1px solid var(--border); scrollbar-width:thin; scrollbar-color:var(--border) transparent; }
+  .preview-panel { flex:1; overflow-y:auto; background:#2a2a32; display:flex; justify-content:center; padding:32px 24px; scrollbar-width:thin; scrollbar-color:var(--border) transparent; }
+
+  .section { border-bottom:1px solid var(--border); }
+  .section-header { display:flex; align-items:center; justify-content:space-between; padding:16px 20px; cursor:pointer; user-select:none; transition:background 0.15s; }
+  .section-header:hover { background:var(--surface); }
+  .section-title { display:flex; align-items:center; gap:10px; font-size:14px; font-weight:600; color:var(--text); }
+  .section-icon { width:28px; height:28px; display:flex; align-items:center; justify-content:center; border-radius:7px; background:var(--accent-dim); color:var(--accent); font-size:14px; }
+  .section-chevron { color:var(--text-dim); transition:transform 0.25s; font-size:12px; }
+  .section.collapsed .section-chevron { transform:rotate(-90deg); }
+  .section.collapsed .section-body { display:none; }
+  .section-body { padding:0 20px 18px; }
+
+  .field-group { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px; }
+  .field-group.full { grid-template-columns:1fr; }
+  .field { display:flex; flex-direction:column; gap:5px; }
+  .field label { font-size:11px; font-weight:500; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px; }
+  .field input,.field textarea,.field select { padding:9px 12px; background:var(--surface); border:1px solid var(--border); border-radius:7px; color:var(--text); font-family:'Noto Sans SC',sans-serif; font-size:13px; outline:none; transition:border-color 0.2s,box-shadow 0.2s; }
+  .field input:focus,.field textarea:focus,.field select:focus { border-color:var(--border-focus); box-shadow:0 0 0 3px rgba(108,140,255,0.1); }
+  .field textarea { resize:vertical; min-height:70px; line-height:1.6; }
+  .field input::placeholder,.field textarea::placeholder { color:var(--text-dim); }
+  
+  /* Markdown 提示 */
+  .markdown-hint { font-size:10px; color:var(--text-dim); margin-top:3px; font-family:'DM Mono',monospace; }
+  .markdown-hint code { background:var(--surface-2); padding:1px 4px; border-radius:3px; }
+
+  .photo-upload-area { display:flex; align-items:center; gap:16px; margin-bottom:14px; padding:14px; background:var(--surface); border:1px solid var(--border); border-radius:10px; }
+  .photo-preview-wrap { position:relative; flex-shrink:0; width:72px; height:72px; }
+  .photo-preview { width:72px; height:72px; border-radius:50%; border:2px solid var(--border); background:var(--surface-2); display:flex; align-items:center; justify-content:center; overflow:hidden; }
+  .photo-preview img { width:100%; height:100%; object-fit:cover; border-radius:50%; }
+  .photo-placeholder { width:100%; height:100%; display:flex; align-items:center; justify-content:center; color:var(--text-dim); font-size:28px; }
+  .photo-remove { position:absolute; top:-4px; right:-4px; width:22px; height:22px; display:flex; align-items:center; justify-content:center; background:var(--danger); color:#fff; border:2px solid var(--bg); border-radius:50%; cursor:pointer; font-size:12px; transition:transform 0.15s; }
+  .photo-remove:hover { transform:scale(1.15); }
+  .photo-upload-info { display:flex; flex-direction:column; gap:6px; flex:1; }
+  .photo-upload-info p { font-size:12px; color:var(--text-muted); line-height:1.5; }
+  .photo-upload-btn { display:inline-flex; align-items:center; gap:6px; padding:7px 16px; border-radius:7px; background:var(--accent-dim); color:var(--accent); border:1px dashed rgba(108,140,255,0.3); font-family:'Noto Sans SC',sans-serif; font-size:12px; font-weight:500; cursor:pointer; transition:all 0.2s; width:fit-content; }
+  .photo-upload-btn:hover { background:rgba(108,140,255,0.18); border-color:var(--accent); }
+  .photo-upload-btn input[type="file"] { display:none; }
+
+  .entry-list { display:flex; flex-direction:column; gap:12px; }
+  .entry-card { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:14px; position:relative; transition:border-color 0.2s; }
+  .entry-card:hover { border-color:var(--text-dim); }
+  .entry-card .field-group { margin-bottom:8px; }
+  .entry-remove { position:absolute; top:10px; right:10px; width:24px; height:24px; display:flex; align-items:center; justify-content:center; background:transparent; border:none; color:var(--text-dim); cursor:pointer; border-radius:5px; font-size:16px; transition:all 0.15s; }
+  .entry-remove:hover { color:var(--danger); background:rgba(255,107,107,0.08); }
+  .add-entry-btn { display:flex; align-items:center; justify-content:center; gap:6px; width:100%; padding:10px; background:transparent; border:1px dashed var(--border); border-radius:8px; color:var(--text-muted); font-family:'Noto Sans SC',sans-serif; font-size:13px; cursor:pointer; transition:all 0.2s; }
+  .add-entry-btn:hover { border-color:var(--accent); color:var(--accent); background:var(--accent-dim); }
+
+  .theme-bar { display:flex; gap:8px; padding:14px 20px; border-bottom:1px solid var(--border); }
+  .theme-dot { width:26px; height:26px; border-radius:50%; cursor:pointer; border:2px solid transparent; transition:all 0.2s; }
+  .theme-dot:hover { transform:scale(1.15); }
+  .theme-dot.active { border-color:#fff; box-shadow:0 0 0 2px var(--bg); }
+  .theme-dot.t-blue { background:#2c5282; } .theme-dot.t-teal { background:#285e61; }
+  .theme-dot.t-wine { background:#742a2a; } .theme-dot.t-forest { background:#22543d; }
+  .theme-dot.t-charcoal { background:#2d3748; } .theme-dot.t-rose { background:#702459; }
+
+  /* Resume */
+  .resume-wrapper { width:210mm; min-height:297mm; background:var(--resume-bg); box-shadow:0 4px 40px rgba(0,0,0,0.4); }
+  .resume { padding:40px 44px; font-family:'Noto Sans SC',sans-serif; color:var(--resume-text); font-size:13px; line-height:1.7; }
+  .resume-header { display:flex; align-items:center; gap:28px; padding-bottom:22px; border-bottom:2px solid var(--resume-accent); margin-bottom:22px; }
+  .resume-photo { width:100px; height:120px; border-radius:6px; object-fit:cover; border:2px solid var(--resume-line); flex-shrink:0; }
+  .resume-photo-placeholder { width:100px; height:120px; border-radius:6px; border:2px dashed var(--resume-line); background:var(--resume-light); flex-shrink:0; display:flex; align-items:center; justify-content:center; color:var(--resume-muted); font-size:12px; }
+  .resume-header-info { flex:1; }
+  .resume-name { font-family:'Noto Serif SC',serif; font-size:30px; font-weight:700; color:var(--resume-heading); letter-spacing:4px; margin-bottom:6px; }
+  .resume-job-title { font-size:14px; color:var(--resume-accent); margin-bottom:12px; font-weight:500; }
+  .resume-job-title strong { font-weight:700; }
+  .resume-contact-grid { display:flex; flex-wrap:wrap; }
+  .resume-contact-item { display:inline-flex; align-items:center; gap:5px; font-size:12px; color:var(--resume-muted); padding-right:16px; margin-bottom:4px; }
+
+  .resume-section { margin-bottom:20px; }
+  .resume-section-title { font-family:'Noto Serif SC',serif; font-size:16px; font-weight:600; color:var(--resume-accent); padding-bottom:6px; margin-bottom:14px; border-bottom:1px solid var(--resume-line); display:flex; align-items:center; gap:8px; letter-spacing:2px; }
+  .resume-section-title::before { content:''; width:4px; height:16px; background:var(--resume-accent); border-radius:2px; flex-shrink:0; }
+  .resume-entry { margin-bottom:14px; padding-left:12px; border-left:2px solid var(--resume-line); }
+  .resume-entry:last-child { margin-bottom:0; }
+  .resume-entry-header { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:4px; }
+  .resume-entry-title { font-weight:600; font-size:14px; color:var(--resume-heading); }
+  .resume-entry-date { font-size:12px; color:var(--resume-muted); font-family:'DM Mono',monospace; white-space:nowrap; }
+  .resume-entry-sub { font-size:12.5px; color:var(--resume-accent); margin-bottom:4px; font-weight:500; }
+  .resume-entry-desc { font-size:13px; color:#4a5568; line-height:1.75; white-space:pre-line; }
+  .resume-entry-desc strong, .resume-eval strong, .skill-desc strong { font-weight:600; color:var(--resume-heading); }
+  .skill-row { display:flex; margin-bottom:10px; padding-left:12px; border-left:2px solid var(--resume-line); }
+  .skill-row:last-child { margin-bottom:0; }
+  .skill-category { font-weight:600; font-size:13px; color:var(--resume-heading); min-width:90px; flex-shrink:0; padding-right:12px; }
+  .skill-desc { font-size:13px; color:#4a5568; line-height:1.7; }
+  .resume-eval { font-size:13px; color:#4a5568; line-height:1.85; padding:12px 16px; background:var(--resume-light); border-radius:6px; border-left:3px solid var(--resume-accent); white-space:pre-line; }
+  
+  /* PDF分页优化 */
+  @media print {
+    .resume-wrapper { box-shadow:none; }
+    .resume-entry { page-break-inside:avoid; }
+    .skill-row { page-break-inside:avoid; }
+    .resume-eval { page-break-inside:avoid; }
+    .resume-section-title { page-break-after:avoid; }
+  }
+
+  @media (max-width:900px) {
+    .main { flex-direction:column; height:auto; }
+    .editor-panel { width:100%; min-width:auto; border-right:none; border-bottom:1px solid var(--border); }
+    .preview-panel { padding:20px 12px; }
+    .resume-wrapper { width:100%; min-height:auto; }
+  }
+  ::-webkit-scrollbar { width:6px; } ::-webkit-scrollbar-track { background:transparent; }
+  ::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="logo">Resume<span>Builder</span></div>
+  <div class="header-actions">
+    <button class="btn btn-danger" onclick="resetAll()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>重置
+    </button>
+    <button class="btn btn-ghost" onclick="exportWord()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>导出 Word
+    </button>
+    <button class="btn btn-primary" onclick="exportPDF()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>导出 PDF
+    </button>
+  </div>
+</header>
+
+<div class="main">
+  <div class="editor-panel">
+    <div class="theme-bar">
+      <span style="font-size:12px;color:var(--text-muted);margin-right:6px;line-height:26px;">主题色</span>
+      <div class="theme-dot t-blue active" data-accent="#2c5282" onclick="setTheme(this)"></div>
+      <div class="theme-dot t-teal" data-accent="#285e61" onclick="setTheme(this)"></div>
+      <div class="theme-dot t-wine" data-accent="#742a2a" onclick="setTheme(this)"></div>
+      <div class="theme-dot t-forest" data-accent="#22543d" onclick="setTheme(this)"></div>
+      <div class="theme-dot t-charcoal" data-accent="#2d3748" onclick="setTheme(this)"></div>
+      <div class="theme-dot t-rose" data-accent="#702459" onclick="setTheme(this)"></div>
+    </div>
+
+    <div class="section">
+      <div class="section-header" onclick="toggleSection(this)">
+        <div class="section-title"><div class="section-icon">👤</div>个人信息</div>
+        <span class="section-chevron">▼</span>
+      </div>
+      <div class="section-body">
+        <div class="photo-upload-area">
+          <div class="photo-preview-wrap">
+            <div class="photo-preview" id="photoPreview"><div class="photo-placeholder">📷</div></div>
+            <div class="photo-remove" id="photoRemove" style="display:none;" onclick="removePhoto()">×</div>
+          </div>
+          <div class="photo-upload-info">
+            <label class="photo-upload-btn">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+              上传头像<input type="file" accept="image/*" onchange="handlePhotoUpload(event)">
+            </label>
+            <p>建议尺寸 300×380px，JPG/PNG，≤2MB</p>
+          </div>
+        </div>
+        <div class="field-group full"><div class="field"><label>姓名</label><input id="p-name" placeholder="张三" oninput="render()"></div></div>
+        <div class="field-group">
+          <div class="field"><label>电话</label><input id="p-phone" placeholder="138-0000-0000" oninput="render()"></div>
+          <div class="field"><label>邮箱</label><input id="p-email" placeholder="zhangsan@email.com" oninput="render()"></div>
+        </div>
+        <div class="field-group">
+          <div class="field"><label>城市</label><input id="p-city" placeholder="北京" oninput="render()"></div>
+          <div class="field">
+            <label>求职意向</label>
+            <input id="p-job" placeholder="前端开发工程师" oninput="render()">
+            <div class="markdown-hint">支持 <code>**加粗**</code> 语法</div>
+          </div>
+        </div>
+        <div class="field-group">
+          <div class="field"><label>年龄/籍贯（可选）</label><input id="p-age" placeholder="25岁 / 湖南" oninput="render()"></div>
+          <div class="field"><label>网站/GitHub（可选）</label><input id="p-site" placeholder="github.com/zhangsan" oninput="render()"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-header" onclick="toggleSection(this)">
+        <div class="section-title"><div class="section-icon">🎓</div>教育背景</div>
+        <span class="section-chevron">▼</span>
+      </div>
+      <div class="section-body">
+        <div class="entry-list" id="edu-list"></div>
+        <button class="add-entry-btn" onclick="addEdu()">＋ 添加教育经历</button>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-header" onclick="toggleSection(this)">
+        <div class="section-title"><div class="section-icon">⚡</div>专业技能</div>
+        <span class="section-chevron">▼</span>
+      </div>
+      <div class="section-body">
+        <div class="entry-list" id="skill-list"></div>
+        <button class="add-entry-btn" onclick="addSkill()">＋ 添加技能分类</button>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-header" onclick="toggleSection(this)">
+        <div class="section-title"><div class="section-icon">🚀</div>项目经历</div>
+        <span class="section-chevron">▼</span>
+      </div>
+      <div class="section-body">
+        <div class="entry-list" id="project-list"></div>
+        <button class="add-entry-btn" onclick="addProject()">＋ 添加项目经历</button>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-header" onclick="toggleSection(this)">
+        <div class="section-title"><div class="section-icon">💡</div>个人评价</div>
+        <span class="section-chevron">▼</span>
+      </div>
+      <div class="section-body">
+        <div class="field-group full">
+          <div class="field">
+            <label>自我评价</label>
+            <textarea id="eval-input" placeholder="简要描述个人优势、工作态度和职业目标..." oninput="render()" style="min-height:90px;"></textarea>
+            <div class="markdown-hint">支持 <code>**加粗**</code> 语法</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="preview-panel">
+    <div class="resume-wrapper" id="resumeWrapper">
+      <div class="resume" id="resumeOutput"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── State ───
+let photoDataUrl = null;
+let eduEntries = [], skillEntries = [], projectEntries = [];
+let idCounter = 0;
+let currentAccent = '#2c5282';
+
+// 汉字标签映射表
+const CONTACT_LABELS = {
+  phone: '电话',
+  email: '邮箱',
+  location: '城市',
+  calendar: '年龄',
+  globe: '网站'
+};
+
+function esc(s) {
+  return s ? s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') : '';
+}
+
+// Markdown 解析函数 - 支持加粗语法
+function parseMarkdown(text) {
+  if (!text) return '';
+  // 转义 HTML 特殊字符
+  let result = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  // 解析 **加粗** 语法
+  result = result.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  return result;
+}
+
+// ─── Photo ───
+function handlePhotoUpload(e) {
+  const f = e.target.files[0]; if (!f) return;
+  if (f.size > 2*1024*1024) { alert('图片不能超过 2MB'); return; }
+  const r = new FileReader();
+  r.onload = ev => {
+    photoDataUrl = ev.target.result;
+    document.getElementById('photoPreview').innerHTML = `<img src="${photoDataUrl}" alt="头像">`;
+    document.getElementById('photoRemove').style.display = 'flex';
+    render();
+  };
+  r.readAsDataURL(f);
+}
+function removePhoto() {
+  photoDataUrl = null;
+  document.getElementById('photoPreview').innerHTML = `<div class="photo-placeholder">📷</div>`;
+  document.getElementById('photoRemove').style.display = 'none';
+  const fi = document.querySelector('.photo-upload-btn input[type="file"]');
+  if (fi) fi.value = '';
+  render();
+}
+
+// ─── Theme ───
+function setTheme(el) {
+  document.querySelectorAll('.theme-dot').forEach(d => d.classList.remove('active'));
+  el.classList.add('active');
+  currentAccent = el.dataset.accent;
+  document.documentElement.style.setProperty('--resume-accent', currentAccent);
+  render();
+}
+
+function toggleSection(h) { h.parentElement.classList.toggle('collapsed'); }
+
+// ─── Education ───
+function addEdu(data) {
+  const id = data ? data.id : ++idCounter;
+  const entry = data || { id, school:'', major:'', degree:'', date:'', desc:'' };
+  eduEntries.push(entry); renderEduList(); render();
+}
+function removeEdu(id) { eduEntries = eduEntries.filter(e => e.id !== id); renderEduList(); render(); }
+function updateEdu(id, k, v) { const e = eduEntries.find(x => x.id === id); if (e) { e[k] = v; render(); } }
+function renderEduList() {
+  document.getElementById('edu-list').innerHTML = eduEntries.map(e => `
+    <div class="entry-card">
+      <button class="entry-remove" onclick="removeEdu(${e.id})">×</button>
+      <div class="field-group">
+        <div class="field"><label>学校名称</label><input value="${esc(e.school)}" oninput="updateEdu(${e.id},'school',this.value)"></div>
+        <div class="field"><label>专业</label><input value="${esc(e.major)}" oninput="updateEdu(${e.id},'major',this.value)"></div>
+      </div>
+      <div class="field-group">
+        <div class="field"><label>学历</label>
+          <select onchange="updateEdu(${e.id},'degree',this.value)">
+            <option value="" ${!e.degree?'selected':''}>请选择</option>
+            <option value="博士" ${e.degree==='博士'?'selected':''}>博士</option>
+            <option value="硕士" ${e.degree==='硕士'?'selected':''}>硕士</option>
+            <option value="本科" ${e.degree==='本科'?'selected':''}>本科</option>
+            <option value="大专" ${e.degree==='大专'?'selected':''}>大专</option>
+          </select>
+        </div>
+        <div class="field"><label>时间</label><input value="${esc(e.date)}" placeholder="2019.09 - 2023.06" oninput="updateEdu(${e.id},'date',this.value)"></div>
+      </div>
+      <div class="field-group full">
+        <div class="field">
+          <label>补充说明</label>
+          <input value="${esc(e.desc)}" placeholder="GPA 3.8/4.0，优秀毕业生" oninput="updateEdu(${e.id},'desc',this.value)">
+          <div class="markdown-hint">支持 <code>**加粗**</code> 语法</div>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+// ─── Skills ───
+function addSkill(data) {
+  const id = data ? data.id : ++idCounter;
+  const entry = data || { id, category:'', desc:'' };
+  skillEntries.push(entry); renderSkillList(); render();
+}
+function removeSkill(id) { skillEntries = skillEntries.filter(e => e.id !== id); renderSkillList(); render(); }
+function updateSkill(id, k, v) { const e = skillEntries.find(x => x.id === id); if (e) { e[k] = v; render(); } }
+function renderSkillList() {
+  document.getElementById('skill-list').innerHTML = skillEntries.map(e => `
+    <div class="entry-card">
+      <button class="entry-remove" onclick="removeSkill(${e.id})">×</button>
+      <div class="field-group full">
+        <div class="field"><label>技能分类</label><input value="${esc(e.category)}" placeholder="前端开发、后端开发、DevOps…" oninput="updateSkill(${e.id},'category',this.value)"></div>
+      </div>
+      <div class="field-group full">
+        <div class="field">
+          <label>掌握描述</label>
+          <textarea oninput="updateSkill(${e.id},'desc',this.value)" placeholder="熟练掌握…">${esc(e.desc)}</textarea>
+          <div class="markdown-hint">支持 <code>**加粗**</code> 语法</div>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+// ─── Projects ───
+function addProject(data) {
+  const id = data ? data.id : ++idCounter;
+  const entry = data || { id, name:'', role:'', date:'', tech:'', desc:'' };
+  projectEntries.push(entry); renderProjectList(); render();
+}
+function removeProject(id) { projectEntries = projectEntries.filter(e => e.id !== id); renderProjectList(); render(); }
+function updateProject(id, k, v) { const e = projectEntries.find(x => x.id === id); if (e) { e[k] = v; render(); } }
+function renderProjectList() {
+  document.getElementById('project-list').innerHTML = projectEntries.map(e => `
+    <div class="entry-card">
+      <button class="entry-remove" onclick="removeProject(${e.id})">×</button>
+      <div class="field-group">
+        <div class="field"><label>项目名称</label><input value="${esc(e.name)}" oninput="updateProject(${e.id},'name',this.value)"></div>
+        <div class="field"><label>担任角色</label><input value="${esc(e.role)}" placeholder="前端负责人" oninput="updateProject(${e.id},'role',this.value)"></div>
+      </div>
+      <div class="field-group">
+        <div class="field"><label>时间</label><input value="${esc(e.date)}" placeholder="2023.03 - 2023.08" oninput="updateProject(${e.id},'date',this.value)"></div>
+        <div class="field"><label>技术栈</label><input value="${esc(e.tech)}" placeholder="Vue3 + TypeScript" oninput="updateProject(${e.id},'tech',this.value)"></div>
+      </div>
+      <div class="field-group full">
+        <div class="field">
+          <label>项目描述</label>
+          <textarea oninput="updateProject(${e.id},'desc',this.value)" placeholder="背景、职责、成果…">${esc(e.desc)}</textarea>
+          <div class="markdown-hint">支持 <code>**加粗**</code> 语法</div>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+// ─── Render preview ───
+function render() {
+  const name = document.getElementById('p-name').value;
+  const phone = document.getElementById('p-phone').value;
+  const email = document.getElementById('p-email').value;
+  const city  = document.getElementById('p-city').value;
+  const job   = document.getElementById('p-job').value;
+  const age   = document.getElementById('p-age').value;
+  const site  = document.getElementById('p-site').value;
+  const evalText = document.getElementById('eval-input').value;
+
+  const contacts = [
+    { key:'phone',    val: phone },
+    { key:'email',    val: email },
+    { key:'location', val: city  },
+    { key:'calendar', val: age   },
+    { key:'globe',    val: site  },
+  ].filter(c => c.val);
+
+  let html = '';
+
+  // Header
+  html += `<div class="resume-header">`;
+  html += photoDataUrl
+    ? `<img class="resume-photo" src="${photoDataUrl}" alt="头像">`
+    : `<div class="resume-photo-placeholder">照片</div>`;
+  html += `<div class="resume-header-info">`;
+  html += `<div class="resume-name">${esc(name) || '你的姓名'}</div>`;
+  if (job) html += `<div class="resume-job-title">${parseMarkdown(job)}</div>`;
+  if (contacts.length) {
+    html += `<div class="resume-contact-grid">`;
+    contacts.forEach(c => {
+      // 将图标替换为汉字标签，并给予主题色样式
+      html += `<span class="resume-contact-item"><span style="color:var(--resume-accent); font-weight:500;">${CONTACT_LABELS[c.key]}：</span><span>${esc(c.val)}</span></span>`;
+    });
+    html += `</div>`;
+  }
+  html += `</div></div>`;
+
+  // Education
+  const validEdu = eduEntries.filter(e => e.school || e.major);
+  if (validEdu.length) {
+    html += `<div class="resume-section"><div class="resume-section-title">教育背景</div>`;
+    validEdu.forEach(e => {
+      html += `<div class="resume-entry"><div class="resume-entry-header"><span class="resume-entry-title">${esc(e.school)}</span><span class="resume-entry-date">${esc(e.date)}</span></div>`;
+      const sub = [e.major, e.degree].filter(Boolean).join(' · ');
+      if (sub) html += `<div class="resume-entry-sub">${esc(sub)}</div>`;
+      if (e.desc) html += `<div class="resume-entry-desc">${parseMarkdown(e.desc)}</div>`;
+      html += `</div>`;
+    });
+    html += `</div>`;
+  }
+
+  // Skills
+  const validSkills = skillEntries.filter(e => e.category || e.desc);
+  if (validSkills.length) {
+    html += `<div class="resume-section"><div class="resume-section-title">专业技能</div>`;
+    validSkills.forEach(e => {
+      html += `<div class="skill-row"><div class="skill-category">${esc(e.category)}</div><div class="skill-desc">${parseMarkdown(e.desc)}</div></div>`;
+    });
+    html += `</div>`;
+  }
+
+  // Projects
+  const validProj = projectEntries.filter(e => e.name);
+  if (validProj.length) {
+    html += `<div class="resume-section"><div class="resume-section-title">项目经历</div>`;
+    validProj.forEach(e => {
+      html += `<div class="resume-entry"><div class="resume-entry-header"><span class="resume-entry-title">${esc(e.name)}</span><span class="resume-entry-date">${esc(e.date)}</span></div>`;
+      const sub = [e.role, e.tech].filter(Boolean).join(' | ');
+      if (sub) html += `<div class="resume-entry-sub">${esc(sub)}</div>`;
+      if (e.desc) html += `<div class="resume-entry-desc">${parseMarkdown(e.desc)}</div>`;
+      html += `</div>`;
+    });
+    html += `</div>`;
+  }
+
+  // Evaluation
+  if (evalText.trim()) {
+    html += `<div class="resume-section"><div class="resume-section-title">个人评价</div><div class="resume-eval">${parseMarkdown(evalText)}</div></div>`;
+  }
+
+  document.getElementById('resumeOutput').innerHTML = html;
+}
+
+// ─── Export PDF ───
+function exportPDF() {
+  const el = document.getElementById('resumeWrapper');
+  const name = document.getElementById('p-name').value || '简历';
+  html2pdf().set({
+    margin: 0, 
+    filename: name + '_简历.pdf',
+    image: { type:'jpeg', quality:0.98 },
+    html2canvas: { 
+      scale: 2, 
+      useCORS: true, 
+      allowTaint: true, 
+      logging: false,
+      letterRendering: true
+    },
+    jsPDF: { 
+      unit: 'mm', 
+      format: 'a4', 
+      orientation: 'portrait'
+    },
+    pagebreak: { 
+      mode: 'css',
+      avoid: ['.resume-entry', '.skill-row', '.resume-eval']
+    }
+  }).from(el).save();
+}
+
+// ─── Export Word ───
+function exportWord() {
+  const name = document.getElementById('p-name').value || '简历';
+  const phone = document.getElementById('p-phone').value;
+  const email = document.getElementById('p-email').value;
+  const city  = document.getElementById('p-city').value;
+  const job   = document.getElementById('p-job').value;
+  const age   = document.getElementById('p-age').value;
+  const site  = document.getElementById('p-site').value;
+  const evalText = document.getElementById('eval-input').value;
+
+  const contacts = [
+    { key:'phone',    val: phone },
+    { key:'email',    val: email },
+    { key:'location', val: city  },
+    { key:'calendar', val: age   },
+    { key:'globe',    val: site  },
+  ].filter(c => c.val);
+
+  let doc = `<html xmlns:o='urn:schemas-microsoft-com:office:office'
+    xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+<head><meta charset='utf-8'><style>
+  body{font-family:'微软雅黑',sans-serif;font-size:12pt;line-height:1.8;color:#333;}
+  h1{font-size:22pt;color:${currentAccent};margin:0 0 4pt;}
+  h2{font-size:14pt;color:${currentAccent};border-bottom:1px solid #ccc;padding-bottom:4pt;margin:16pt 0 8pt;}
+  .job{color:${currentAccent};font-size:13pt;font-weight:bold;margin:0 0 6pt;}
+  .contacts{margin-top:4pt;}
+  .ci{display:inline-block;font-size:10.5pt;color:#666;margin:0 14pt 3pt 0;}
+  .entry{margin-bottom:8pt;padding-left:8pt;border-left:2px solid #ddd;}
+  .etitle{font-weight:bold;}
+  .esub{color:${currentAccent};}
+  .edesc{color:#555;font-size:11pt;}
+  .srow{margin-bottom:6pt;padding-left:8pt;border-left:2px solid #ddd;}
+  .scat{font-weight:bold;min-width:72pt;display:inline-block;}
+  .sdesc{color:#555;font-size:11pt;}
+  .eval{padding:8pt 12pt;background:#f7fafc;border-left:3px solid ${currentAccent};color:#555;font-size:11pt;}
+</style></head><body>`;
+
+  // Header table
+  doc += `<table width="100%" cellpadding="0" cellspacing="0" style="border-bottom:2px solid ${currentAccent};margin-bottom:12pt;padding-bottom:12pt;"><tr>`;
+  if (photoDataUrl) {
+    doc += `<td width="90" valign="top" style="padding-right:16pt;"><img src="${photoDataUrl}" width="75" height="95" style="border-radius:4px;border:1px solid #ddd;display:block;"></td>`;
+  }
+  doc += `<td valign="top"><h1>${esc(name)||'你的姓名'}</h1>`;
+  if (job) doc += `<p class="job">${parseMarkdown(job)}</p>`;
+  if (contacts.length) {
+    doc += `<div class="contacts">`;
+    contacts.forEach(c => { 
+      // Word 导出同样替换为汉字
+      doc += `<span class="ci"><span style="color:${currentAccent};font-weight:bold;">${CONTACT_LABELS[c.key]}：</span> ${esc(c.val)}</span>`; 
+    });
+    doc += `</div>`;
+  }
+  doc += `</td></tr></table>`;
+
+  const validEdu = eduEntries.filter(e => e.school || e.major);
+  if (validEdu.length) {
+    doc += `<h2>教育背景</h2>`;
+    validEdu.forEach(e => {
+      doc += `<div class="entry"><span class="etitle">${esc(e.school)}</span>`;
+      const sub = [e.major, e.degree].filter(Boolean).join(' · ');
+      if (sub) doc += ` <span class="esub">${esc(sub)}</span>`;
+      if (e.date) doc += ` <span style="color:#888;font-size:10.5pt;">${esc(e.date)}</span>`;
+      if (e.desc) doc += `<br><span class="edesc">${parseMarkdown(e.desc)}</span>`;
+      doc += `</div>`;
+    });
+  }
+
+  const validSkills = skillEntries.filter(e => e.category || e.desc);
+  if (validSkills.length) {
+    doc += `<h2>专业技能</h2>`;
+    validSkills.forEach(e => {
+      doc += `<div class="srow"><span class="scat">${esc(e.category)}</span> <span class="sdesc">${parseMarkdown(e.desc)}</span></div>`;
+    });
+  }
+
+  const validProj = projectEntries.filter(e => e.name);
+  if (validProj.length) {
+    doc += `<h2>项目经历</h2>`;
+    validProj.forEach(e => {
+      doc += `<div class="entry"><span class="etitle">${esc(e.name)}</span>`;
+      if (e.role) doc += ` <span class="esub">${esc(e.role)}</span>`;
+      if (e.date) doc += ` <span style="color:#888;font-size:10.5pt;">${esc(e.date)}</span>`;
+      if (e.tech) doc += `<br><span class="edesc" style="font-weight:bold;">技术栈：${esc(e.tech)}</span>`;
+      if (e.desc) doc += `<br><span class="edesc">${parseMarkdown(e.desc)}</span>`;
+      doc += `</div>`;
+    });
+  }
+
+  if (evalText.trim()) doc += `<h2>个人评价</h2><div class="eval">${parseMarkdown(evalText)}</div>`;
+  doc += `</body></html>`;
+
+  const blob = new Blob(['\ufeff' + doc], { type:'application/msword' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = name + '_简历.doc'; a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ─── Reset ───
+function resetAll() {
+  if (!confirm('确定清空所有内容？')) return;
+  document.querySelectorAll('.editor-panel input:not([type="file"]), .editor-panel textarea').forEach(el => el.value = '');
+  document.querySelectorAll('.editor-panel select').forEach(el => el.selectedIndex = 0);
+  removePhoto();
+  eduEntries = []; skillEntries = []; projectEntries = [];
+  renderEduList(); renderSkillList(); renderProjectList(); render();
+}
+
+// ─── Sample data ───
+function loadSample() {
+  document.getElementById('p-name').value  = '张三';
+  document.getElementById('p-phone').value = '138-0000-0000';
+  document.getElementById('p-email').value = 'zhangsan@email.com';
+  document.getElementById('p-city').value  = '北京';
+  document.getElementById('p-job').value   = '**前端开发工程师**';
+  document.getElementById('p-age').value   = '25岁 / 湖南';
+  document.getElementById('p-site').value  = 'github.com/zhangsan';
+  document.getElementById('eval-input').value = '拥有**3年前端开发经验**，熟练掌握 Vue 和 React 技术栈。具备良好的代码规范意识和团队协作能力，善于解决复杂的技术问题。对新技术保持高度热情，持续学习，追求代码质量和用户体验的极致。';
+
+  addEdu({ id:++idCounter, school:'北京大学', major:'计算机科学与技术', degree:'本科', date:'2017.09 - 2021.06', desc:'**GPA 3.8/4.0**，专业排名前5%，获国家奖学金' });
+  addEdu({ id:++idCounter, school:'清华大学', major:'软件工程', degree:'硕士', date:'2021.09 - 2023.06', desc:'研究方向：**前端工程化与性能优化**' });
+  addSkill({ id:++idCounter, category:'前端开发', desc:'**熟练掌握** HTML5/CSS3/JavaScript/TypeScript，熟悉 Vue.js（Vue2/Vue3）和 React 技术栈，能独立完成复杂单页应用的架构设计、开发与性能优化。' });
+  addSkill({ id:++idCounter, category:'工程化', desc:'熟悉 Webpack/Vite 构建工具，掌握 Git 工作流与代码审查流程，有**组件库封装**和 **Monorepo 项目**实践经验。' });
+  addSkill({ id:++idCounter, category:'后端 & 部署', desc:'了解 Node.js/Express，能编写 RESTful API；熟悉 Docker 容器化部署与 CI/CD 流程，有 Nginx 配置经验。' });
+  addProject({ id:++idCounter, name:'企业级后台管理系统', role:'前端负责人', date:'2022.06 - 2023.02', tech:'Vue3 + TypeScript + Pinia + Element Plus', desc:'负责公司核心后台系统的前端架构设计与开发，主导组件库搭建，封装**30+通用业务组件**，团队开发效率**提升40%**。实现动态权限管理、数据可视化看板等核心模块。' });
+  addProject({ id:++idCounter, name:'移动端电商小程序', role:'核心开发', date:'2021.10 - 2022.03', tech:'React + Taro + Redux', desc:'独立完成商品详情、购物车、订单流程等核心页面开发，优化首屏加载速度至**1.2s**，用户转化率**提升15%**。' });
+}
+
+loadSample();
+</script>
+</body>
+</html>
