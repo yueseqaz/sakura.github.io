@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SakuraClipboard - macOS 剪贴板历史工具</title>
-<meta name="description" content="SakuraClipboard 是一款轻量的 macOS 剪贴板历史工具，支持文本与图片历史、搜索、收藏夹、SQLite 本地存储和中英文界面。">
+<meta name="description" content="SakuraClipboard 是一款轻量的 macOS 菜单栏剪贴板历史工具，本地保存最近文本和图片记录，支持菜单内 History 滚动加载、图片悬停预览、自动清理和历史上限设置。">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&family=Noto+Sans+SC:wght@300;400;500;600&family=DM+Mono:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
@@ -576,9 +576,9 @@
     <div>
       <div class="eyebrow" data-i18n="hero_badge">macOS 剪贴板历史工具</div>
       <h1><span data-i18n="hero_title_1">让复制</span><br><em data-i18n="hero_title_2">井然有序</em></h1>
-      <p data-i18n="hero_subtitle">SakuraClipboard 自动记录文本与图片剪贴板历史，支持搜索、筛选、收藏夹和本地 SQLite 存储，让常用内容随时回到手边。</p>
+      <p data-i18n="hero_subtitle">SakuraClipboard 是轻量的 macOS 菜单栏剪贴板历史工具。本地保存最近的文本和图片记录，从系统菜单栏打开，不提供额外主面板。</p>
       <div class="hero-actions">
-        <a class="btn btn-primary" href="https://github.com/yueseqaz/SakuraClipboard" target="_blank" rel="noopener noreferrer" data-i18n="btn_github">查看 GitHub</a>
+        <a class="btn btn-primary" href="https://github.com/yueseqaz/SakuraClipboard/releases/latest/download/SakuraClipboard.dmg" data-i18n="btn_github">下载 DMG</a>
         <a class="btn btn-secondary" href="#features" data-i18n="btn_features">了解功能</a>
       </div>
     </div>
@@ -590,24 +590,24 @@
           <span class="window-title">Clipboard History</span>
         </div>
         <div class="clipboard-ui">
-          <div class="search" data-i18n="ui_search">按关键字搜索文本</div>
+          <div class="search" data-i18n="ui_search">当前：产品发布文案 · Text</div>
           <div class="filter-row">
-            <span class="chip" data-i18n="ui_all">全部</span>
-            <span class="chip" data-i18n="ui_text">文本</span>
-            <span class="chip" data-i18n="ui_image">图片</span>
-            <span class="chip" data-i18n="ui_fav">收藏</span>
+            <span class="chip" data-i18n="ui_all">History</span>
+            <span class="chip" data-i18n="ui_text">Auto Clean</span>
+            <span class="chip" data-i18n="ui_image">Limit 500</span>
+            <span class="chip" data-i18n="ui_fav">Launch</span>
           </div>
           <div class="clip-row">
             <div class="clip-head"><span data-i18n="ui_row1_title">产品发布文案</span><span>★</span></div>
-            <p data-i18n="ui_row1_desc">保留重要文字，复制回来只需一次点击。</p>
+            <p data-i18n="ui_row1_desc">点击历史条目即可重新复制到剪贴板。</p>
           </div>
           <div class="clip-row">
-            <div class="clip-head"><span data-i18n="ui_row2_title">设计参考图</span><span>PNG</span></div>
-            <p data-i18n="ui_row2_desc">图片历史支持预览，素材不会从视线里消失。</p>
+            <div class="clip-head"><span data-i18n="ui_row2_title">设计参考图</span><span>Preview</span></div>
+            <p data-i18n="ui_row2_desc">图片历史支持悬停预览，菜单内即可确认内容。</p>
           </div>
           <div class="clip-row">
             <div class="clip-head"><span data-i18n="ui_row3_title">Local Storage</span><span>SQLite</span></div>
-            <p data-i18n="ui_row3_desc">本地持久化保存，历史容量更大，检索更快。</p>
+            <p data-i18n="ui_row3_desc">本地保存最近记录，并可按时间自动清理。</p>
           </div>
         </div>
       </div>
@@ -617,16 +617,16 @@
   <section class="section" id="features">
     <div class="section-header">
       <div class="section-label" data-i18n="features_label">Core Features</div>
-      <h2 class="section-title" data-i18n="features_title">剪贴板，也需要整理感</h2>
-      <p class="section-subtitle" data-i18n="features_subtitle">围绕日常复制、找回、归档三件事设计，避免内容散落，也避免过度打扰。</p>
+      <h2 class="section-title" data-i18n="features_title">轻量，只留在菜单栏</h2>
+      <p class="section-subtitle" data-i18n="features_subtitle">围绕快速查看、重新复制和自动维护设计，不额外占据桌面空间。</p>
     </div>
     <div class="feature-grid">
-      <div class="card"><div class="icon">⌘</div><h3 data-i18n="f1_title">文本与图片历史</h3><p data-i18n="f1_desc">自动记录文本和图片，点击任意条目即可重新复制回剪贴板。</p></div>
-      <div class="card"><div class="icon">⌕</div><h3 data-i18n="f2_title">快速搜索筛选</h3><p data-i18n="f2_desc">支持关键字、类型、时间范围、收藏状态和收藏夹筛选。</p></div>
-      <div class="card"><div class="icon">★</div><h3 data-i18n="f3_title">收藏夹管理</h3><p data-i18n="f3_desc">重要条目可加入收藏，并直接分配或修改收藏夹。</p></div>
-      <div class="card"><div class="icon">▣</div><h3 data-i18n="f4_title">长文本与图片预览</h3><p data-i18n="f4_desc">长文本可折叠展开，图片内容可预览，查找更直观。</p></div>
-      <div class="card"><div class="icon">◈</div><h3 data-i18n="f5_title">本地持久化</h3><p data-i18n="f5_desc">使用 SQLite 保存历史，支持更大容量和更快检索。</p></div>
-      <div class="card"><div class="icon">↻</div><h3 data-i18n="f6_title">安全清理</h3><p data-i18n="f6_desc">清空时仅删除未收藏内容，重要收藏会保留。</p></div>
+      <div class="card"><div class="icon">⌘</div><h3 data-i18n="f1_title">文本与图片历史</h3><p data-i18n="f1_desc">自动记录文本和图片，打开 History 即可查看最近内容。</p></div>
+      <div class="card"><div class="icon">▤</div><h3 data-i18n="f2_title">原生菜单栏界面</h3><p data-i18n="f2_desc">从系统菜单栏打开，没有额外主面板，使用更轻。</p></div>
+      <div class="card"><div class="icon">≋</div><h3 data-i18n="f3_title">滚动加载历史</h3><p data-i18n="f3_desc">固定高度 History 菜单支持内部滚动和继续加载。</p></div>
+      <div class="card"><div class="icon">▣</div><h3 data-i18n="f4_title">图片悬停预览</h3><p data-i18n="f4_desc">鼠标悬停在图片条目上即可预览内容。</p></div>
+      <div class="card"><div class="icon">◈</div><h3 data-i18n="f5_title">SQLite 本地存储</h3><p data-i18n="f5_desc">最近记录保存在本地，数据留在你的 Mac 上。</p></div>
+      <div class="card"><div class="icon">↻</div><h3 data-i18n="f6_title">自动清理与上限</h3><p data-i18n="f6_desc">支持按保留时间自动清理，并设置 100 到 5000 条历史上限。</p></div>
     </div>
   </section>
 
@@ -638,18 +638,18 @@
     </div>
     <div class="flow">
       <div class="step"><span>01</span><h3 data-i18n="s1_title">打开菜单栏</h3><p data-i18n="s1_desc">从 macOS 菜单栏进入历史列表。</p></div>
-      <div class="step"><span>02</span><h3 data-i18n="s2_title">搜索或筛选</h3><p data-i18n="s2_desc">按文字、类型、时间或收藏夹快速缩小范围。</p></div>
+      <div class="step"><span>02</span><h3 data-i18n="s2_title">打开 History</h3><p data-i18n="s2_desc">查看最近记录，并在固定高度菜单中滚动加载更多。</p></div>
       <div class="step"><span>03</span><h3 data-i18n="s3_title">点击复制</h3><p data-i18n="s3_desc">点击条目即可复制回系统剪贴板。</p></div>
-      <div class="step"><span>04</span><h3 data-i18n="s4_title">收藏归档</h3><p data-i18n="s4_desc">把重要内容放进收藏夹，之后仍能保留。</p></div>
+      <div class="step"><span>04</span><h3 data-i18n="s4_title">设置保留规则</h3><p data-i18n="s4_desc">通过 Auto Clean 和 History Limit 控制保存时长与数量。</p></div>
     </div>
   </section>
 
   <section class="section download" id="download">
     <div class="section-header">
-      <div class="section-label" data-i18n="download_label">Open Source</div>
-      <h2 class="section-title" data-i18n="download_title">准备整理剪贴板了吗？</h2>
-      <p class="section-subtitle" data-i18n="download_subtitle">前往 GitHub 查看源码、构建方式与最新项目状态。</p>
-      <a class="btn btn-primary" href="https://github.com/yueseqaz/SakuraClipboard" target="_blank" rel="noopener noreferrer" data-i18n="download_btn">打开 GitHub 仓库</a>
+      <div class="section-label" data-i18n="download_label">Download</div>
+      <h2 class="section-title" data-i18n="download_title">下载 SakuraClipboard</h2>
+      <p class="section-subtitle" data-i18n="download_subtitle">下载最新 DMG，将 SakuraClipboard.app 拖入 Applications 即可使用。</p>
+      <a class="btn btn-primary" href="https://github.com/yueseqaz/SakuraClipboard/releases/latest/download/SakuraClipboard.dmg" data-i18n="download_btn">下载 SakuraClipboard.dmg</a>
     </div>
   </section>
 
@@ -657,19 +657,19 @@
     <div class="section-header">
       <div class="section-label">Q&A</div>
       <h2 class="section-title" data-i18n="qa_title">常见问题</h2>
-      <p class="section-subtitle" data-i18n="qa_subtitle">围绕存储、清理、语言和启动方式的说明。</p>
+      <p class="section-subtitle" data-i18n="qa_subtitle">围绕存储、菜单栏、清理和启动方式的说明。</p>
     </div>
     <div class="qa-list">
       <div class="qa-item"><button class="qa-question"><span data-i18n="q1">数据会上传到云端吗？</span><span>▾</span></button><div class="qa-answer"><div class="qa-answer-inner" data-i18n="a1">不会。SakuraClipboard 使用本地 SQLite 存储剪贴板历史，数据保存在你的 Mac 上。</div></div></div>
-      <div class="qa-item"><button class="qa-question"><span data-i18n="q2">清空历史会删除收藏吗？</span><span>▾</span></button><div class="qa-answer"><div class="qa-answer-inner" data-i18n="a2">不会。清空操作只删除未收藏条目，已收藏内容会保留。</div></div></div>
-      <div class="qa-item"><button class="qa-question"><span data-i18n="q3">支持图片剪贴板吗？</span><span>▾</span></button><div class="qa-answer"><div class="qa-answer-inner" data-i18n="a3">支持。应用可以记录图片历史，并提供图片预览。</div></div></div>
+      <div class="qa-item"><button class="qa-question"><span data-i18n="q2">有独立主窗口吗？</span><span>▾</span></button><div class="qa-answer"><div class="qa-answer-inner" data-i18n="a2">没有。SakuraClipboard 从系统菜单栏打开，History 也在菜单内显示。</div></div></div>
+      <div class="qa-item"><button class="qa-question"><span data-i18n="q3">支持图片剪贴板吗？</span><span>▾</span></button><div class="qa-answer"><div class="qa-answer-inner" data-i18n="a3">支持。应用可以记录图片历史，并在 History 菜单中悬停预览。</div></div></div>
       <div class="qa-item"><button class="qa-question"><span data-i18n="q4">可以开机自动启动吗？</span><span>▾</span></button><div class="qa-answer"><div class="qa-answer-inner" data-i18n="a4">可以。项目支持 Launch at Login，可在应用内开启。</div></div></div>
     </div>
   </section>
 
   <footer>
     <p>© 2026 SakuraClipboard</p>
-    <p data-i18n="footer_tagline">把复制过的内容，整理成可靠的记忆。</p>
+    <p data-i18n="footer_tagline">菜单栏里的轻量剪贴板历史。</p>
   </footer>
 </div>
 
@@ -679,61 +679,61 @@
       nav_features: '功能', nav_preview: '预览', nav_workflow: '使用', nav_qa: 'Q&A',
       hero_badge: 'macOS 剪贴板历史工具',
       hero_title_1: '让复制', hero_title_2: '井然有序',
-      hero_subtitle: 'SakuraClipboard 自动记录文本与图片剪贴板历史，支持搜索、筛选、收藏夹和本地 SQLite 存储，让常用内容随时回到手边。',
-      btn_github: '查看 GitHub', btn_features: '了解功能',
-      ui_search: '按关键字搜索文本', ui_all: '全部', ui_text: '文本', ui_image: '图片', ui_fav: '收藏',
-      ui_row1_title: '产品发布文案', ui_row1_desc: '保留重要文字，复制回来只需一次点击。',
-      ui_row2_title: '设计参考图', ui_row2_desc: '图片历史支持预览，素材不会从视线里消失。',
-      ui_row3_title: 'Local Storage', ui_row3_desc: '本地持久化保存，历史容量更大，检索更快。',
-      features_label: 'Core Features', features_title: '剪贴板，也需要整理感', features_subtitle: '围绕日常复制、找回、归档三件事设计，避免内容散落，也避免过度打扰。',
-      f1_title: '文本与图片历史', f1_desc: '自动记录文本和图片，点击任意条目即可重新复制回剪贴板。',
-      f2_title: '快速搜索筛选', f2_desc: '支持关键字、类型、时间范围、收藏状态和收藏夹筛选。',
-      f3_title: '收藏夹管理', f3_desc: '重要条目可加入收藏，并直接分配或修改收藏夹。',
-      f4_title: '长文本与图片预览', f4_desc: '长文本可折叠展开，图片内容可预览，查找更直观。',
-      f5_title: '本地持久化', f5_desc: '使用 SQLite 保存历史，支持更大容量和更快检索。',
-      f6_title: '安全清理', f6_desc: '清空时仅删除未收藏内容，重要收藏会保留。',
+      hero_subtitle: 'SakuraClipboard 是轻量的 macOS 菜单栏剪贴板历史工具。本地保存最近的文本和图片记录，从系统菜单栏打开，不提供额外主面板。',
+      btn_github: '下载 DMG', btn_features: '了解功能',
+      ui_search: '当前：产品发布文案 · Text', ui_all: 'History', ui_text: 'Auto Clean', ui_image: 'Limit 500', ui_fav: 'Launch',
+      ui_row1_title: '产品发布文案', ui_row1_desc: '点击历史条目即可重新复制到剪贴板。',
+      ui_row2_title: '设计参考图', ui_row2_desc: '图片历史支持悬停预览，菜单内即可确认内容。',
+      ui_row3_title: 'Local Storage', ui_row3_desc: '本地保存最近记录，并可按时间自动清理。',
+      features_label: 'Core Features', features_title: '轻量，只留在菜单栏', features_subtitle: '围绕快速查看、重新复制和自动维护设计，不额外占据桌面空间。',
+      f1_title: '文本与图片历史', f1_desc: '自动记录文本和图片，打开 History 即可查看最近内容。',
+      f2_title: '原生菜单栏界面', f2_desc: '从系统菜单栏打开，没有额外主面板，使用更轻。',
+      f3_title: '滚动加载历史', f3_desc: '固定高度 History 菜单支持内部滚动和继续加载。',
+      f4_title: '图片悬停预览', f4_desc: '鼠标悬停在图片条目上即可预览内容。',
+      f5_title: 'SQLite 本地存储', f5_desc: '最近记录保存在本地，数据留在你的 Mac 上。',
+      f6_title: '自动清理与上限', f6_desc: '支持按保留时间自动清理，并设置 100 到 5000 条历史上限。',
       workflow_label: 'Workflow', workflow_title: '从菜单栏开始', workflow_subtitle: 'SakuraClipboard 保持轻量，不占据桌面，只在需要找回内容时出现。',
       s1_title: '打开菜单栏', s1_desc: '从 macOS 菜单栏进入历史列表。',
-      s2_title: '搜索或筛选', s2_desc: '按文字、类型、时间或收藏夹快速缩小范围。',
+      s2_title: '打开 History', s2_desc: '查看最近记录，并在固定高度菜单中滚动加载更多。',
       s3_title: '点击复制', s3_desc: '点击条目即可复制回系统剪贴板。',
-      s4_title: '收藏归档', s4_desc: '把重要内容放进收藏夹，之后仍能保留。',
-      download_label: 'Open Source', download_title: '准备整理剪贴板了吗？', download_subtitle: '前往 GitHub 查看源码、构建方式与最新项目状态。', download_btn: '打开 GitHub 仓库',
-      qa_title: '常见问题', qa_subtitle: '围绕存储、清理、语言和启动方式的说明。',
+      s4_title: '设置保留规则', s4_desc: '通过 Auto Clean 和 History Limit 控制保存时长与数量。',
+      download_label: 'Download', download_title: '下载 SakuraClipboard', download_subtitle: '下载最新 DMG，将 SakuraClipboard.app 拖入 Applications 即可使用。', download_btn: '下载 SakuraClipboard.dmg',
+      qa_title: '常见问题', qa_subtitle: '围绕存储、菜单栏、清理和启动方式的说明。',
       q1: '数据会上传到云端吗？', a1: '不会。SakuraClipboard 使用本地 SQLite 存储剪贴板历史，数据保存在你的 Mac 上。',
-      q2: '清空历史会删除收藏吗？', a2: '不会。清空操作只删除未收藏条目，已收藏内容会保留。',
-      q3: '支持图片剪贴板吗？', a3: '支持。应用可以记录图片历史，并提供图片预览。',
+      q2: '有独立主窗口吗？', a2: '没有。SakuraClipboard 从系统菜单栏打开，History 也在菜单内显示。',
+      q3: '支持图片剪贴板吗？', a3: '支持。应用可以记录图片历史，并在 History 菜单中悬停预览。',
       q4: '可以开机自动启动吗？', a4: '可以。项目支持 Launch at Login，可在应用内开启。',
-      footer_tagline: '把复制过的内容，整理成可靠的记忆。'
+      footer_tagline: '菜单栏里的轻量剪贴板历史。'
     },
     en: {
       nav_features: 'Features', nav_preview: 'Preview', nav_workflow: 'Workflow', nav_qa: 'Q&A',
       hero_badge: 'macOS Clipboard History Tool',
       hero_title_1: 'Keep Every Copy', hero_title_2: 'in Order',
-      hero_subtitle: 'SakuraClipboard records text and image clipboard history with search, filters, favorite folders, and local SQLite storage, keeping useful content close at hand.',
-      btn_github: 'View GitHub', btn_features: 'Explore Features',
-      ui_search: 'Search text by keyword', ui_all: 'All', ui_text: 'Text', ui_image: 'Image', ui_fav: 'Favorites',
-      ui_row1_title: 'Launch Copy', ui_row1_desc: 'Keep important text and copy it back with one click.',
-      ui_row2_title: 'Design Reference', ui_row2_desc: 'Image history includes previews, so assets stay visible.',
-      ui_row3_title: 'Local Storage', ui_row3_desc: 'SQLite persistence supports larger history and faster lookup.',
-      features_label: 'Core Features', features_title: 'A Cleaner Clipboard', features_subtitle: 'Designed around copying, finding, and archiving without getting in the way.',
-      f1_title: 'Text & Image History', f1_desc: 'Automatically records text and images. Click any item to copy it back.',
-      f2_title: 'Search & Filters', f2_desc: 'Filter by keyword, type, time range, favorite state, and folder.',
-      f3_title: 'Favorite Folders', f3_desc: 'Favorite important items and assign or change folders inline.',
-      f4_title: 'Preview Support', f4_desc: 'Long text can expand or collapse, and image items include previews.',
-      f5_title: 'Local Persistence', f5_desc: 'SQLite storage supports larger history and faster retrieval.',
-      f6_title: 'Safe Clearing', f6_desc: 'Clear actions remove only unfavorited items and keep favorites intact.',
+      hero_subtitle: 'SakuraClipboard is a lightweight macOS menu bar clipboard history app. It keeps recent text and image clips locally, opens from the system menu bar, and avoids a separate main window.',
+      btn_github: 'Download DMG', btn_features: 'Explore Features',
+      ui_search: 'Current: Launch copy · Text', ui_all: 'History', ui_text: 'Auto Clean', ui_image: 'Limit 500', ui_fav: 'Launch',
+      ui_row1_title: 'Launch Copy', ui_row1_desc: 'Click any history item to copy it back to the clipboard.',
+      ui_row2_title: 'Design Reference', ui_row2_desc: 'Hover over an image item to preview it inside History.',
+      ui_row3_title: 'Local Storage', ui_row3_desc: 'Recent clips stay local and can be cleaned by age.',
+      features_label: 'Core Features', features_title: 'Lightweight by Design', features_subtitle: 'Built for quick review, copy-back, and automatic maintenance without taking over the desktop.',
+      f1_title: 'Text & Image History', f1_desc: 'Automatically records text and images. Open History to browse recent items.',
+      f2_title: 'Native Menu Bar UI', f2_desc: 'Opens from the system menu bar with no separate main panel.',
+      f3_title: 'Scrollable History', f3_desc: 'A fixed-height History menu supports scrolling and incremental loading.',
+      f4_title: 'Image Hover Preview', f4_desc: 'Hover over image entries to preview their contents.',
+      f5_title: 'SQLite Local Storage', f5_desc: 'Recent clips are stored locally on your Mac.',
+      f6_title: 'Auto Clean & Limits', f6_desc: 'Clean by retention age and choose a history limit from 100 to 5000 items.',
       workflow_label: 'Workflow', workflow_title: 'Start From the Menu Bar', workflow_subtitle: 'SakuraClipboard stays light and appears only when you need to recover something.',
       s1_title: 'Open Menu Bar', s1_desc: 'Access history from the macOS menu bar.',
-      s2_title: 'Search or Filter', s2_desc: 'Narrow results by text, type, time, or folder.',
+      s2_title: 'Open History', s2_desc: 'Browse recent clips and scroll inside the fixed-height menu to load more.',
       s3_title: 'Click to Copy', s3_desc: 'Click an item to copy it back to the system clipboard.',
-      s4_title: 'Favorite It', s4_desc: 'Put important content into folders so it remains available.',
-      download_label: 'Open Source', download_title: 'Ready to Organize Your Clipboard?', download_subtitle: 'Visit GitHub for source code, build notes, and the latest project status.', download_btn: 'Open GitHub Repository',
-      qa_title: 'Frequently Asked Questions', qa_subtitle: 'Notes about storage, clearing, language, and launch behavior.',
+      s4_title: 'Set Retention', s4_desc: 'Use Auto Clean and History Limit to control age and item count.',
+      download_label: 'Download', download_title: 'Download SakuraClipboard', download_subtitle: 'Download the latest DMG, then drag SakuraClipboard.app into Applications.', download_btn: 'Download SakuraClipboard.dmg',
+      qa_title: 'Frequently Asked Questions', qa_subtitle: 'Notes about storage, menu bar behavior, cleanup, and launch behavior.',
       q1: 'Does data upload to the cloud?', a1: 'No. SakuraClipboard stores clipboard history locally with SQLite on your Mac.',
-      q2: 'Does clearing history remove favorites?', a2: 'No. Clear actions remove only unfavorited items and keep favorites intact.',
-      q3: 'Does it support image clipboard items?', a3: 'Yes. The app can record image history and show image previews.',
+      q2: 'Does it have a separate main window?', a2: 'No. SakuraClipboard opens from the system menu bar, and History is shown inside the menu.',
+      q3: 'Does it support image clipboard items?', a3: 'Yes. The app records image history and supports hover preview in the History menu.',
       q4: 'Can it launch at login?', a4: 'Yes. The project supports Launch at Login from inside the app.',
-      footer_tagline: 'Turn copied content into reliable memory.'
+      footer_tagline: 'Lightweight clipboard history in the menu bar.'
     }
   };
 
