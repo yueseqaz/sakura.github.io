@@ -1,0 +1,1344 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SakuraObserver - 本地行为记录与截图归档</title>
+<meta name="description" content="SakuraObserver 是一款 macOS 原生本地观察工具，支持定时截图、人脸触发抓拍、键盘统计、鼠标与键盘事件记录。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=Noto+Serif+SC:wght@400;500;600&family=Noto+Sans+SC:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #fbf8f3;
+    --paper: #fffdf9;
+    --paper-warm: #f4ece3;
+    --ink: #2c2420;
+    --ink-soft: #675b53;
+    --muted: #9b8c80;
+    --line: rgba(116, 93, 79, 0.16);
+    --sakura: #e8a0b4;
+    --sakura-pale: #fae7ed;
+    --sakura-deep: #bd6c84;
+    --moss: #7e9a83;
+    --sky: #6c9ebd;
+    --gold: #c0a165;
+    --shadow: 0 22px 70px rgba(44, 36, 32, 0.12);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html {
+    scroll-behavior: smooth;
+    font-size: 16px;
+  }
+
+  body {
+    min-height: 100vh;
+    font-family: 'Noto Sans SC', sans-serif;
+    color: var(--ink);
+    background:
+      linear-gradient(90deg, rgba(44, 36, 32, 0.035) 1px, transparent 1px),
+      linear-gradient(rgba(44, 36, 32, 0.03) 1px, transparent 1px),
+      radial-gradient(ellipse at 20% 10%, rgba(232, 160, 180, 0.18), transparent 38%),
+      radial-gradient(ellipse at 78% 34%, rgba(126, 154, 131, 0.13), transparent 34%),
+      var(--bg);
+    background-size: 52px 52px, 52px 52px, auto, auto, auto;
+    line-height: 1.75;
+    overflow-x: hidden;
+  }
+
+  a { color: inherit; text-decoration: none; }
+
+  .grain {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.3;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 160 160' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.18'/%3E%3C/svg%3E");
+  }
+
+  .petals {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    overflow: hidden;
+  }
+
+  .petal {
+    position: absolute;
+    top: -32px;
+    width: 13px;
+    height: 10px;
+    border-radius: 70% 0 70% 0;
+    background: rgba(232, 160, 180, 0.5);
+    animation: petal-fall linear infinite;
+  }
+
+  .petal:nth-child(1) { left: 6%; animation-duration: 15s; animation-delay: 0s; }
+  .petal:nth-child(2) { left: 17%; animation-duration: 19s; animation-delay: 3s; background: rgba(250, 231, 237, 0.7); }
+  .petal:nth-child(3) { left: 31%; animation-duration: 14s; animation-delay: 6s; width: 9px; height: 7px; }
+  .petal:nth-child(4) { left: 49%; animation-duration: 21s; animation-delay: 1s; }
+  .petal:nth-child(5) { left: 68%; animation-duration: 16s; animation-delay: 4s; background: rgba(250, 231, 237, 0.72); }
+  .petal:nth-child(6) { left: 83%; animation-duration: 18s; animation-delay: 8s; }
+  .petal:nth-child(7) { left: 94%; animation-duration: 13s; animation-delay: 2s; width: 10px; height: 8px; }
+
+  @keyframes petal-fall {
+    0% { opacity: 0; transform: translate3d(0, -20px, 0) rotate(0deg); }
+    12% { opacity: 0.75; }
+    50% { transform: translate3d(34px, 52vh, 0) rotate(320deg); }
+    100% { opacity: 0; transform: translate3d(-22px, 106vh, 0) rotate(700deg); }
+  }
+
+  .preloader {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    display: grid;
+    place-items: center;
+    background: var(--bg);
+    transition: opacity 0.7s ease, visibility 0.7s ease;
+  }
+
+  .preloader.hidden {
+    opacity: 0;
+    visibility: hidden;
+  }
+
+  .preloader-mark {
+    display: grid;
+    gap: 1rem;
+    justify-items: center;
+    color: var(--sakura-deep);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+  }
+
+  .iris {
+    width: 58px;
+    height: 58px;
+    border: 1px solid var(--sakura);
+    border-radius: 50%;
+    position: relative;
+    animation: iris-spin 1.8s ease-in-out infinite;
+  }
+
+  .iris::before,
+  .iris::after {
+    content: "";
+    position: absolute;
+    inset: 14px;
+    border-radius: 50%;
+    border: 7px solid var(--sakura-pale);
+    border-top-color: var(--sakura-deep);
+  }
+
+  .iris::after {
+    inset: 24px;
+    background: var(--ink);
+    border: 0;
+  }
+
+  @keyframes iris-spin {
+    0%, 100% { transform: rotate(-8deg) scale(0.94); opacity: 0.68; }
+    50% { transform: rotate(12deg) scale(1); opacity: 1; }
+  }
+
+  nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 80;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.05rem clamp(1.25rem, 4vw, 3.5rem);
+    transition: background 0.35s ease, box-shadow 0.35s ease, padding 0.35s ease;
+  }
+
+  nav.scrolled {
+    padding-top: 0.78rem;
+    padding-bottom: 0.78rem;
+    background: rgba(251, 248, 243, 0.88);
+    backdrop-filter: blur(22px);
+    box-shadow: 0 1px 0 var(--line);
+  }
+
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.72rem;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.28rem;
+    font-weight: 600;
+  }
+
+  .brand-mark {
+    width: 34px;
+    height: 34px;
+    display: inline-grid;
+    place-items: center;
+    border: 1px solid rgba(189, 108, 132, 0.28);
+    border-radius: 50%;
+    background: var(--paper);
+    box-shadow: 0 8px 22px rgba(189, 108, 132, 0.12);
+  }
+
+  .brand-mark svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .nav-right {
+    display: flex;
+    align-items: center;
+    gap: 1.6rem;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 1.75rem;
+    list-style: none;
+  }
+
+  .nav-links a {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--ink-soft);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    position: relative;
+  }
+
+  .nav-links a::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -0.28rem;
+    width: 0;
+    height: 1px;
+    background: var(--sakura-deep);
+    transition: width 0.28s ease;
+  }
+
+  .nav-links a:hover::after { width: 100%; }
+
+  .lang-toggle {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 0;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: rgba(255, 253, 249, 0.75);
+    padding: 3px;
+    cursor: pointer;
+  }
+
+  .lang-toggle-bg {
+    position: absolute;
+    inset: 3px auto 3px 3px;
+    width: calc(50% - 3px);
+    border-radius: 999px;
+    background: var(--ink);
+    transition: transform 0.3s ease;
+  }
+
+  .lang-toggle[data-lang="en"] .lang-toggle-bg {
+    transform: translateX(100%);
+  }
+
+  .lang-option {
+    position: relative;
+    z-index: 1;
+    min-width: 38px;
+    padding: 0.24rem 0.55rem;
+    text-align: center;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--muted);
+    transition: color 0.3s ease;
+  }
+
+  .lang-toggle[data-lang="zh"] .lang-option[data-lang="zh"],
+  .lang-toggle[data-lang="en"] .lang-option[data-lang="en"] {
+    color: var(--paper);
+  }
+
+  main, footer {
+    position: relative;
+    z-index: 2;
+  }
+
+  .hero {
+    min-height: 92vh;
+    display: grid;
+    align-items: center;
+    padding: 7.5rem clamp(1.25rem, 5vw, 4rem) 3rem;
+  }
+
+  .hero-grid {
+    max-width: 1180px;
+    width: 100%;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: minmax(0, 0.92fr) minmax(360px, 1.08fr);
+    gap: clamp(2.5rem, 6vw, 5.2rem);
+    align-items: center;
+  }
+
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.62rem;
+    padding: 0.34rem 0.92rem;
+    border: 1px solid rgba(189, 108, 132, 0.22);
+    border-radius: 999px;
+    background: rgba(250, 231, 237, 0.68);
+    color: var(--sakura-deep);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    animation: reveal-up 0.8s ease 0.15s both;
+  }
+
+  .eyebrow::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--sakura-deep);
+    animation: blink 2.2s ease-in-out infinite;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(189, 108, 132, 0.25); }
+    50% { opacity: 0.55; box-shadow: 0 0 0 8px rgba(189, 108, 132, 0); }
+  }
+
+  h1 {
+    margin-top: 2rem;
+    font-family: 'Cormorant Garamond', 'Noto Serif SC', serif;
+    font-size: clamp(3.2rem, 8vw, 6.9rem);
+    font-weight: 300;
+    line-height: 0.98;
+    letter-spacing: 0;
+    animation: reveal-up 0.9s ease 0.3s both;
+  }
+
+  h1 em {
+    font-style: italic;
+    color: var(--sakura-deep);
+  }
+
+  .hero-copy {
+    max-width: 560px;
+    margin-top: 1.75rem;
+    color: var(--ink-soft);
+    font-size: 1.02rem;
+    font-weight: 300;
+    animation: reveal-up 0.9s ease 0.45s both;
+  }
+
+  .hero-actions {
+    margin-top: 2.2rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.9rem;
+    animation: reveal-up 0.9s ease 0.6s both;
+  }
+
+  .button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.62rem;
+    min-height: 46px;
+    padding: 0.82rem 1.35rem;
+    border-radius: 999px;
+    border: 1px solid var(--ink);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.06em;
+    transition: transform 0.28s ease, box-shadow 0.28s ease, background 0.28s ease, color 0.28s ease;
+  }
+
+  .button.primary {
+    background: var(--ink);
+    color: var(--paper);
+  }
+
+  .button.secondary {
+    background: rgba(255, 253, 249, 0.56);
+    color: var(--ink);
+    border-color: var(--line);
+  }
+
+  .button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 14px 38px rgba(44, 36, 32, 0.16);
+  }
+
+  .hero-note {
+    margin-top: 1.15rem;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    animation: reveal-up 0.9s ease 0.75s both;
+  }
+
+  @keyframes reveal-up {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .product-visual {
+    position: relative;
+    min-height: 520px;
+    animation: visual-in 1s ease 0.38s both;
+  }
+
+  @keyframes visual-in {
+    from { opacity: 0; transform: translateY(28px) scale(0.96); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .app-window {
+    position: absolute;
+    inset: 2rem 0 auto auto;
+    width: min(100%, 620px);
+    background: rgba(255, 253, 249, 0.88);
+    border: 1px solid rgba(116, 93, 79, 0.18);
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    backdrop-filter: blur(18px);
+  }
+
+  .window-bar {
+    height: 38px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 14px;
+    border-bottom: 1px solid var(--line);
+    background: rgba(244, 236, 227, 0.72);
+  }
+
+  .traffic {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--sakura);
+  }
+
+  .traffic:nth-child(2) { background: var(--gold); }
+  .traffic:nth-child(3) { background: var(--moss); }
+
+  .window-title {
+    margin-left: 0.55rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--muted);
+  }
+
+  .app-body {
+    display: grid;
+    grid-template-columns: 150px 1fr;
+    min-height: 388px;
+  }
+
+  .sidebar {
+    border-right: 1px solid var(--line);
+    background: rgba(250, 231, 237, 0.35);
+    padding: 16px 12px;
+  }
+
+  .side-logo {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, var(--sakura), var(--sakura-deep));
+    margin-bottom: 18px;
+  }
+
+  .side-row {
+    height: 28px;
+    border-radius: 6px;
+    margin: 9px 0;
+    background: rgba(44, 36, 32, 0.055);
+  }
+
+  .side-row.active {
+    background: rgba(232, 160, 180, 0.3);
+  }
+
+  .dashboard {
+    padding: 18px;
+  }
+
+  .dashboard-head {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+
+  .mock-title {
+    width: 148px;
+    height: 18px;
+    border-radius: 4px;
+    background: var(--ink);
+  }
+
+  .mock-pill {
+    width: 88px;
+    height: 24px;
+    border-radius: 999px;
+    background: var(--sakura-pale);
+  }
+
+  .metric-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  .metric {
+    height: 82px;
+    border-radius: 8px;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    padding: 12px;
+  }
+
+  .metric strong {
+    display: block;
+    width: 44px;
+    height: 22px;
+    border-radius: 4px;
+    background: var(--sakura-deep);
+    margin-bottom: 13px;
+  }
+
+  .metric span {
+    display: block;
+    width: 82%;
+    height: 8px;
+    border-radius: 999px;
+    background: rgba(44, 36, 32, 0.12);
+  }
+
+  .timeline {
+    display: grid;
+    gap: 9px;
+  }
+
+  .log-line {
+    height: 36px;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    background: linear-gradient(90deg, rgba(255, 253, 249, 0.86), rgba(250, 231, 237, 0.46));
+    position: relative;
+    overflow: hidden;
+  }
+
+  .log-line::before {
+    content: "";
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    width: 68%;
+    height: 8px;
+    border-radius: 999px;
+    background: rgba(44, 36, 32, 0.12);
+  }
+
+  .floating-shot {
+    position: absolute;
+    left: 0;
+    bottom: 28px;
+    width: 250px;
+    border-radius: 8px;
+    border: 1px solid rgba(116, 93, 79, 0.18);
+    background: var(--paper);
+    box-shadow: 0 18px 50px rgba(44, 36, 32, 0.14);
+    padding: 12px;
+    transform: rotate(-4deg);
+  }
+
+  .shot-preview {
+    aspect-ratio: 16 / 10;
+    border-radius: 6px;
+    background:
+      linear-gradient(120deg, rgba(108, 158, 189, 0.24), rgba(232, 160, 180, 0.26)),
+      repeating-linear-gradient(90deg, rgba(44, 36, 32, 0.08) 0 1px, transparent 1px 24px);
+    position: relative;
+  }
+
+  .shot-preview::after {
+    content: "";
+    position: absolute;
+    right: 18px;
+    bottom: 16px;
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    border: 2px solid rgba(189, 108, 132, 0.5);
+    background: rgba(255, 253, 249, 0.36);
+  }
+
+  .shot-caption {
+    margin-top: 10px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.62rem;
+    color: var(--muted);
+  }
+
+  .signal-card {
+    position: absolute;
+    right: 14px;
+    bottom: 0;
+    width: 190px;
+    border-radius: 8px;
+    border: 1px solid rgba(116, 93, 79, 0.18);
+    background: rgba(44, 36, 32, 0.92);
+    color: var(--paper);
+    box-shadow: 0 18px 44px rgba(44, 36, 32, 0.2);
+    padding: 16px;
+  }
+
+  .signal-card .mono {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.62rem;
+    color: rgba(255, 253, 249, 0.62);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  .signal-card strong {
+    display: block;
+    margin-top: 0.55rem;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 2rem;
+    font-weight: 300;
+    color: var(--sakura);
+    line-height: 1;
+  }
+
+  .section {
+    padding: 7rem clamp(1.25rem, 5vw, 4rem);
+  }
+
+  .section.alt {
+    background: rgba(244, 236, 227, 0.68);
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .container {
+    width: min(1120px, 100%);
+    margin: 0 auto;
+  }
+
+  .section-kicker {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: var(--sakura-deep);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+  }
+
+  .section-kicker::before {
+    content: "";
+    width: 26px;
+    height: 1px;
+    background: var(--sakura-deep);
+  }
+
+  .section-heading {
+    max-width: 780px;
+    font-family: 'Cormorant Garamond', 'Noto Serif SC', serif;
+    font-size: clamp(2.15rem, 5vw, 4.25rem);
+    font-weight: 300;
+    line-height: 1.12;
+    letter-spacing: 0;
+  }
+
+  .section-desc {
+    max-width: 560px;
+    margin-top: 1rem;
+    color: var(--ink-soft);
+    font-weight: 300;
+  }
+
+  .feature-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    margin-top: 3.2rem;
+  }
+
+  .feature-card {
+    min-height: 250px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: rgba(255, 253, 249, 0.76);
+    padding: 1.5rem;
+    transition: transform 0.32s ease, box-shadow 0.32s ease, border-color 0.32s ease;
+  }
+
+  .feature-card:hover {
+    transform: translateY(-7px);
+    box-shadow: 0 18px 50px rgba(44, 36, 32, 0.09);
+    border-color: rgba(189, 108, 132, 0.3);
+  }
+
+  .feature-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 8px;
+    display: grid;
+    place-items: center;
+    background: var(--sakura-pale);
+    color: var(--sakura-deep);
+    margin-bottom: 1.25rem;
+  }
+
+  .feature-icon svg {
+    width: 22px;
+    height: 22px;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 1.7;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .feature-card h3 {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 1.05rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .feature-card p {
+    color: var(--ink-soft);
+    font-size: 0.88rem;
+    font-weight: 300;
+  }
+
+  .marquee {
+    overflow: hidden;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    background: rgba(255, 253, 249, 0.5);
+  }
+
+  .marquee-track {
+    display: flex;
+    width: max-content;
+    animation: marquee 30s linear infinite;
+  }
+
+  .marquee-row {
+    display: flex;
+    align-items: center;
+    gap: 2.2rem;
+    padding: 1.5rem 1.1rem;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.25rem;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  .marquee-row span:nth-child(even) {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--sakura);
+  }
+
+  @keyframes marquee {
+    to { transform: translateX(-50%); }
+  }
+
+  .privacy-grid {
+    display: grid;
+    grid-template-columns: 0.9fr 1.1fr;
+    gap: 3rem;
+    align-items: center;
+  }
+
+  .privacy-panel {
+    border-radius: 8px;
+    border: 1px solid rgba(255, 253, 249, 0.12);
+    background:
+      linear-gradient(135deg, rgba(232, 160, 180, 0.12), transparent 42%),
+      #2c2420;
+    color: var(--paper);
+    padding: clamp(1.5rem, 4vw, 2.6rem);
+    box-shadow: var(--shadow);
+  }
+
+  .privacy-panel h2 {
+    font-family: 'Cormorant Garamond', 'Noto Serif SC', serif;
+    font-size: clamp(2rem, 4vw, 3.5rem);
+    font-weight: 300;
+    line-height: 1.1;
+  }
+
+  .privacy-panel p {
+    margin-top: 1rem;
+    color: rgba(255, 253, 249, 0.7);
+    font-weight: 300;
+  }
+
+  .privacy-list {
+    display: grid;
+    gap: 0.9rem;
+  }
+
+  .privacy-item {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 1rem;
+    align-items: start;
+    padding: 1.05rem;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: rgba(255, 253, 249, 0.58);
+  }
+
+  .privacy-item strong {
+    color: var(--moss);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.84rem;
+  }
+
+  .privacy-item p {
+    color: var(--ink-soft);
+    font-size: 0.9rem;
+    font-weight: 300;
+  }
+
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-top: 3rem;
+  }
+
+  .step {
+    border-top: 1px solid var(--ink);
+    padding-top: 1.15rem;
+  }
+
+  .step-num {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 3rem;
+    line-height: 1;
+    color: var(--sakura-deep);
+  }
+
+  .step h3 {
+    margin-top: 1.1rem;
+    font-family: 'Noto Serif SC', serif;
+    font-size: 1.08rem;
+  }
+
+  .step p {
+    margin-top: 0.62rem;
+    color: var(--ink-soft);
+    font-size: 0.9rem;
+    font-weight: 300;
+  }
+
+  .download {
+    text-align: center;
+    padding-bottom: 8rem;
+  }
+
+  .download-box {
+    width: min(820px, 100%);
+    margin: 0 auto;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: rgba(255, 253, 249, 0.7);
+    padding: clamp(2rem, 5vw, 4rem);
+    box-shadow: var(--shadow);
+  }
+
+  .download-box h2 {
+    font-family: 'Cormorant Garamond', 'Noto Serif SC', serif;
+    font-size: clamp(2.4rem, 5vw, 4.5rem);
+    font-weight: 300;
+    line-height: 1.08;
+  }
+
+  .download-box p {
+    max-width: 560px;
+    margin: 1rem auto 2rem;
+    color: var(--ink-soft);
+    font-weight: 300;
+  }
+
+  .system-line {
+    margin-top: 1.35rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--muted);
+  }
+
+  footer {
+    border-top: 1px solid var(--line);
+    padding: 2.4rem clamp(1.25rem, 5vw, 4rem);
+    background: rgba(251, 248, 243, 0.78);
+  }
+
+  .footer-inner {
+    max-width: 1120px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    gap: 1.5rem;
+    align-items: center;
+  }
+
+  .footer-brand {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.15rem;
+    font-weight: 600;
+  }
+
+  .footer-copy {
+    color: var(--muted);
+    font-size: 0.78rem;
+  }
+
+  .footer-links {
+    display: flex;
+    gap: 1.4rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--ink-soft);
+  }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(34px);
+    transition: opacity 0.75s ease, transform 0.75s ease;
+  }
+
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  @media (max-width: 960px) {
+    .nav-links { display: none; }
+    .hero { min-height: auto; padding-top: 6.8rem; }
+    .hero-grid,
+    .privacy-grid {
+      grid-template-columns: 1fr;
+    }
+    .product-visual { min-height: 500px; }
+    .feature-grid { grid-template-columns: repeat(2, 1fr); }
+    .steps { grid-template-columns: 1fr; }
+  }
+
+  @media (max-width: 620px) {
+    .brand { font-size: 1.05rem; }
+    .brand-mark { width: 30px; height: 30px; }
+    .hero-actions { flex-direction: column; align-items: stretch; }
+    .button { width: 100%; }
+    .product-visual { min-height: 420px; }
+    .app-window { inset: 1rem 0 auto 0; }
+    .app-body { grid-template-columns: 98px 1fr; min-height: 330px; }
+    .metric-grid { grid-template-columns: 1fr; }
+    .metric:nth-child(2),
+    .metric:nth-child(3) { display: none; }
+    .floating-shot { width: 190px; bottom: 18px; }
+    .signal-card { width: 150px; }
+    .feature-grid { grid-template-columns: 1fr; }
+    .footer-inner { flex-direction: column; align-items: flex-start; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      scroll-behavior: auto !important;
+      transition-duration: 0.001ms !important;
+    }
+  }
+</style>
+</head>
+<body>
+<div class="grain"></div>
+<div class="petals" aria-hidden="true">
+  <div class="petal"></div><div class="petal"></div><div class="petal"></div><div class="petal"></div>
+  <div class="petal"></div><div class="petal"></div><div class="petal"></div>
+</div>
+
+<div class="preloader" id="preloader">
+  <div class="preloader-mark">
+    <div class="iris"></div>
+    <span>SakuraObserver</span>
+  </div>
+</div>
+
+<nav id="nav">
+  <a class="brand" href="#top" aria-label="SakuraObserver 首页">
+    <span class="brand-mark">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M2.8 12s3.4-6.2 9.2-6.2S21.2 12 21.2 12s-3.4 6.2-9.2 6.2S2.8 12 2.8 12Z" fill="#fae7ed" stroke="#bd6c84" stroke-width="1.3"/>
+        <circle cx="12" cy="12" r="3.2" fill="#bd6c84"/>
+        <path d="M12 2.8v2.1M12 19.1v2.1M4.4 4.4l1.5 1.5M18.1 18.1l1.5 1.5" stroke="#bd6c84" stroke-width="1.2" stroke-linecap="round"/>
+      </svg>
+    </span>
+    SakuraObserver
+  </a>
+  <div class="nav-right">
+    <ul class="nav-links">
+      <li><a href="#features" data-i18n="nav.features">功能</a></li>
+      <li><a href="#privacy" data-i18n="nav.privacy">隐私</a></li>
+      <li><a href="#workflow" data-i18n="nav.workflow">流程</a></li>
+      <li><a href="#download" data-i18n="nav.download">下载</a></li>
+    </ul>
+    <button class="lang-toggle" id="langToggle" data-lang="zh" type="button" aria-label="切换语言">
+      <span class="lang-toggle-bg"></span>
+      <span class="lang-option" data-lang="zh">中</span>
+      <span class="lang-option" data-lang="en">EN</span>
+    </button>
+  </div>
+</nav>
+
+<main id="top">
+  <section class="hero">
+    <div class="hero-grid">
+      <div>
+        <div class="eyebrow" data-i18n="hero.badge">macOS 本地观察工具</div>
+        <h1>
+          <span data-i18n="hero.title.a">把日常记录</span><br>
+          <em data-i18n="hero.title.b">安静归档</em>
+        </h1>
+        <p class="hero-copy" data-i18n="hero.copy">
+          SakuraObserver 用定时截图、人脸触发抓拍、键盘统计与输入事件记录，帮助你在本机保存清晰的行为线索。所有数据留在本地，不依赖云端。
+        </p>
+        <div class="hero-actions">
+          <a class="button primary" href="dist/SakuraObserver.dmg" download>
+            <span data-i18n="hero.download">下载 DMG</span>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v8M4.5 6.5 8 10l3.5-3.5M3 13h10"/></svg>
+          </a>
+          <a class="button secondary" href="https://github.com/yueseqaz/SakuraObserver" target="_blank" rel="noopener noreferrer" data-i18n="hero.github">查看 GitHub</a>
+        </div>
+        <p class="hero-note" data-i18n="hero.note">macOS 13+ · SwiftUI 原生应用 · 本地存储</p>
+      </div>
+
+      <div class="product-visual" aria-label="SakuraObserver 应用界面示意">
+        <div class="app-window">
+          <div class="window-bar">
+            <span class="traffic"></span><span class="traffic"></span><span class="traffic"></span>
+            <span class="window-title">SakuraObserver / Live Archive</span>
+          </div>
+          <div class="app-body">
+            <div class="sidebar">
+              <div class="side-logo"></div>
+              <div class="side-row active"></div>
+              <div class="side-row"></div>
+              <div class="side-row"></div>
+              <div class="side-row"></div>
+            </div>
+            <div class="dashboard">
+              <div class="dashboard-head">
+                <div class="mock-title"></div>
+                <div class="mock-pill"></div>
+              </div>
+              <div class="metric-grid">
+                <div class="metric"><strong></strong><span></span></div>
+                <div class="metric"><strong style="background:var(--moss)"></strong><span></span></div>
+                <div class="metric"><strong style="background:var(--sky)"></strong><span></span></div>
+              </div>
+              <div class="timeline">
+                <div class="log-line"></div>
+                <div class="log-line"></div>
+                <div class="log-line"></div>
+                <div class="log-line"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="floating-shot">
+          <div class="shot-preview"></div>
+          <div class="shot-caption">capture / 09-16-04.jpg</div>
+        </div>
+        <div class="signal-card">
+          <span class="mono" data-i18n="visual.signal">Local Events</span>
+          <strong>100%</strong>
+          <span class="mono" data-i18n="visual.local">stored on device</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="marquee" aria-hidden="true">
+    <div class="marquee-track">
+      <div class="marquee-row">
+        <span>Timed Screenshots</span><span></span><span>Face Triggered Capture</span><span></span><span>Keyboard Stats</span><span></span><span>Local Logs</span><span></span><span>macOS Native</span><span></span>
+      </div>
+      <div class="marquee-row">
+        <span>Timed Screenshots</span><span></span><span>Face Triggered Capture</span><span></span><span>Keyboard Stats</span><span></span><span>Local Logs</span><span></span><span>macOS Native</span><span></span>
+      </div>
+    </div>
+  </div>
+
+  <section class="section" id="features">
+    <div class="container">
+      <div class="section-kicker reveal" data-i18n="features.kicker">Core Features</div>
+      <h2 class="section-heading reveal" data-i18n="features.title">记录不打扰，回看有线索。</h2>
+      <p class="section-desc reveal" data-i18n="features.desc">SakuraObserver 适合需要本地留痕、复盘工作节奏、整理截图档案的 macOS 用户。功能集中，界面克制，数据路径清楚。</p>
+
+      <div class="feature-grid">
+        <article class="feature-card reveal">
+          <div class="feature-icon"><svg viewBox="0 0 24 24"><path d="M4 7h16v11H4z"/><path d="M8 7l1.2-2h5.6L16 7"/><circle cx="12" cy="12.5" r="2.8"/></svg></div>
+          <h3 data-i18n="features.card1.title">定时截图归档</h3>
+          <p data-i18n="features.card1.desc">按设定周期保存屏幕截图，自动按日期整理，适合长期观察与事后回看。</p>
+        </article>
+        <article class="feature-card reveal">
+          <div class="feature-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.2"/><path d="M5 20c1.2-4 3.5-6 7-6s5.8 2 7 6"/></svg></div>
+          <h3 data-i18n="features.card2.title">人脸触发抓拍</h3>
+          <p data-i18n="features.card2.desc">检测到人脸时保存人脸裁剪图与对应全屏截图，关键时刻不需要手动操作。</p>
+        </article>
+        <article class="feature-card reveal">
+          <div class="feature-icon"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M7 10h.01M11 10h.01M15 10h.01M7 14h10"/></svg></div>
+          <h3 data-i18n="features.card3.title">键盘统计</h3>
+          <p data-i18n="features.card3.desc">独立页面展示总按键次数、不同按键数量、高频按键与近期键盘记录。</p>
+        </article>
+        <article class="feature-card reveal">
+          <div class="feature-icon"><svg viewBox="0 0 24 24"><path d="M12 3v18M5 8h14M7 16h10"/><path d="m8 5 4-2 4 2M8 19l4 2 4-2"/></svg></div>
+          <h3 data-i18n="features.card4.title">权限清晰可见</h3>
+          <p data-i18n="features.card4.desc">摄像头、辅助功能、屏幕录制权限状态可见，缺少权限时给出明确提示。</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section alt" id="privacy">
+    <div class="container privacy-grid">
+      <div class="privacy-panel reveal">
+        <div class="section-kicker" data-i18n="privacy.kicker">Privacy First</div>
+        <h2 data-i18n="privacy.title">记录在本机，边界也在本机。</h2>
+        <p data-i18n="privacy.desc">SakuraObserver 不做云端同步，不上传截图，不把日志送到远程服务。你选择目录，应用负责按规则保存。</p>
+      </div>
+      <div class="privacy-list">
+        <div class="privacy-item reveal">
+          <strong>01</strong>
+          <p data-i18n="privacy.item1">截图与日志保存在本地目录，普通截图与人脸截图分开管理。</p>
+        </div>
+        <div class="privacy-item reveal">
+          <strong>02</strong>
+          <p data-i18n="privacy.item2">所有频率设置以秒为单位，可拖动调整，也可输入数值后确认。</p>
+        </div>
+        <div class="privacy-item reveal">
+          <strong>03</strong>
+          <p data-i18n="privacy.item3">日志按保留天数自动清理，不设置条数上限，方便保留连续记录。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="workflow">
+    <div class="container">
+      <div class="section-kicker reveal" data-i18n="workflow.kicker">How It Works</div>
+      <h2 class="section-heading reveal" data-i18n="workflow.title">打开、授权、让它安静记录。</h2>
+      <div class="steps">
+        <div class="step reveal">
+          <div class="step-num">01</div>
+          <h3 data-i18n="workflow.step1.title">安装应用</h3>
+          <p data-i18n="workflow.step1.desc">下载 DMG，把 SakuraObserver 拖入 Applications 后启动。</p>
+        </div>
+        <div class="step reveal">
+          <div class="step-num">02</div>
+          <h3 data-i18n="workflow.step2.title">开启权限</h3>
+          <p data-i18n="workflow.step2.desc">根据需要允许摄像头、辅助功能与屏幕录制，应用会显示缺失项。</p>
+        </div>
+        <div class="step reveal">
+          <div class="step-num">03</div>
+          <h3 data-i18n="workflow.step3.title">设置频率</h3>
+          <p data-i18n="workflow.step3.desc">选择截图目录和记录周期，关闭窗口后应用也可以继续运行。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="download" id="download">
+    <div class="download-box reveal">
+      <div class="section-kicker" style="justify-content:center" data-i18n="download.kicker">Download</div>
+      <h2 data-i18n="download.title">开始使用 SakuraObserver</h2>
+      <p data-i18n="download.desc">当前版本已完成核心 MVP：人脸抓拍、定时截图、键盘统计、输入监听、日志筛选与本地持久化。</p>
+      <div class="hero-actions" style="justify-content:center;margin-top:0">
+        <a class="button primary" href="dist/SakuraObserver.dmg" download data-i18n="download.button">下载 SakuraObserver.dmg</a>
+        <a class="button secondary" href="README.md" data-i18n="download.readme">查看说明</a>
+      </div>
+      <div class="system-line" data-i18n="download.system">适用环境：macOS 13+ · Swift 6 / SwiftPM</div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="footer-inner">
+    <div>
+      <div class="footer-brand">SakuraObserver</div>
+      <div class="footer-copy">© 2026 Sakura Software Studio. <span data-i18n="footer.copy">本地观察，安静归档。</span></div>
+    </div>
+    <div class="footer-links">
+      <a href="https://github.com/yueseqaz/SakuraObserver" target="_blank" rel="noopener noreferrer">GitHub</a>
+      <a href="#download" data-i18n="footer.download">Download</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+  window.addEventListener('load', () => {
+    window.setTimeout(() => {
+      document.getElementById('preloader').classList.add('hidden');
+    }, 550);
+  });
+
+  const nav = document.getElementById('nav');
+  window.addEventListener('scroll', () => {
+    nav.classList.toggle('scrolled', window.scrollY > 42);
+  });
+
+  const revealObserver = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) entry.target.classList.add('visible');
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -36px 0px' });
+
+  document.querySelectorAll('.reveal').forEach((el) => revealObserver.observe(el));
+
+  const translations = {
+    zh: {
+      'nav.features': '功能',
+      'nav.privacy': '隐私',
+      'nav.workflow': '流程',
+      'nav.download': '下载',
+      'hero.badge': 'macOS 本地观察工具',
+      'hero.title.a': '把日常记录',
+      'hero.title.b': '安静归档',
+      'hero.copy': 'SakuraObserver 用定时截图、人脸触发抓拍、键盘统计与输入事件记录，帮助你在本机保存清晰的行为线索。所有数据留在本地，不依赖云端。',
+      'hero.download': '下载 DMG',
+      'hero.github': '查看 GitHub',
+      'hero.note': 'macOS 13+ · SwiftUI 原生应用 · 本地存储',
+      'visual.signal': 'Local Events',
+      'visual.local': 'stored on device',
+      'features.kicker': 'Core Features',
+      'features.title': '记录不打扰，回看有线索。',
+      'features.desc': 'SakuraObserver 适合需要本地留痕、复盘工作节奏、整理截图档案的 macOS 用户。功能集中，界面克制，数据路径清楚。',
+      'features.card1.title': '定时截图归档',
+      'features.card1.desc': '按设定周期保存屏幕截图，自动按日期整理，适合长期观察与事后回看。',
+      'features.card2.title': '人脸触发抓拍',
+      'features.card2.desc': '检测到人脸时保存人脸裁剪图与对应全屏截图，关键时刻不需要手动操作。',
+      'features.card3.title': '键盘统计',
+      'features.card3.desc': '独立页面展示总按键次数、不同按键数量、高频按键与近期键盘记录。',
+      'features.card4.title': '权限清晰可见',
+      'features.card4.desc': '摄像头、辅助功能、屏幕录制权限状态可见，缺少权限时给出明确提示。',
+      'privacy.kicker': 'Privacy First',
+      'privacy.title': '记录在本机，边界也在本机。',
+      'privacy.desc': 'SakuraObserver 不做云端同步，不上传截图，不把日志送到远程服务。你选择目录，应用负责按规则保存。',
+      'privacy.item1': '截图与日志保存在本地目录，普通截图与人脸截图分开管理。',
+      'privacy.item2': '所有频率设置以秒为单位，可拖动调整，也可输入数值后确认。',
+      'privacy.item3': '日志按保留天数自动清理，不设置条数上限，方便保留连续记录。',
+      'workflow.kicker': 'How It Works',
+      'workflow.title': '打开、授权、让它安静记录。',
+      'workflow.step1.title': '安装应用',
+      'workflow.step1.desc': '下载 DMG，把 SakuraObserver 拖入 Applications 后启动。',
+      'workflow.step2.title': '开启权限',
+      'workflow.step2.desc': '根据需要允许摄像头、辅助功能与屏幕录制，应用会显示缺失项。',
+      'workflow.step3.title': '设置频率',
+      'workflow.step3.desc': '选择截图目录和记录周期，关闭窗口后应用也可以继续运行。',
+      'download.kicker': 'Download',
+      'download.title': '开始使用 SakuraObserver',
+      'download.desc': '当前版本已完成核心 MVP：人脸抓拍、定时截图、键盘统计、输入监听、日志筛选与本地持久化。',
+      'download.button': '下载 SakuraObserver.dmg',
+      'download.readme': '查看说明',
+      'download.system': '适用环境：macOS 13+ · Swift 6 / SwiftPM',
+      'footer.copy': '本地观察，安静归档。',
+      'footer.download': 'Download'
+    },
+    en: {
+      'nav.features': 'Features',
+      'nav.privacy': 'Privacy',
+      'nav.workflow': 'Workflow',
+      'nav.download': 'Download',
+      'hero.badge': 'macOS local observation tool',
+      'hero.title.a': 'Quietly archive',
+      'hero.title.b': 'daily traces',
+      'hero.copy': 'SakuraObserver combines timed screenshots, face-triggered captures, keyboard statistics, and input event logs to keep clear local records on your Mac. Data stays on your device.',
+      'hero.download': 'Download DMG',
+      'hero.github': 'View GitHub',
+      'hero.note': 'macOS 13+ · Native SwiftUI app · Local storage',
+      'visual.signal': 'Local Events',
+      'visual.local': 'stored on device',
+      'features.kicker': 'Core Features',
+      'features.title': 'Quiet while recording. Clear when reviewing.',
+      'features.desc': 'SakuraObserver is built for macOS users who need local traces, work rhythm review, and screenshot archives. Focused features, restrained UI, transparent storage.',
+      'features.card1.title': 'Timed Screenshot Archive',
+      'features.card1.desc': 'Save screenshots on a chosen interval and organize them by date for long-running observation and later review.',
+      'features.card2.title': 'Face-Triggered Capture',
+      'features.card2.desc': 'When a face is detected, save a cropped face image and matching full-screen capture without manual action.',
+      'features.card3.title': 'Keyboard Statistics',
+      'features.card3.desc': 'See total keystrokes, unique keys, frequent keys, and recent keyboard records on a dedicated page.',
+      'features.card4.title': 'Visible Permissions',
+      'features.card4.desc': 'Camera, Accessibility, and Screen Recording status are surfaced clearly with direct guidance when missing.',
+      'privacy.kicker': 'Privacy First',
+      'privacy.title': 'Records stay local. Boundaries stay local.',
+      'privacy.desc': 'SakuraObserver does not sync to the cloud, upload screenshots, or send logs to remote services. You choose the folders; the app follows your rules.',
+      'privacy.item1': 'Screenshots and logs are stored in local folders, with timed captures and face captures managed separately.',
+      'privacy.item2': 'Intervals use seconds. Adjust with sliders or type precise values and confirm.',
+      'privacy.item3': 'Logs are cleaned by retention days, with no fixed item limit, preserving continuous records.',
+      'workflow.kicker': 'How It Works',
+      'workflow.title': 'Open it, grant permissions, let it observe quietly.',
+      'workflow.step1.title': 'Install',
+      'workflow.step1.desc': 'Download the DMG, drag SakuraObserver into Applications, and launch it.',
+      'workflow.step2.title': 'Grant permissions',
+      'workflow.step2.desc': 'Allow Camera, Accessibility, and Screen Recording as needed. Missing items are shown in the app.',
+      'workflow.step3.title': 'Set intervals',
+      'workflow.step3.desc': 'Choose capture folders and recording intervals. The app can keep running after the window closes.',
+      'download.kicker': 'Download',
+      'download.title': 'Start using SakuraObserver',
+      'download.desc': 'The current MVP includes face capture, timed screenshots, keyboard stats, input monitoring, log filtering, and local persistence.',
+      'download.button': 'Download SakuraObserver.dmg',
+      'download.readme': 'Read README',
+      'download.system': 'Requires macOS 13+ · Swift 6 / SwiftPM',
+      'footer.copy': 'Local observation, quietly archived.',
+      'footer.download': 'Download'
+    }
+  };
+
+  let currentLang = 'zh';
+  const toggle = document.getElementById('langToggle');
+  toggle.addEventListener('click', () => {
+    currentLang = currentLang === 'zh' ? 'en' : 'zh';
+    toggle.dataset.lang = currentLang;
+    document.documentElement.lang = currentLang === 'zh' ? 'zh-CN' : 'en';
+    document.querySelectorAll('[data-i18n]').forEach((el) => {
+      const key = el.getAttribute('data-i18n');
+      if (translations[currentLang][key]) el.innerHTML = translations[currentLang][key];
+    });
+  });
+</script>
+</body>
+</html>
