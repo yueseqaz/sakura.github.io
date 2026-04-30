@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SakuraClipboard - macOS 剪贴板历史工具</title>
+<meta name="description" content="SakuraClipboard 是一款轻量的 macOS 剪贴板历史工具，支持文本与图片历史、搜索、收藏夹、SQLite 本地存储和中英文界面。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&family=Noto+Sans+SC:wght@300;400;500;600&family=DM+Mono:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #faf8f5;
+    --bg-warm: #f5f0ea;
+    --surface: rgba(255, 255, 255, 0.74);
+    --surface-solid: #ffffff;
+    --sakura: #e8a0b4;
+    --sakura-light: #f2c8d4;
+    --sakura-pale: #fae6ec;
+    --sakura-deep: #c77a90;
+    --ink: #2c2420;
+    --ink-soft: #6b5e56;
+    --ink-muted: #a09488;
+    --gold: #c9a96e;
+    --line: rgba(200, 180, 170, 0.24);
+    --shadow: 0 24px 70px rgba(85, 55, 45, 0.11);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; font-size: 16px; }
+
+  body {
+    min-height: 100vh;
+    font-family: 'Noto Sans SC', sans-serif;
+    color: var(--ink);
+    line-height: 1.72;
+    overflow-x: hidden;
+    background:
+      radial-gradient(circle at 12% 18%, rgba(242, 200, 212, 0.46), transparent 26%),
+      radial-gradient(circle at 86% 14%, rgba(232, 213, 168, 0.34), transparent 24%),
+      radial-gradient(circle at 62% 82%, rgba(250, 230, 236, 0.72), transparent 30%),
+      linear-gradient(rgba(199, 122, 144, 0.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(199, 122, 144, 0.035) 1px, transparent 1px),
+      var(--bg);
+    background-size: auto, auto, auto, 64px 64px, 64px 64px, auto;
+  }
+
+  a { color: inherit; text-decoration: none; }
+
+  .container {
+    width: min(1180px, calc(100% - 80px));
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+  }
+
+  nav {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 40px;
+    margin: 0 -40px 76px;
+    background: rgba(250, 248, 245, 0.88);
+    border-bottom: 1px solid var(--line);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+  }
+
+  .logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.62rem;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.45rem;
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  .logo-icon {
+    width: 30px;
+    height: 30px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: var(--sakura-pale);
+    border: 1px solid rgba(199, 122, 144, 0.22);
+    font-size: 0.96rem;
+  }
+
+  .nav-right {
+    display: flex;
+    align-items: center;
+    gap: 1.6rem;
+  }
+
+  .nav-links {
+    list-style: none;
+    display: flex;
+    gap: 1.7rem;
+  }
+
+  .nav-links a {
+    font-size: 0.86rem;
+    color: var(--ink-soft);
+    letter-spacing: 0.04em;
+    position: relative;
+  }
+
+  .nav-links a::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: -5px;
+    width: 0;
+    height: 1px;
+    background: var(--sakura);
+    transition: all 0.3s ease;
+  }
+
+  .nav-links a:hover { color: var(--ink); }
+  .nav-links a:hover::after { left: 0; width: 100%; }
+
+  .lang-toggle {
+    display: flex;
+    padding: 4px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: rgba(200, 180, 170, 0.12);
+  }
+
+  .lang-btn {
+    border: 0;
+    background: transparent;
+    color: var(--ink-soft);
+    padding: 7px 14px;
+    border-radius: 999px;
+    cursor: pointer;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.78rem;
+  }
+
+  .lang-btn.active {
+    background: var(--ink);
+    color: #fffaf8;
+  }
+
+  .hero {
+    min-height: 58vh;
+    display: grid;
+    grid-template-columns: 1fr 0.88fr;
+    gap: 4rem;
+    align-items: center;
+    padding: 2rem 0 8rem;
+  }
+
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.55rem 1rem;
+    margin-bottom: 1.5rem;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.72);
+    color: var(--ink-soft);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.76rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .eyebrow::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--sakura);
+  }
+
+  h1, h2, h3 {
+    font-family: 'Cormorant Garamond', serif;
+    letter-spacing: 0;
+    color: var(--ink);
+  }
+
+  h1 {
+    font-size: clamp(3.4rem, 8vw, 7rem);
+    font-weight: 300;
+    line-height: 0.96;
+    margin-bottom: 1.35rem;
+  }
+
+  h1 em {
+    color: var(--sakura-deep);
+    font-style: italic;
+  }
+
+  .hero p {
+    max-width: 650px;
+    color: var(--ink-soft);
+    font-size: 1.08rem;
+    font-weight: 300;
+  }
+
+  .hero-actions {
+    display: flex;
+    gap: 0.9rem;
+    flex-wrap: wrap;
+    margin-top: 2.2rem;
+  }
+
+  .btn {
+    min-height: 52px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.55rem;
+    padding: 0.85rem 1.6rem;
+    border: 1px solid rgba(199, 122, 144, 0.34);
+    font-weight: 600;
+    transition: all 0.28s ease;
+  }
+
+  .btn-primary {
+    background: var(--ink);
+    color: #fffaf8;
+    box-shadow: 0 18px 46px rgba(44, 36, 32, 0.18);
+  }
+
+  .btn-primary:hover {
+    background: var(--sakura-deep);
+    transform: translateY(-2px);
+  }
+
+  .btn-secondary {
+    background: rgba(255, 255, 255, 0.55);
+    color: var(--ink);
+  }
+
+  .btn-secondary:hover {
+    background: var(--sakura-pale);
+    transform: translateY(-2px);
+  }
+
+  .product-panel {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    padding: 1.2rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .product-panel::before {
+    content: "";
+    position: absolute;
+    inset: -30% -20% auto auto;
+    width: 260px;
+    height: 260px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(232, 160, 180, 0.32), transparent 68%);
+  }
+
+  .app-window {
+    position: relative;
+    background: rgba(255, 255, 255, 0.82);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .window-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.85rem 1rem;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .red { background: #ff6b62; }
+  .yellow { background: #f2bc4b; }
+  .green { background: #69c779; }
+  .window-title {
+    margin-left: 0.5rem;
+    color: var(--ink-muted);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+  }
+
+  .clipboard-ui {
+    padding: 1rem;
+    display: grid;
+    gap: 0.8rem;
+  }
+
+  .search {
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 0.72rem 1rem;
+    color: var(--ink-muted);
+    background: rgba(255, 255, 255, 0.74);
+    font-size: 0.86rem;
+  }
+
+  .filter-row {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .chip {
+    border: 1px solid rgba(199, 122, 144, 0.22);
+    border-radius: 999px;
+    padding: 0.32rem 0.72rem;
+    color: var(--sakura-deep);
+    background: var(--sakura-pale);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+  }
+
+  .clip-row {
+    display: grid;
+    gap: 0.34rem;
+    padding: 0.86rem;
+    background: rgba(255, 255, 255, 0.64);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+  }
+
+  .clip-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: var(--ink);
+    font-weight: 600;
+    font-size: 0.9rem;
+  }
+
+  .clip-row p {
+    color: var(--ink-soft);
+    font-size: 0.82rem;
+  }
+
+  .section {
+    padding: 6.5rem 0;
+    border-top: 1px solid rgba(200, 180, 170, 0.18);
+  }
+
+  .section-header {
+    display: grid;
+    gap: 0.8rem;
+    justify-items: center;
+    text-align: center;
+    margin-bottom: 3.2rem;
+  }
+
+  .section-label {
+    color: var(--sakura-deep);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.78rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .section-title {
+    font-size: clamp(2.4rem, 5vw, 4.5rem);
+    font-weight: 300;
+    line-height: 1;
+  }
+
+  .section-subtitle {
+    max-width: 650px;
+    color: var(--ink-soft);
+    font-weight: 300;
+  }
+
+  .feature-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.2rem;
+  }
+
+  .card {
+    min-height: 218px;
+    padding: 1.5rem;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    box-shadow: 0 18px 52px rgba(85, 55, 45, 0.07);
+    transition: all 0.3s ease;
+  }
+
+  .card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(199, 122, 144, 0.34);
+    box-shadow: 0 24px 70px rgba(232, 160, 180, 0.18);
+  }
+
+  .icon {
+    width: 46px;
+    height: 46px;
+    display: grid;
+    place-items: center;
+    margin-bottom: 1.15rem;
+    border-radius: 50%;
+    background: var(--sakura-pale);
+    border: 1px solid rgba(199, 122, 144, 0.22);
+    color: var(--sakura-deep);
+    font-size: 1.2rem;
+  }
+
+  .card h3 {
+    font-size: 1.35rem;
+    margin-bottom: 0.55rem;
+  }
+
+  .card p {
+    color: var(--ink-soft);
+    font-size: 0.92rem;
+    font-weight: 300;
+  }
+
+  .flow {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+  }
+
+  .step {
+    padding: 1.4rem;
+    background: rgba(255, 255, 255, 0.58);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+  }
+
+  .step span {
+    color: var(--sakura-deep);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+  }
+
+  .step h3 {
+    font-size: 1.25rem;
+    margin: 0.55rem 0 0.35rem;
+  }
+
+  .step p {
+    color: var(--ink-soft);
+    font-size: 0.9rem;
+  }
+
+  .qa-list {
+    max-width: 860px;
+    margin: 0 auto;
+    display: grid;
+    gap: 0.9rem;
+  }
+
+  .qa-item {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .qa-question {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.1rem 1.35rem;
+    color: var(--ink);
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+    text-align: left;
+    font: 600 0.98rem 'Noto Sans SC', sans-serif;
+  }
+
+  .qa-answer {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.32s ease;
+  }
+
+  .qa-item.open .qa-answer { max-height: 320px; }
+
+  .qa-answer-inner {
+    padding: 0 1.35rem 1.15rem;
+    color: var(--ink-soft);
+    font-size: 0.92rem;
+  }
+
+  .download {
+    text-align: center;
+    background: rgba(255, 255, 255, 0.48);
+  }
+
+  footer {
+    text-align: center;
+    padding: 3rem 0;
+    color: var(--ink-muted);
+    font-size: 0.86rem;
+    border-top: 1px solid var(--line);
+  }
+
+  .sakura {
+    position: fixed;
+    top: -50px;
+    z-index: 0;
+    pointer-events: none;
+    animation: fall linear forwards;
+    filter: drop-shadow(0 6px 12px rgba(199, 122, 144, 0.12));
+  }
+
+  @keyframes fall {
+    to { transform: translateY(110vh) rotate(720deg); }
+  }
+
+  @media (max-width: 940px) {
+    .hero { grid-template-columns: 1fr; padding-bottom: 5rem; }
+    .feature-grid { grid-template-columns: repeat(2, 1fr); }
+    .flow { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  @media (max-width: 720px) {
+    .container { width: calc(100% - 40px); }
+    nav {
+      margin: 0 -20px 54px;
+      padding: 16px 20px;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 1rem;
+    }
+    .nav-right { flex-direction: column; gap: 1rem; }
+    .nav-links { justify-content: center; flex-wrap: wrap; row-gap: 0.6rem; }
+    h1 { font-size: 3.1rem; }
+    .hero-actions { flex-direction: column; }
+    .btn { width: 100%; }
+    .feature-grid,
+    .flow { grid-template-columns: 1fr; }
+    .section { padding: 5rem 0; }
+  }
+</style>
+</head>
+<body>
+<div id="sakura-container"></div>
+<div class="container">
+  <nav>
+    <a class="logo" href="index.html" aria-label="Back to Sakura Software Studio">
+      <span class="logo-icon">✦</span>
+      <span>SakuraClipboard</span>
+    </a>
+    <div class="nav-right">
+      <ul class="nav-links">
+        <li><a href="#features" data-nav="features">功能</a></li>
+        <li><a href="#preview" data-nav="preview">预览</a></li>
+        <li><a href="#workflow" data-nav="workflow">使用</a></li>
+        <li><a href="#qa" data-nav="qa">Q&A</a></li>
+      </ul>
+      <div class="lang-toggle">
+        <button class="lang-btn active" data-set-lang="zh">中文</button>
+        <button class="lang-btn" data-set-lang="en">EN</button>
+      </div>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <div>
+      <div class="eyebrow" data-i18n="hero_badge">macOS 剪贴板历史工具</div>
+      <h1><span data-i18n="hero_title_1">让复制</span><br><em data-i18n="hero_title_2">井然有序</em></h1>
+      <p data-i18n="hero_subtitle">SakuraClipboard 自动记录文本与图片剪贴板历史，支持搜索、筛选、收藏夹和本地 SQLite 存储，让常用内容随时回到手边。</p>
+      <div class="hero-actions">
+        <a class="btn btn-primary" href="https://github.com/yueseqaz/SakuraClipboard" target="_blank" rel="noopener noreferrer" data-i18n="btn_github">查看 GitHub</a>
+        <a class="btn btn-secondary" href="#features" data-i18n="btn_features">了解功能</a>
+      </div>
+    </div>
+
+    <div class="product-panel" id="preview">
+      <div class="app-window">
+        <div class="window-bar">
+          <span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span>
+          <span class="window-title">Clipboard History</span>
+        </div>
+        <div class="clipboard-ui">
+          <div class="search" data-i18n="ui_search">按关键字搜索文本</div>
+          <div class="filter-row">
+            <span class="chip" data-i18n="ui_all">全部</span>
+            <span class="chip" data-i18n="ui_text">文本</span>
+            <span class="chip" data-i18n="ui_image">图片</span>
+            <span class="chip" data-i18n="ui_fav">收藏</span>
+          </div>
+          <div class="clip-row">
+            <div class="clip-head"><span data-i18n="ui_row1_title">产品发布文案</span><span>★</span></div>
+            <p data-i18n="ui_row1_desc">保留重要文字，复制回来只需一次点击。</p>
+          </div>
+          <div class="clip-row">
+            <div class="clip-head"><span data-i18n="ui_row2_title">设计参考图</span><span>PNG</span></div>
+            <p data-i18n="ui_row2_desc">图片历史支持预览，素材不会从视线里消失。</p>
+          </div>
+          <div class="clip-row">
+            <div class="clip-head"><span data-i18n="ui_row3_title">Local Storage</span><span>SQLite</span></div>
+            <p data-i18n="ui_row3_desc">本地持久化保存，历史容量更大，检索更快。</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="features">
+    <div class="section-header">
+      <div class="section-label" data-i18n="features_label">Core Features</div>
+      <h2 class="section-title" data-i18n="features_title">剪贴板，也需要整理感</h2>
+      <p class="section-subtitle" data-i18n="features_subtitle">围绕日常复制、找回、归档三件事设计，避免内容散落，也避免过度打扰。</p>
+    </div>
+    <div class="feature-grid">
+      <div class="card"><div class="icon">⌘</div><h3 data-i18n="f1_title">文本与图片历史</h3><p data-i18n="f1_desc">自动记录文本和图片，点击任意条目即可重新复制回剪贴板。</p></div>
+      <div class="card"><div class="icon">⌕</div><h3 data-i18n="f2_title">快速搜索筛选</h3><p data-i18n="f2_desc">支持关键字、类型、时间范围、收藏状态和收藏夹筛选。</p></div>
+      <div class="card"><div class="icon">★</div><h3 data-i18n="f3_title">收藏夹管理</h3><p data-i18n="f3_desc">重要条目可加入收藏，并直接分配或修改收藏夹。</p></div>
+      <div class="card"><div class="icon">▣</div><h3 data-i18n="f4_title">长文本与图片预览</h3><p data-i18n="f4_desc">长文本可折叠展开，图片内容可预览，查找更直观。</p></div>
+      <div class="card"><div class="icon">◈</div><h3 data-i18n="f5_title">本地持久化</h3><p data-i18n="f5_desc">使用 SQLite 保存历史，支持更大容量和更快检索。</p></div>
+      <div class="card"><div class="icon">↻</div><h3 data-i18n="f6_title">安全清理</h3><p data-i18n="f6_desc">清空时仅删除未收藏内容，重要收藏会保留。</p></div>
+    </div>
+  </section>
+
+  <section class="section" id="workflow">
+    <div class="section-header">
+      <div class="section-label" data-i18n="workflow_label">Workflow</div>
+      <h2 class="section-title" data-i18n="workflow_title">从菜单栏开始</h2>
+      <p class="section-subtitle" data-i18n="workflow_subtitle">SakuraClipboard 保持轻量，不占据桌面，只在需要找回内容时出现。</p>
+    </div>
+    <div class="flow">
+      <div class="step"><span>01</span><h3 data-i18n="s1_title">打开菜单栏</h3><p data-i18n="s1_desc">从 macOS 菜单栏进入历史列表。</p></div>
+      <div class="step"><span>02</span><h3 data-i18n="s2_title">搜索或筛选</h3><p data-i18n="s2_desc">按文字、类型、时间或收藏夹快速缩小范围。</p></div>
+      <div class="step"><span>03</span><h3 data-i18n="s3_title">点击复制</h3><p data-i18n="s3_desc">点击条目即可复制回系统剪贴板。</p></div>
+      <div class="step"><span>04</span><h3 data-i18n="s4_title">收藏归档</h3><p data-i18n="s4_desc">把重要内容放进收藏夹，之后仍能保留。</p></div>
+    </div>
+  </section>
+
+  <section class="section download" id="download">
+    <div class="section-header">
+      <div class="section-label" data-i18n="download_label">Open Source</div>
+      <h2 class="section-title" data-i18n="download_title">准备整理剪贴板了吗？</h2>
+      <p class="section-subtitle" data-i18n="download_subtitle">前往 GitHub 查看源码、构建方式与最新项目状态。</p>
+      <a class="btn btn-primary" href="https://github.com/yueseqaz/SakuraClipboard" target="_blank" rel="noopener noreferrer" data-i18n="download_btn">打开 GitHub 仓库</a>
+    </div>
+  </section>
+
+  <section class="section" id="qa">
+    <div class="section-header">
+      <div class="section-label">Q&A</div>
+      <h2 class="section-title" data-i18n="qa_title">常见问题</h2>
+      <p class="section-subtitle" data-i18n="qa_subtitle">围绕存储、清理、语言和启动方式的说明。</p>
+    </div>
+    <div class="qa-list">
+      <div class="qa-item"><button class="qa-question"><span data-i18n="q1">数据会上传到云端吗？</span><span>▾</span></button><div class="qa-answer"><div class="qa-answer-inner" data-i18n="a1">不会。SakuraClipboard 使用本地 SQLite 存储剪贴板历史，数据保存在你的 Mac 上。</div></div></div>
+      <div class="qa-item"><button class="qa-question"><span data-i18n="q2">清空历史会删除收藏吗？</span><span>▾</span></button><div class="qa-answer"><div class="qa-answer-inner" data-i18n="a2">不会。清空操作只删除未收藏条目，已收藏内容会保留。</div></div></div>
+      <div class="qa-item"><button class="qa-question"><span data-i18n="q3">支持图片剪贴板吗？</span><span>▾</span></button><div class="qa-answer"><div class="qa-answer-inner" data-i18n="a3">支持。应用可以记录图片历史，并提供图片预览。</div></div></div>
+      <div class="qa-item"><button class="qa-question"><span data-i18n="q4">可以开机自动启动吗？</span><span>▾</span></button><div class="qa-answer"><div class="qa-answer-inner" data-i18n="a4">可以。项目支持 Launch at Login，可在应用内开启。</div></div></div>
+    </div>
+  </section>
+
+  <footer>
+    <p>© 2026 SakuraClipboard</p>
+    <p data-i18n="footer_tagline">把复制过的内容，整理成可靠的记忆。</p>
+  </footer>
+</div>
+
+<script>
+  const i18n = {
+    zh: {
+      nav_features: '功能', nav_preview: '预览', nav_workflow: '使用', nav_qa: 'Q&A',
+      hero_badge: 'macOS 剪贴板历史工具',
+      hero_title_1: '让复制', hero_title_2: '井然有序',
+      hero_subtitle: 'SakuraClipboard 自动记录文本与图片剪贴板历史，支持搜索、筛选、收藏夹和本地 SQLite 存储，让常用内容随时回到手边。',
+      btn_github: '查看 GitHub', btn_features: '了解功能',
+      ui_search: '按关键字搜索文本', ui_all: '全部', ui_text: '文本', ui_image: '图片', ui_fav: '收藏',
+      ui_row1_title: '产品发布文案', ui_row1_desc: '保留重要文字，复制回来只需一次点击。',
+      ui_row2_title: '设计参考图', ui_row2_desc: '图片历史支持预览，素材不会从视线里消失。',
+      ui_row3_title: 'Local Storage', ui_row3_desc: '本地持久化保存，历史容量更大，检索更快。',
+      features_label: 'Core Features', features_title: '剪贴板，也需要整理感', features_subtitle: '围绕日常复制、找回、归档三件事设计，避免内容散落，也避免过度打扰。',
+      f1_title: '文本与图片历史', f1_desc: '自动记录文本和图片，点击任意条目即可重新复制回剪贴板。',
+      f2_title: '快速搜索筛选', f2_desc: '支持关键字、类型、时间范围、收藏状态和收藏夹筛选。',
+      f3_title: '收藏夹管理', f3_desc: '重要条目可加入收藏，并直接分配或修改收藏夹。',
+      f4_title: '长文本与图片预览', f4_desc: '长文本可折叠展开，图片内容可预览，查找更直观。',
+      f5_title: '本地持久化', f5_desc: '使用 SQLite 保存历史，支持更大容量和更快检索。',
+      f6_title: '安全清理', f6_desc: '清空时仅删除未收藏内容，重要收藏会保留。',
+      workflow_label: 'Workflow', workflow_title: '从菜单栏开始', workflow_subtitle: 'SakuraClipboard 保持轻量，不占据桌面，只在需要找回内容时出现。',
+      s1_title: '打开菜单栏', s1_desc: '从 macOS 菜单栏进入历史列表。',
+      s2_title: '搜索或筛选', s2_desc: '按文字、类型、时间或收藏夹快速缩小范围。',
+      s3_title: '点击复制', s3_desc: '点击条目即可复制回系统剪贴板。',
+      s4_title: '收藏归档', s4_desc: '把重要内容放进收藏夹，之后仍能保留。',
+      download_label: 'Open Source', download_title: '准备整理剪贴板了吗？', download_subtitle: '前往 GitHub 查看源码、构建方式与最新项目状态。', download_btn: '打开 GitHub 仓库',
+      qa_title: '常见问题', qa_subtitle: '围绕存储、清理、语言和启动方式的说明。',
+      q1: '数据会上传到云端吗？', a1: '不会。SakuraClipboard 使用本地 SQLite 存储剪贴板历史，数据保存在你的 Mac 上。',
+      q2: '清空历史会删除收藏吗？', a2: '不会。清空操作只删除未收藏条目，已收藏内容会保留。',
+      q3: '支持图片剪贴板吗？', a3: '支持。应用可以记录图片历史，并提供图片预览。',
+      q4: '可以开机自动启动吗？', a4: '可以。项目支持 Launch at Login，可在应用内开启。',
+      footer_tagline: '把复制过的内容，整理成可靠的记忆。'
+    },
+    en: {
+      nav_features: 'Features', nav_preview: 'Preview', nav_workflow: 'Workflow', nav_qa: 'Q&A',
+      hero_badge: 'macOS Clipboard History Tool',
+      hero_title_1: 'Keep Every Copy', hero_title_2: 'in Order',
+      hero_subtitle: 'SakuraClipboard records text and image clipboard history with search, filters, favorite folders, and local SQLite storage, keeping useful content close at hand.',
+      btn_github: 'View GitHub', btn_features: 'Explore Features',
+      ui_search: 'Search text by keyword', ui_all: 'All', ui_text: 'Text', ui_image: 'Image', ui_fav: 'Favorites',
+      ui_row1_title: 'Launch Copy', ui_row1_desc: 'Keep important text and copy it back with one click.',
+      ui_row2_title: 'Design Reference', ui_row2_desc: 'Image history includes previews, so assets stay visible.',
+      ui_row3_title: 'Local Storage', ui_row3_desc: 'SQLite persistence supports larger history and faster lookup.',
+      features_label: 'Core Features', features_title: 'A Cleaner Clipboard', features_subtitle: 'Designed around copying, finding, and archiving without getting in the way.',
+      f1_title: 'Text & Image History', f1_desc: 'Automatically records text and images. Click any item to copy it back.',
+      f2_title: 'Search & Filters', f2_desc: 'Filter by keyword, type, time range, favorite state, and folder.',
+      f3_title: 'Favorite Folders', f3_desc: 'Favorite important items and assign or change folders inline.',
+      f4_title: 'Preview Support', f4_desc: 'Long text can expand or collapse, and image items include previews.',
+      f5_title: 'Local Persistence', f5_desc: 'SQLite storage supports larger history and faster retrieval.',
+      f6_title: 'Safe Clearing', f6_desc: 'Clear actions remove only unfavorited items and keep favorites intact.',
+      workflow_label: 'Workflow', workflow_title: 'Start From the Menu Bar', workflow_subtitle: 'SakuraClipboard stays light and appears only when you need to recover something.',
+      s1_title: 'Open Menu Bar', s1_desc: 'Access history from the macOS menu bar.',
+      s2_title: 'Search or Filter', s2_desc: 'Narrow results by text, type, time, or folder.',
+      s3_title: 'Click to Copy', s3_desc: 'Click an item to copy it back to the system clipboard.',
+      s4_title: 'Favorite It', s4_desc: 'Put important content into folders so it remains available.',
+      download_label: 'Open Source', download_title: 'Ready to Organize Your Clipboard?', download_subtitle: 'Visit GitHub for source code, build notes, and the latest project status.', download_btn: 'Open GitHub Repository',
+      qa_title: 'Frequently Asked Questions', qa_subtitle: 'Notes about storage, clearing, language, and launch behavior.',
+      q1: 'Does data upload to the cloud?', a1: 'No. SakuraClipboard stores clipboard history locally with SQLite on your Mac.',
+      q2: 'Does clearing history remove favorites?', a2: 'No. Clear actions remove only unfavorited items and keep favorites intact.',
+      q3: 'Does it support image clipboard items?', a3: 'Yes. The app can record image history and show image previews.',
+      q4: 'Can it launch at login?', a4: 'Yes. The project supports Launch at Login from inside the app.',
+      footer_tagline: 'Turn copied content into reliable memory.'
+    }
+  };
+
+  let currentLang = 'zh';
+  function setLang(lang) {
+    currentLang = lang;
+    const dict = i18n[lang];
+    document.querySelectorAll('[data-i18n]').forEach((el) => {
+      const key = el.getAttribute('data-i18n');
+      if (dict[key] !== undefined) el.innerHTML = dict[key];
+    });
+    document.querySelectorAll('.nav-links a').forEach((a) => {
+      const key = a.getAttribute('data-nav');
+      if (dict['nav_' + key]) a.textContent = dict['nav_' + key];
+    });
+    document.querySelectorAll('.lang-btn').forEach((btn) => {
+      btn.classList.toggle('active', btn.getAttribute('data-set-lang') === lang);
+    });
+    document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en';
+  }
+
+  document.querySelectorAll('.lang-btn').forEach((btn) => {
+    btn.addEventListener('click', () => setLang(btn.getAttribute('data-set-lang')));
+  });
+
+  document.querySelectorAll('.qa-question').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const item = btn.parentElement;
+      const open = item.classList.contains('open');
+      document.querySelectorAll('.qa-item').forEach((i) => i.classList.remove('open'));
+      if (!open) item.classList.add('open');
+    });
+  });
+
+  document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
+    anchor.addEventListener('click', (event) => {
+      event.preventDefault();
+      const target = document.querySelector(anchor.getAttribute('href'));
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+
+  function createSakura() {
+    const petal = document.createElement('div');
+    petal.className = 'sakura';
+    petal.textContent = ['✦', '✧', '❀', '✿'][Math.floor(Math.random() * 4)];
+    petal.style.left = Math.random() * 100 + 'vw';
+    petal.style.fontSize = Math.random() * 8 + 10 + 'px';
+    petal.style.opacity = Math.random() * 0.32 + 0.12;
+    petal.style.animationDuration = Math.random() * 12 + 12 + 's';
+    document.body.appendChild(petal);
+    setTimeout(() => petal.remove(), 25000);
+  }
+
+  setInterval(createSakura, 3600);
+  for (let i = 0; i < 4; i++) setTimeout(createSakura, i * 850);
+  setLang('zh');
+</script>
+</body>
+</html>
