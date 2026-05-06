@@ -6,7 +6,6 @@
 <title>简历编辑器</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700&family=Noto+Serif+SC:wght@400;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <style>
   :root {
     --bg: #0f0f12; --surface: #1a1a20; --surface-2: #22222a;
@@ -33,6 +32,7 @@
   .btn-danger { background:transparent; color:var(--danger); border:1px solid rgba(255,107,107,0.2); }
   .btn-danger:hover { background:rgba(255,107,107,0.08); }
   .btn svg { width:16px; height:16px; }
+  .btn:disabled { opacity:0.6; cursor:not-allowed; transform:none !important; filter:none !important; }
 
   .main { display:flex; margin-top:56px; height:calc(100vh - 56px); }
   .editor-panel { width:420px; min-width:380px; overflow-y:auto; background:var(--bg); border-right:1px solid var(--border); scrollbar-width:thin; scrollbar-color:var(--border) transparent; }
@@ -56,8 +56,6 @@
   .field input:focus,.field textarea:focus,.field select:focus { border-color:var(--border-focus); box-shadow:0 0 0 3px rgba(108,140,255,0.1); }
   .field textarea { resize:vertical; min-height:70px; line-height:1.6; }
   .field input::placeholder,.field textarea::placeholder { color:var(--text-dim); }
-  
-  /* Markdown 提示 */
   .markdown-hint { font-size:10px; color:var(--text-dim); margin-top:3px; font-family:'DM Mono',monospace; }
   .markdown-hint code { background:var(--surface-2); padding:1px 4px; border-radius:3px; }
 
@@ -91,44 +89,55 @@
   .theme-dot.t-wine { background:#742a2a; } .theme-dot.t-forest { background:#22543d; }
   .theme-dot.t-charcoal { background:#2d3748; } .theme-dot.t-rose { background:#702459; }
 
-  /* Resume */
+  /* ── Resume Preview ── */
   .resume-wrapper { width:210mm; min-height:297mm; background:var(--resume-bg); box-shadow:0 4px 40px rgba(0,0,0,0.4); }
-  .resume { padding:40px 44px; font-family:'Noto Sans SC',sans-serif; color:var(--resume-text); font-size:13px; line-height:1.7; }
+  .resume { padding:36px 44px 44px; font-family:'Noto Sans SC',sans-serif; color:var(--resume-text); font-size:13px; line-height:1.7; }
   .resume-header { display:flex; align-items:center; gap:28px; padding-bottom:22px; border-bottom:2px solid var(--resume-accent); margin-bottom:22px; }
-  .resume-photo { width:100px; height:120px; border-radius:6px; object-fit:cover; border:2px solid var(--resume-line); flex-shrink:0; }
-  .resume-photo-placeholder { width:100px; height:120px; border-radius:6px; border:2px dashed var(--resume-line); background:var(--resume-light); flex-shrink:0; display:flex; align-items:center; justify-content:center; color:var(--resume-muted); font-size:12px; }
+  .resume-photo { width:88px; height:110px; border-radius:6px; object-fit:cover; border:2px solid var(--resume-line); flex-shrink:0; }
+  .resume-photo-placeholder { width:88px; height:110px; border-radius:6px; border:2px dashed var(--resume-line); background:var(--resume-light); flex-shrink:0; display:flex; align-items:center; justify-content:center; color:var(--resume-muted); font-size:12px; }
   .resume-header-info { flex:1; }
-  .resume-name { font-family:'Noto Serif SC',serif; font-size:30px; font-weight:700; color:var(--resume-heading); letter-spacing:4px; margin-bottom:6px; }
+  .resume-name { font-family:'Noto Serif SC',serif; font-size:28px; font-weight:700; color:var(--resume-heading); letter-spacing:4px; margin-bottom:6px; }
   .resume-job-title { font-size:14px; color:var(--resume-accent); margin-bottom:12px; font-weight:500; }
   .resume-job-title strong { font-weight:700; }
   .resume-contact-grid { display:flex; flex-wrap:wrap; }
   .resume-contact-item { display:inline-flex; align-items:center; gap:5px; font-size:12px; color:var(--resume-muted); padding-right:16px; margin-bottom:4px; }
 
   .resume-section { margin-bottom:20px; }
-  .resume-section-title { font-family:'Noto Serif SC',serif; font-size:16px; font-weight:600; color:var(--resume-accent); padding-bottom:6px; margin-bottom:14px; border-bottom:1px solid var(--resume-line); display:flex; align-items:center; gap:8px; letter-spacing:2px; }
-  .resume-section-title::before { content:''; width:4px; height:16px; background:var(--resume-accent); border-radius:2px; flex-shrink:0; }
+  .resume-section-title { font-family:'Noto Serif SC',serif; font-size:15px; font-weight:600; color:var(--resume-accent); padding-bottom:6px; margin-bottom:14px; border-bottom:1px solid var(--resume-line); display:flex; align-items:center; gap:8px; letter-spacing:2px; }
+  .resume-section-title::before { content:''; width:4px; height:15px; background:var(--resume-accent); border-radius:2px; flex-shrink:0; }
   .resume-entry { margin-bottom:14px; padding-left:12px; border-left:2px solid var(--resume-line); }
   .resume-entry:last-child { margin-bottom:0; }
   .resume-entry-header { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:4px; }
-  .resume-entry-title { font-weight:600; font-size:14px; color:var(--resume-heading); }
-  .resume-entry-date { font-size:12px; color:var(--resume-muted); font-family:'DM Mono',monospace; white-space:nowrap; }
-  .resume-entry-sub { font-size:12.5px; color:var(--resume-accent); margin-bottom:4px; font-weight:500; }
-  .resume-entry-desc { font-size:13px; color:#4a5568; line-height:1.75; white-space:pre-line; }
+  .resume-entry-title { font-weight:600; font-size:13.5px; color:var(--resume-heading); }
+  .resume-entry-date { font-size:11.5px; color:var(--resume-muted); font-family:'DM Mono',monospace; white-space:nowrap; margin-left:8px; }
+  .resume-entry-sub { font-size:12px; color:var(--resume-accent); margin-bottom:4px; font-weight:500; }
+  .resume-entry-desc { font-size:12.5px; color:#4a5568; line-height:1.8; white-space:pre-line; }
   .resume-entry-desc strong, .resume-eval strong, .skill-desc strong { font-weight:600; color:var(--resume-heading); }
   .skill-row { display:flex; margin-bottom:10px; padding-left:12px; border-left:2px solid var(--resume-line); }
   .skill-row:last-child { margin-bottom:0; }
-  .skill-category { font-weight:600; font-size:13px; color:var(--resume-heading); min-width:90px; flex-shrink:0; padding-right:12px; }
-  .skill-desc { font-size:13px; color:#4a5568; line-height:1.7; }
-  .resume-eval { font-size:13px; color:#4a5568; line-height:1.85; padding:12px 16px; background:var(--resume-light); border-radius:6px; border-left:3px solid var(--resume-accent); white-space:pre-line; }
-  
-  /* PDF分页优化 */
-  @media print {
-    .resume-wrapper { box-shadow:none; }
-    .resume-entry { page-break-inside:avoid; }
-    .skill-row { page-break-inside:avoid; }
-    .resume-eval { page-break-inside:avoid; }
-    .resume-section-title { page-break-after:avoid; }
+  .skill-category { font-weight:600; font-size:13px; color:var(--resume-heading); min-width:88px; flex-shrink:0; padding-right:12px; line-height:1.8; }
+  .skill-desc { font-size:12.5px; color:#4a5568; line-height:1.8; }
+  .resume-eval { font-size:12.5px; color:#4a5568; line-height:1.85; padding:12px 16px; background:var(--resume-light); border-radius:6px; border-left:3px solid var(--resume-accent); white-space:pre-line; }
+
+  /* PDF 导出时的克隆样式覆盖 */
+  #pdf-clone-container {
+    position:fixed; left:-9999px; top:0;
+    width:794px; /* A4 px at 96dpi ≈ 794 */
+    background:#fff; z-index:-1;
   }
+
+  /* 加载蒙版 */
+  .pdf-loading {
+    position:fixed; inset:0; background:rgba(0,0,0,0.7);
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    z-index:9999; gap:14px; color:#fff; font-size:15px;
+  }
+  .pdf-spinner {
+    width:40px; height:40px; border:3px solid rgba(255,255,255,0.2);
+    border-top-color:#6c8cff; border-radius:50%;
+    animation:spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform:rotate(360deg); } }
 
   @media (max-width:900px) {
     .main { flex-direction:column; height:auto; }
@@ -151,7 +160,7 @@
     <button class="btn btn-ghost" onclick="exportWord()">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>导出 Word
     </button>
-    <button class="btn btn-primary" onclick="exportPDF()">
+    <button class="btn btn-primary" id="pdf-btn" onclick="exportPDF()">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>导出 PDF
     </button>
   </div>
@@ -265,6 +274,10 @@
   </div>
 </div>
 
+<!-- jsPDF + html2canvas CDN（替代 html2pdf，修复中文乱码） -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
 <script>
 // ─── State ───
 let photoDataUrl = null;
@@ -272,27 +285,16 @@ let eduEntries = [], skillEntries = [], projectEntries = [];
 let idCounter = 0;
 let currentAccent = '#2c5282';
 
-// 汉字标签映射表
-const CONTACT_LABELS = {
-  phone: '电话',
-  email: '邮箱',
-  location: '城市',
-  calendar: '年龄',
-  globe: '网站'
-};
+const CONTACT_LABELS = { phone:'电话', email:'邮箱', location:'城市', calendar:'年龄', globe:'网站' };
 
 function esc(s) {
   return s ? s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') : '';
 }
-
-// Markdown 解析函数 - 支持加粗语法
 function parseMarkdown(text) {
   if (!text) return '';
-  // 转义 HTML 特殊字符
-  let result = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  // 解析 **加粗** 语法
-  result = result.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-  return result;
+  let r = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  r = r.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  return r;
 }
 
 // ─── Photo ───
@@ -433,16 +435,12 @@ function render() {
   const evalText = document.getElementById('eval-input').value;
 
   const contacts = [
-    { key:'phone',    val: phone },
-    { key:'email',    val: email },
-    { key:'location', val: city  },
-    { key:'calendar', val: age   },
-    { key:'globe',    val: site  },
+    { key:'phone', val: phone }, { key:'email', val: email },
+    { key:'location', val: city }, { key:'calendar', val: age }, { key:'globe', val: site },
   ].filter(c => c.val);
 
   let html = '';
 
-  // Header
   html += `<div class="resume-header">`;
   html += photoDataUrl
     ? `<img class="resume-photo" src="${photoDataUrl}" alt="头像">`
@@ -453,14 +451,12 @@ function render() {
   if (contacts.length) {
     html += `<div class="resume-contact-grid">`;
     contacts.forEach(c => {
-      // 将图标替换为汉字标签，并给予主题色样式
-      html += `<span class="resume-contact-item"><span style="color:var(--resume-accent); font-weight:500;">${CONTACT_LABELS[c.key]}：</span><span>${esc(c.val)}</span></span>`;
+      html += `<span class="resume-contact-item"><span style="color:var(--resume-accent);font-weight:500;">${CONTACT_LABELS[c.key]}：</span><span>${esc(c.val)}</span></span>`;
     });
     html += `</div>`;
   }
   html += `</div></div>`;
 
-  // Education
   const validEdu = eduEntries.filter(e => e.school || e.major);
   if (validEdu.length) {
     html += `<div class="resume-section"><div class="resume-section-title">教育背景</div>`;
@@ -474,7 +470,6 @@ function render() {
     html += `</div>`;
   }
 
-  // Skills
   const validSkills = skillEntries.filter(e => e.category || e.desc);
   if (validSkills.length) {
     html += `<div class="resume-section"><div class="resume-section-title">专业技能</div>`;
@@ -484,7 +479,6 @@ function render() {
     html += `</div>`;
   }
 
-  // Projects
   const validProj = projectEntries.filter(e => e.name);
   if (validProj.length) {
     html += `<div class="resume-section"><div class="resume-section-title">项目经历</div>`;
@@ -498,7 +492,6 @@ function render() {
     html += `</div>`;
   }
 
-  // Evaluation
   if (evalText.trim()) {
     html += `<div class="resume-section"><div class="resume-section-title">个人评价</div><div class="resume-eval">${parseMarkdown(evalText)}</div></div>`;
   }
@@ -506,31 +499,226 @@ function render() {
   document.getElementById('resumeOutput').innerHTML = html;
 }
 
-// ─── Export PDF ───
-function exportPDF() {
-  const el = document.getElementById('resumeWrapper');
-  const name = document.getElementById('p-name').value || '简历';
-  html2pdf().set({
-    margin: 0, 
-    filename: name + '_简历.pdf',
-    image: { type:'jpeg', quality:0.98 },
-    html2canvas: { 
-      scale: 2, 
-      useCORS: true, 
-      allowTaint: true, 
-      logging: false,
-      letterRendering: true
-    },
-    jsPDF: { 
-      unit: 'mm', 
-      format: 'a4', 
-      orientation: 'portrait'
-    },
-    pagebreak: { 
-      mode: 'css',
-      avoid: ['.resume-entry', '.skill-row', '.resume-eval']
+// ─── Export PDF（修复分页裁切/黑边）───
+// 修复点：
+//  1. 不再把一张超长 canvas 硬切片，避免文字被切成两半
+//  2. 先在离屏容器中按 A4 尺寸生成多个“真实页面”
+//  3. 尽量按 section / entry / skill-row 边界分页
+//  4. 导出时移除预览阴影，避免 PDF 页边出现黑色横条
+async function exportPDF() {
+  const btn = document.getElementById('pdf-btn');
+  btn.disabled = true;
+
+  const overlay = document.createElement('div');
+  overlay.className = 'pdf-loading';
+  overlay.innerHTML = `<div class="pdf-spinner"></div><div>正在生成 PDF，请稍候…</div>`;
+  document.body.appendChild(overlay);
+
+  let exportRoot = null;
+
+  try {
+    const { jsPDF } = window.jspdf;
+
+    if (document.fonts && document.fonts.ready) {
+      await document.fonts.ready;
     }
-  }).from(el).save();
+
+    const originalResume = document.getElementById('resumeOutput');
+    if (!originalResume || !originalResume.children.length) {
+      throw new Error('简历内容为空，无法导出。');
+    }
+
+    // A4 在浏览器 96dpi 下约为 794 × 1123 px。
+    // 后面 addImage 时会映射到 210 × 297 mm。
+    const A4_W_PX = 794;
+    const A4_H_PX = 1123;
+    const A4_W_MM = 210;
+    const A4_H_MM = 297;
+
+    exportRoot = document.createElement('div');
+    exportRoot.id = 'pdf-export-root';
+    exportRoot.style.cssText = [
+      'position:fixed',
+      'left:-99999px',
+      'top:0',
+      `width:${A4_W_PX}px`,
+      'background:#ffffff',
+      'z-index:-1',
+      'overflow:hidden'
+    ].join(';');
+    exportRoot.style.setProperty('--resume-accent', currentAccent);
+    document.body.appendChild(exportRoot);
+
+    const pages = [];
+    let currentPage = null;
+
+    function createPage() {
+      const page = document.createElement('div');
+      page.className = 'resume pdf-page';
+      page.style.cssText = [
+        `width:${A4_W_PX}px`,
+        `height:${A4_H_PX}px`,
+        `min-height:${A4_H_PX}px`,
+        'box-sizing:border-box',
+        'overflow:hidden',
+        'background:#ffffff',
+        'box-shadow:none',
+        'margin:0'
+      ].join(';');
+      exportRoot.appendChild(page);
+      pages.push(page);
+      currentPage = page;
+      return page;
+    }
+
+    function pageIsEmpty() {
+      return !currentPage || currentPage.children.length === 0;
+    }
+
+    function fitsPage() {
+      // +2 是给不同浏览器的小数像素误差留余量。
+      return currentPage.scrollHeight <= A4_H_PX + 2;
+    }
+
+    function tryAppendToPage(node) {
+      currentPage.appendChild(node);
+      if (fitsPage()) return true;
+      currentPage.removeChild(node);
+      return false;
+    }
+
+    function appendBlock(node) {
+      const clone = node.cloneNode(true);
+
+      if (tryAppendToPage(clone)) return;
+
+      if (!pageIsEmpty()) {
+        createPage();
+        if (tryAppendToPage(node.cloneNode(true))) return;
+      }
+
+      // 极端情况：单个块本身超过一页。保底放入当前页，避免导出失败。
+      // 建议把过长段落拆成多条项目经历/技能描述。
+      currentPage.appendChild(node.cloneNode(true));
+    }
+
+    function makeSectionShell(sourceSection, continued = false) {
+      const section = document.createElement('div');
+      section.className = sourceSection.className || 'resume-section';
+
+      const title = sourceSection.querySelector(':scope > .resume-section-title');
+      if (title) {
+        const titleClone = title.cloneNode(true);
+        if (continued) titleClone.textContent = titleClone.textContent.trim() + '（续）';
+        section.appendChild(titleClone);
+      }
+
+      return section;
+    }
+
+    function appendSplitSection(sourceSection) {
+      const items = Array.from(sourceSection.children).filter(child => {
+        return !child.classList.contains('resume-section-title');
+      });
+
+      let section = makeSectionShell(sourceSection, false);
+      currentPage.appendChild(section);
+
+      // 如果当前页连标题都放不下，就换一页。
+      if (!fitsPage()) {
+        currentPage.removeChild(section);
+        createPage();
+        section = makeSectionShell(sourceSection, false);
+        currentPage.appendChild(section);
+      }
+
+      items.forEach((item, index) => {
+        const itemClone = item.cloneNode(true);
+        section.appendChild(itemClone);
+
+        if (!fitsPage()) {
+          section.removeChild(itemClone);
+
+          // 如果当前页只有标题没有内容，删除这个空 section，直接去新页。
+          const onlyTitleLeft = section.children.length <= 1;
+          if (onlyTitleLeft && section.parentElement === currentPage) {
+            currentPage.removeChild(section);
+          }
+
+          createPage();
+          section = makeSectionShell(sourceSection, index > 0);
+          currentPage.appendChild(section);
+          section.appendChild(itemClone);
+
+          // 极端情况：单条经历/技能过长，仍可能超过一页。
+          // 这里不再强切文字，避免出现半行文字；需要时可手动拆分内容。
+        }
+      });
+    }
+
+    function appendSection(sectionNode) {
+      // 关键修复：如果当前页放不下一个完整 section，不要把整个 section 直接挪到下一页，
+      // 否则会在上一页底部留下大块空白。改为优先按条目拆分页，尽量填满当前页。
+      if (pageIsEmpty() && tryAppendToPage(sectionNode.cloneNode(true))) return;
+
+      appendSplitSection(sectionNode);
+    }
+
+    createPage();
+
+    Array.from(originalResume.children).forEach(node => {
+      if (node.classList.contains('resume-section')) {
+        appendSection(node);
+      } else {
+        appendBlock(node);
+      }
+    });
+
+    // 等待离屏页面中的图片加载，避免头像空白。
+    await Promise.all(Array.from(exportRoot.querySelectorAll('img')).map(img => {
+      if (img.complete) return Promise.resolve();
+      return new Promise(resolve => {
+        img.onload = resolve;
+        img.onerror = resolve;
+      });
+    }));
+
+    const pdf = new jsPDF({ unit:'mm', format:'a4', orientation:'portrait', compress:true });
+
+    for (let i = 0; i < pages.length; i++) {
+      if (i > 0) pdf.addPage();
+
+      const canvas = await html2canvas(pages[i], {
+        scale: 2.5,
+        useCORS: true,
+        allowTaint: true,
+        logging: false,
+        backgroundColor: '#ffffff',
+        width: A4_W_PX,
+        height: A4_H_PX,
+        windowWidth: A4_W_PX,
+        windowHeight: A4_H_PX,
+        onclone: (doc) => {
+          doc.documentElement.style.setProperty('--resume-accent', currentAccent);
+          const root = doc.getElementById('pdf-export-root');
+          if (root) root.style.setProperty('--resume-accent', currentAccent);
+        }
+      });
+
+      const imgData = canvas.toDataURL('image/jpeg', 0.98);
+      pdf.addImage(imgData, 'JPEG', 0, 0, A4_W_MM, A4_H_MM);
+    }
+
+    const name = document.getElementById('p-name').value || '简历';
+    pdf.save(name + '_简历.pdf');
+  } catch (err) {
+    console.error('PDF 导出失败', err);
+    alert('PDF 导出失败，请重试。\n' + (err && err.message ? err.message : err));
+  } finally {
+    if (exportRoot && exportRoot.parentElement) exportRoot.parentElement.removeChild(exportRoot);
+    if (overlay && overlay.parentElement) overlay.parentElement.removeChild(overlay);
+    btn.disabled = false;
+  }
 }
 
 // ─── Export Word ───
@@ -545,11 +733,8 @@ function exportWord() {
   const evalText = document.getElementById('eval-input').value;
 
   const contacts = [
-    { key:'phone',    val: phone },
-    { key:'email',    val: email },
-    { key:'location', val: city  },
-    { key:'calendar', val: age   },
-    { key:'globe',    val: site  },
+    { key:'phone', val: phone }, { key:'email', val: email },
+    { key:'location', val: city }, { key:'calendar', val: age }, { key:'globe', val: site },
   ].filter(c => c.val);
 
   let doc = `<html xmlns:o='urn:schemas-microsoft-com:office:office'
@@ -571,7 +756,6 @@ function exportWord() {
   .eval{padding:8pt 12pt;background:#f7fafc;border-left:3px solid ${currentAccent};color:#555;font-size:11pt;}
 </style></head><body>`;
 
-  // Header table
   doc += `<table width="100%" cellpadding="0" cellspacing="0" style="border-bottom:2px solid ${currentAccent};margin-bottom:12pt;padding-bottom:12pt;"><tr>`;
   if (photoDataUrl) {
     doc += `<td width="90" valign="top" style="padding-right:16pt;"><img src="${photoDataUrl}" width="75" height="95" style="border-radius:4px;border:1px solid #ddd;display:block;"></td>`;
@@ -580,9 +764,8 @@ function exportWord() {
   if (job) doc += `<p class="job">${parseMarkdown(job)}</p>`;
   if (contacts.length) {
     doc += `<div class="contacts">`;
-    contacts.forEach(c => { 
-      // Word 导出同样替换为汉字
-      doc += `<span class="ci"><span style="color:${currentAccent};font-weight:bold;">${CONTACT_LABELS[c.key]}：</span> ${esc(c.val)}</span>`; 
+    contacts.forEach(c => {
+      doc += `<span class="ci"><span style="color:${currentAccent};font-weight:bold;">${CONTACT_LABELS[c.key]}：</span> ${esc(c.val)}</span>`;
     });
     doc += `</div>`;
   }
