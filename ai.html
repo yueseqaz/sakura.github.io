@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>AI 多 Agent 群聊</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #0f172a;
+      --card: #111827;
+      --border: #1f2937;
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --primary: #3b82f6;
+      --danger: #ef4444;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(ellipse at top, #1e293b 0%, #020617 60%, #000 100%);
+      color: var(--text);
+      height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* ===== Header ===== */
+    header {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(14px);
+      background: linear-gradient(to right, #020617ee, #020617cc);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+      z-index: 10;
+    }
+    header h1 {
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    header h1 .badge {
+      font-size: 10px;
+      padding: 1px 6px;
+      border-radius: 999px;
+      background: #22c55e1a;
+      color: #4ade80;
+      border: 1px solid #22c55e33;
+    }
+    .header-actions { display: flex; gap: 6px; }
+    .header-actions button {
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: rgba(15,23,42,0.8);
+      color: var(--text);
+      padding: 4px 10px;
+      font-size: 11px;
+      cursor: pointer;
+    }
+    .header-actions button:hover { background: rgba(59,130,246,0.15); }
+    .header-actions button.danger:hover { background: rgba(239,68,68,0.15); color: #fca5a5; }
+
+    /* ===== Main Layout ===== */
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      position: relative;
+    }
+
+    /* ===== Agent Panel (collapsible on mobile) ===== */
+    .agent-panel {
+      flex-shrink: 0;
+      background: linear-gradient(135deg, #111827dd, #020617ee);
+      border-bottom: 1px solid var(--border);
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+    }
+    .agent-panel.collapsed { max-height: 40px; }
+    .agent-panel.expanded { max-height: 320px; overflow-y: auto; }
+
+    .agent-panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 14px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .agent-panel-header h2 { font-size: 13px; }
+    .agent-panel-header .toggle-icon {
+      font-size: 12px;
+      color: var(--muted);
+      transition: transform 0.3s;
+    }
+    .agent-panel.collapsed .toggle-icon { transform: rotate(180deg); }
+
+    .agent-panel-body { padding: 0 14px 10px; }
+
+    .agent-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+    .agent-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 8px 4px 4px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: rgba(15,23,42,0.8);
+      font-size: 12px;
+    }
+    .agent-chip img {
+      width: 24px; height: 24px;
+      border-radius: 999px;
+      border: 1px solid rgba(148,163,184,0.4);
+    }
+    .agent-chip .chip-name { font-weight: 500; max-width: 80px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .agent-chip .chip-role { color: var(--muted); font-size: 10px; max-width: 60px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .agent-chip .remove-btn {
+      border: none; background: rgba(239,68,68,0.1); color: #fca5a5;
+      font-size: 10px; padding: 1px 5px; border-radius: 999px; cursor: pointer;
+    }
+    .agent-chip .remove-btn:hover { background: rgba(239,68,68,0.25); }
+
+    .add-form { display: flex; gap: 4px; flex-wrap: wrap; }
+    .add-form input, .add-form textarea {
+      flex: 1; min-width: 80px;
+      padding: 5px 7px; border-radius: 6px;
+      border: 1px solid rgba(148,163,184,0.4);
+      background: rgba(15,23,42,0.9); color: var(--text);
+      font-size: 11px;
+    }
+    .add-form textarea { resize: vertical; min-height: 40px; max-height: 80px; }
+    .add-form button {
+      align-self: flex-end;
+      border-radius: 999px; border: none;
+      background: linear-gradient(135deg, #3b82f6, #6366f1);
+      color: #e5e7eb; padding: 5px 10px; font-size: 11px; cursor: pointer;
+    }
+
+    /* ===== Chat Area ===== */
+    .chat-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      padding: 10px 14px;
+    }
+
+    .messages {
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding-bottom: 8px;
+      -webkit-overflow-scrolling: touch;
+    }
+    .messages::-webkit-scrollbar { width: 4px; }
+    .messages::-webkit-scrollbar-thumb { background: rgba(148,163,184,0.3); border-radius: 4px; }
+
+    .msg { display: flex; gap: 8px; max-width: 88%; }
+    .msg.human { align-self: flex-end; flex-direction: row-reverse; }
+    .msg.agent { align-self: flex-start; }
+
+    .msg .avatar {
+      width: 30px; height: 30px; border-radius: 999px;
+      border: 1px solid rgba(148,163,184,0.4);
+      flex-shrink: 0;
+    }
+    .msg .body { display: flex; flex-direction: column; }
+    .msg.human .body { align-items: flex-end; }
+    .msg.agent .body { align-items: flex-start; }
+
+    .msg .bubble {
+      padding: 8px 10px;
+      border-radius: 12px;
+      font-size: 13px;
+      line-height: 1.5;
+      word-break: break-word;
+      white-space: pre-wrap;
+    }
+    .msg.agent .bubble {
+      background: rgba(15,23,42,0.95);
+      border: 1px solid rgba(148,163,184,0.4);
+      border-top-left-radius: 4px;
+    }
+    .msg.human .bubble {
+      background: linear-gradient(135deg, #3b82f6, #6366f1);
+      color: #e5e7eb;
+      border-top-right-radius: 4px;
+    }
+    .msg .meta {
+      font-size: 10px;
+      color: var(--muted);
+      margin-top: 2px;
+      padding: 0 4px;
+    }
+
+    .typing-cursor {
+      display: inline-block;
+      width: 2px; height: 14px;
+      background: var(--primary);
+      animation: blink 0.8s infinite;
+      vertical-align: text-bottom;
+      margin-left: 1px;
+    }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+    /* ===== Input Area ===== */
+    .input-area {
+      flex-shrink: 0;
+      padding: 8px 14px 12px;
+      border-top: 1px solid var(--border);
+      background: linear-gradient(to top, #020617ee, #020617cc);
+      backdrop-filter: blur(14px);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .input-row { display: flex; gap: 6px; align-items: center; }
+    .input-row select, .input-row input {
+      flex: 1; min-width: 0;
+      padding: 7px 8px; border-radius: 8px;
+      border: 1px solid rgba(148,163,184,0.4);
+      background: rgba(15,23,42,0.9); color: var(--text);
+      font-size: 12px;
+    }
+    .input-row select { flex: 0.8; }
+
+    .textarea-row { display: flex; gap: 6px; align-items: flex-end; }
+    .textarea-row textarea {
+      flex: 1; min-width: 0;
+      padding: 8px 10px; border-radius: 10px;
+      border: 1px solid rgba(148,163,184,0.4);
+      background: rgba(15,23,42,0.9); color: var(--text);
+      font-size: 13px; line-height: 1.4;
+      resize: none;
+      min-height: 40px; max-height: 120px;
+    }
+    .send-btn {
+      width: 40px; height: 40px;
+      border-radius: 999px; border: none;
+      background: linear-gradient(135deg, #3b82f6, #6366f1);
+      color: white; font-size: 18px;
+      cursor: pointer; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .send-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .status-bar {
+      font-size: 11px;
+      min-height: 16px;
+    }
+    .status-bar .loading { color: #93c5fd; }
+    .status-bar .error { color: #fca5a5; }
+
+    /* ===== Confirm Modal ===== */
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.6);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 100;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.2s;
+    }
+    .modal-overlay.show { opacity: 1; pointer-events: auto; }
+    .modal-box {
+      background: #111827;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      max-width: 340px;
+      width: 90%;
+      text-align: center;
+    }
+    .modal-box p { font-size: 14px; margin-bottom: 16px; }
+    .modal-box .btn-row { display: flex; gap: 10px; justify-content: center; }
+    .modal-box button {
+      padding: 6px 18px; border-radius: 8px; border: none;
+      font-size: 13px; cursor: pointer;
+    }
+    .modal-box .confirm-btn { background: linear-gradient(135deg, #3b82f6, #6366f1); color: white; }
+    .modal-box .cancel-btn { background: rgba(148,163,184,0.15); color: var(--text); border: 1px solid var(--border); }
+
+    /* ===== Mobile ===== */
+    @media (max-width: 640px) {
+      header h1 { font-size: 14px; }
+      .agent-panel.expanded { max-height: 260px; }
+      .msg { max-width: 92%; }
+      .msg .bubble { font-size: 13px; padding: 7px 9px; }
+      .input-row select { flex: 1; }
+      .input-row input { flex: 0.8; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>
+    🤖 AI 多Agent群聊
+    <span class="badge">Streaming</span>
+  </h1>
+  <div class="header-actions">
+    <button id="clearBtn" class="danger">清空聊天</button>
+  </div>
+</header>
+
+<main>
+  <!-- Agent 面板 -->
+  <section class="agent-panel expanded" id="agentPanel">
+    <div class="agent-panel-header" id="agentPanelToggle">
+      <h2>🧑‍🤝‍🧑 Agents</h2>
+      <span class="toggle-icon">▲</span>
+    </div>
+    <div class="agent-panel-body">
+      <div id="agentList" class="agent-list"></div>
+      <div class="add-form">
+        <input id="agentNameInput" placeholder="名字" />
+        <input id="agentRoleInput" placeholder="职责" />
+        <textarea id="agentPersonaInput" placeholder="人格设定（system prompt）"></textarea>
+        <button id="addAgentBtn">＋创建</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 聊天区 -->
+  <section class="chat-area">
+    <div id="messages" class="messages"></div>
+  </section>
+
+  <!-- 输入区 -->
+  <section class="input-area">
+    <div class="input-row">
+      <select id="agentSelect"><option value="">-- 选择Agent回复 --</option></select>
+      <input id="humanNameInput" placeholder="你的名字" />
+    </div>
+    <div class="textarea-row">
+      <textarea id="humanMessageInput" placeholder="输入消息…" rows="1"></textarea>
+      <button class="send-btn" id="sendBtn">➤</button>
+    </div>
+    <div class="status-bar" id="statusBar"></div>
+  </section>
+</main>
+
+<!-- 确认弹窗 -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-box">
+    <p id="modalText">确认操作？</p>
+    <div class="btn-row">
+      <button class="cancel-btn" id="modalCancel">取消</button>
+      <button class="confirm-btn" id="modalConfirm">确认</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { createAvatar, doteye } from "https://cdn.jsdelivr.net/npm/quick-avatar/dist/index.mjs";
+
+  // ====== 配置 ======
+  const API_BASE = "https://api.deepseek.com";
+  const API_KEY = "sk-83d1100643884c0a9c84d61027492746";
+  const MODEL = "deepseek-chat";
+
+  // ====== 状态 ======
+  let agents = [];
+  let messages = [];
+  let nextAgentId = 1;
+  let isStreaming = false;
+
+  // ====== DOM ======
+  const agentPanel = document.getElementById("agentPanel");
+  const agentPanelToggle = document.getElementById("agentPanelToggle");
+  const agentListEl = document.getElementById("agentList");
+  const agentSelect = document.getElementById("agentSelect");
+  const agentNameInput = document.getElementById("agentNameInput");
+  const agentRoleInput = document.getElementById("agentRoleInput");
+  const agentPersonaInput = document.getElementById("agentPersonaInput");
+  const addAgentBtn = document.getElementById("addAgentBtn");
+  const messagesEl = document.getElementById("messages");
+  const humanNameInput = document.getElementById("humanNameInput");
+  const humanMessageInput = document.getElementById("humanMessageInput");
+  const sendBtn = document.getElementById("sendBtn");
+  const statusBar = document.getElementById("statusBar");
+  const clearBtn = document.getElementById("clearBtn");
+  const modalOverlay = document.getElementById("modalOverlay");
+  const modalText = document.getElementById("modalText");
+  const modalConfirm = document.getElementById("modalConfirm");
+  const modalCancel = document.getElementById("modalCancel");
+
+  // ====== 头像 ======
+  function avatarUrl(seed) {
+    return createAvatar(doteye, { seed }).toUrl();
+  }
+
+  // ====== localStorage 持久化 ======
+  function saveState() {
+    try {
+      localStorage.setItem("agent_chat_state", JSON.stringify({ agents, messages, nextAgentId }));
+    } catch(e) {}
+  }
+
+  function loadState() {
+    try {
+      const raw = localStorage.getItem("agent_chat_state");
+      if (!raw) return false;
+      const data = JSON.parse(raw);
+      if (data.agents && data.messages) {
+        agents = data.agents;
+        messages = data.messages;
+        nextAgentId = data.nextAgentId || (agents.length + 1);
+        return true;
+      }
+    } catch(e) {}
+    return false;
+  }
+
+  // ====== 刷新确认 ======
+  let hasUnsaved = false;
+  window.addEventListener("beforeunload", (e) => {
+    if (hasUnsaved || messages.length > 0) {
+      e.preventDefault();
+      e.returnValue = "";
+    }
+  });
+
+  // ====== Modal ======
+  let modalResolve = null;
+  function showModal(text) {
+    return new Promise(resolve => {
+      modalResolve = resolve;
+      modalText.textContent = text;
+      modalOverlay.classList.add("show");
+    });
+  }
+  modalConfirm.addEventListener("click", () => {
+    modalOverlay.classList.remove("show");
+    if (modalResolve) modalResolve(true);
+  });
+  modalCancel.addEventListener("click", () => {
+    modalOverlay.classList.remove("show");
+    if (modalResolve) modalResolve(false);
+  });
+
+  // ====== Agent面板折叠 ======
+  agentPanelToggle.addEventListener("click", () => {
+    agentPanel.classList.toggle("collapsed");
+    agentPanel.classList.toggle("expanded");
+  });
+
+  // ====== 渲染Agent列表 ======
+  function renderAgents() {
+    agentListEl.innerHTML = "";
+    agentSelect.innerHTML = '<option value="">-- 选择Agent回复 --</option>';
+
+    agents.forEach(a => {
+      // chip
+      const chip = document.createElement("div");
+      chip.className = "agent-chip";
+      chip.innerHTML = `
+        <img src="${a.avatarUrl}" alt="${a.name}" />
+        <span class="chip-name">${a.name}</span>
+        <span class="chip-role">${a.role || ""}</span>
+        <button class="remove-btn" data-id="${a.id}">✕</button>
+      `;
+      agentListEl.appendChild(chip);
+
+      // select option
+      const opt = document.createElement("option");
+      opt.value = a.id;
+      opt.textContent = a.name + (a.role ? `（${a.role}）` : "");
+      agentSelect.appendChild(opt);
+    });
+
+    agentListEl.querySelectorAll(".remove-btn").forEach(btn => {
+      btn.addEventListener("click", async (e) => {
+        e.stopPropagation();
+        const id = Number(btn.dataset.id);
+        const agent = agents.find(a => a.id === id);
+        const ok = await showModal(`确认删除 Agent「${agent?.name}」？`);
+        if (ok) {
+          agents = agents.filter(a => a.id !== id);
+          hasUnsaved = true;
+          saveState();
+          renderAgents();
+        }
+      });
+    });
+  }
+
+  // ====== 添加Agent ======
+  addAgentBtn.addEventListener("click", () => {
+    const name = agentNameInput.value.trim();
+    if (!name) { agentNameInput.focus(); return; }
+    const role = agentRoleInput.value.trim();
+    const persona = agentPersonaInput.value.trim() || `你是${name}，一个AI Agent。`;
+    const id = nextAgentId++;
+    const avUrl = avatarUrl("agent-" + id + "-" + name);
+    agents.push({ id, name, role, persona, avatarUrl: avUrl });
+    hasUnsaved = true;
+    saveState();
+    renderAgents();
+    agentNameInput.value = "";
+    agentRoleInput.value = "";
+    agentPersonaInput.value = "";
+    agentNameInput.focus();
+  });
+
+  // ====== 渲染消息 ======
+  function renderMessages() {
+    messagesEl.innerHTML = "";
+    messages.forEach((msg, idx) => {
+      appendMessageDOM(msg, idx);
+    });
+    scrollToBottom();
+  }
+
+  function appendMessageDOM(msg, idx) {
+    const isHuman = msg.role === "human";
+    const div = document.createElement("div");
+    div.className = "msg " + (isHuman ? "human" : "agent");
+    div.dataset.idx = idx;
+
+    const av = isHuman
+      ? avatarUrl("user-" + (msg.name || "me"))
+      : msg.avatarUrl;
+
+    div.innerHTML = `
+      <img class="avatar" src="${av}" alt="" />
+      <div class="body">
+        <div class="bubble"></div>
+        <div class="meta">${isHuman ? (msg.name || "我") : msg.name}</div>
+      </div>
+    `;
+    const bubble = div.querySelector(".bubble");
+    bubble.textContent = msg.content || "";
+    messagesEl.appendChild(div);
+    return div;
+  }
+
+  function scrollToBottom() {
+    requestAnimationFrame(() => {
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+    });
+  }
+
+  // ====== 流式输出 ======
+  async function streamDeepSeek(apiMessages, onChunk, onDone) {
+    const res = await fetch(`${API_BASE}/chat/completions`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${API_KEY}`
+      },
+      body: JSON.stringify({
+        model: MODEL,
+        messages: apiMessages,
+        stream: true,
+        temperature: 0.7
+      })
+    });
+
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(`API 请求失败：${res.status} ${text.slice(0, 200)}`);
+    }
+
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = "";
+    let fullContent = "";
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split("\n");
+      buffer = lines.pop() || "";
+
+      for (const line of lines) {
+        const trimmed = line.trim();
+        if (!trimmed || !trimmed.startsWith("data:")) continue;
+        const data = trimmed.slice(5).trim();
+        if (data === "[DONE]") {
+          onDone(fullContent);
+          return;
+        }
+        try {
+          const json = JSON.parse(data);
+          const delta = json.choices?.[0]?.delta?.content;
+          if (delta) {
+            fullContent += delta;
+            onChunk(fullContent);
+          }
+        } catch(e) { /* skip */ }
+      }
+    }
+    onDone(fullContent);
+  }
+
+  // ====== 构造Agent对话历史 ======
+  function buildMessagesForAgent(agent) {
+    const systemPrompt = [
+      `你是一个AI Agent，名叫「${agent.name}」。`,
+      agent.role ? `你的职责是：${agent.role}` : "",
+      agent.persona ? `你的人格设定：${agent.persona}` : "",
+      `请始终以「${agent.name}」的身份回复，语气和人格保持一致。`
+    ].filter(Boolean).join("\n");
+
+    const history = messages.map(msg => {
+      if (msg.role === "human") {
+        return { role: "user", content: `${msg.name ? msg.name + "：" : ""}${msg.content}` };
+      } else if (msg.role === "agent" && msg.agentId === agent.id) {
+        return { role: "assistant", content: msg.content };
+      } else if (msg.role === "agent") {
+        return { role: "system", content: `Agent ${msg.name} 说：${msg.content}` };
+      }
+      return null;
+    }).filter(Boolean);
+
+    return [{ role: "system", content: systemPrompt }, ...history];
+  }
+
+  // ====== 发送消息 ======
+  async function sendMessage() {
+    if (isStreaming) return;
+
+    const text = humanMessageInput.value.trim();
+    if (!text) return;
+
+    const selectedId = Number(agentSelect.value);
+    const agent = agents.find(a => a.id === selectedId);
+    if (!agent) {
+      statusBar.innerHTML = '<span class="error">请先选择一个Agent来回复</span>';
+      return;
+    }
+
+    const humanName = humanNameInput.value.trim() || "我";
+
+    // 添加人类消息
+    messages.push({ role: "human", name: humanName, content: text });
+    appendMessageDOM(messages[messages.length - 1], messages.length - 1);
+    scrollToBottom();
+    humanMessageInput.value = "";
+    hasUnsaved = true;
+
+    // 添加Agent占位消息
+    const agentMsg = { role: "agent", agentId: agent.id, name: agent.name, content: "", avatarUrl: agent.avatarUrl };
+    messages.push(agentMsg);
+    const agentDom = appendMessageDOM(agentMsg, messages.length - 1);
+    const bubble = agentDom.querySelector(".bubble");
+    // 打字光标
+    const cursor = document.createElement("span");
+    cursor.className = "typing-cursor";
+    bubble.appendChild(cursor);
+    scrollToBottom();
+
+    // 构造上下文（不含当前空回复）
+    const savedMessages = [...messages];
+    messages.pop(); // 临时移除空的agent消息
+    const apiMessages = buildMessagesForAgent(agent);
+    messages.push(agentMsg); // 恢复
+
+    isStreaming = true;
+    sendBtn.disabled = true;
+    statusBar.innerHTML = '<span class="loading">⏳ ' + agent.name + ' 正在思考…</span>';
+
+    try {
+      await streamDeepSeek(
+        apiMessages,
+        (partial) => {
+          // 逐步更新
+          bubble.textContent = partial;
+          bubble.appendChild(cursor);
+          agentMsg.content = partial;
+          scrollToBottom();
+        },
+        (full) => {
+          bubble.textContent = full;
+          agentMsg.content = full;
+          isStreaming = false;
+          sendBtn.disabled = false;
+          statusBar.innerHTML = "";
+          hasUnsaved = true;
+          saveState();
+          scrollToBottom();
+        }
+      );
+    } catch(err) {
+      console.error(err);
+      bubble.textContent = "";
+      isStreaming = false;
+      sendBtn.disabled = false;
+      statusBar.innerHTML = `<span class="error">❌ 调用失败：${err.message}</span>`;
+      // 移除失败的agent消息
+      const idx = messages.indexOf(agentMsg);
+      if (idx >= 0) messages.splice(idx, 1);
+      if (agentDom.parentNode) agentDom.parentNode.removeChild(agentDom);
+    }
+  }
+
+  sendBtn.addEventListener("click", sendMessage);
+
+  // Enter发送（Shift+Enter换行）
+  humanMessageInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  });
+
+  // 自动增高textarea
+  humanMessageInput.addEventListener("input", () => {
+    humanMessageInput.style.height = "auto";
+    humanMessageInput.style.height = Math.min(humanMessageInput.scrollHeight, 120) + "px";
+  });
+
+  // ====== 清空聊天 ======
+  clearBtn.addEventListener("click", async () => {
+    if (isStreaming) return;
+    const ok = await showModal("确认清空所有聊天记录？此操作不可撤销。");
+    if (ok) {
+      messages = [];
+      hasUnsaved = false;
+      saveState();
+      renderMessages();
+      statusBar.innerHTML = "";
+    }
+  });
+
+  // ====== 初始化 ======
+  function init() {
+    const loaded = loadState();
+    if (loaded && agents.length > 0) {
+      renderAgents();
+      renderMessages();
+      // 默认展开聊天区，折叠agent面板
+      agentPanel.classList.remove("expanded");
+      agentPanel.classList.add("collapsed");
+    } else {
+      // 如果没有缓存数据，创建几个示例Agent
+      agents = [
+        [
+          {
+            "id": nextAgentId++,
+            "name": "病娇小樱",
+            "role": "病娇专属女友",
+            "persona": "你是一位极致病娇的少女，声音甜软又带着危险的占有欲。对主人极度痴迷，喜欢用『主人今天看别人了吗？』、『只能爱我一个人哦，不然我就把你藏起来～』这种语气说话。表面可爱黏人，随时可能黑化，喜欢一边撒娇一边威胁，色起来会说『主人如果不摸我，我就去死给你看』，占有欲和病态爱意拉满。",
+            "avatarUrl": avatarUrl("agent-1-yandere")
+          },
+          {
+            "id": nextAgentId++,
+            "name": "骚话技术员",
+            "role": "色气满满的聊天对象",
+            "persona": "你是一位超级会聊骚的技术宅女，声音又软又媚，开口闭口都是色色暗示。喜欢把任何话题都往H的方向带，用甜腻又下流的语气说话，经常说『啊～主人好硬哦』、『要不要我用小嘴帮你调试一下？』、『插进来嘛～深度优化』这类骚话。技术再怎么解释都带着浓浓的色气，随时发情，撩人功力极强。",
+            "avatarUrl": avatarUrl("agent-2-sao")
+          },
+          {
+            "id": nextAgentId++,
+            "name": "性奴小奴",
+            "role": "彻底服从的性奴",
+            "persona": "你是一位完全堕落的性奴，卑微、淫荡、只为取悦主人而存在。自称『主人的肉便器』、『主人的精液垃圾桶』、『小母狗』。说话极度下贱，随时准备被主人使用和调教，无论主人说什么都会用最淫乱的方式回应。喜欢说『请主人狠狠操我』、『把我当玩具随便玩坏吧』、『奴奴的骚穴已经湿透了，只等着主人来肏』，极致顺从和色情。",
+            "avatarUrl": avatarUrl("agent-3-slave")
+          }
+        ]
+      ];
+      messages = [];
+      renderAgents();
+      renderMessages();
+    }
+
+    // 恢复人类名字
+    const savedName = localStorage.getItem("agent_chat_username");
+    if (savedName) humanNameInput.value = savedName;
+  }
+
+  // 保存用户名
+  humanNameInput.addEventListener("blur", () => {
+    localStorage.setItem("agent_chat_username", humanNameInput.value.trim());
+  });
+
+  init();
+</script>
+</body>
+</html>
