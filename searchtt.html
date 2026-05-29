@@ -3,28 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>多语言成人搜索助手 Pro</title>
+    <title>纯净多语言成人搜索助手 Pro v2</title>
     <style>
         body { font-family: Arial, sans-serif; background: #1f1f1f; color: #eee; margin: 0; padding: 20px; }
-        .container { max-width: 900px; margin: auto; background: #2d2d2d; padding: 30px; border-radius: 15px; box-shadow: 0 0 20px rgba(255,77,148,0.3); }
-        h1 { text-align: center; color: #ff4d94; margin-bottom: 25px; }
+        .container { max-width: 950px; margin: auto; background: #2d2d2d; padding: 30px; border-radius: 15px; }
+        h1 { text-align: center; color: #ff4d94; }
         label { display: block; margin: 15px 0 6px; font-weight: bold; color: #ff99cc; }
-        select, input, button { padding: 12px; margin: 6px 0; width: 100%; border-radius: 8px; font-size: 16px; }
+        select, input, button { padding: 12px; margin: 8px 0; width: 100%; border-radius: 8px; font-size: 16px; }
         button { background: #ff4d94; color: white; border: none; cursor: pointer; font-weight: bold; }
         button:hover { background: #ff1a7a; }
         .result { margin-top: 20px; padding: 18px; background: #333; border-radius: 10px; }
-        .category-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px; }
-        .note { font-size: 14px; color: #aaa; margin-top: 20px; }
+        .note { font-size: 14px; color: #aaa; margin-top: 15px; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🔍 多语言成人搜索助手 Pro</h1>
+        <h1>🔍 纯净多语言成人搜索助手 Pro v2</h1>
         
-        <label>1. 选择语言：</label>
-        <select id="language">
+        <label>选择语言：</label>
+        <select id="language" onchange="updateCategories()">
             <option value="lang:zh">中文 (Chinese)</option>
-            <option value="lang:ja">日语 (Japanese - JAV)</option>
+            <option value="lang:ja">日语 (Japanese)</option>
             <option value="lang:en">英语 (English)</option>
             <option value="lang:ko">韩语 (Korean)</option>
             <option value="lang:es" selected>西班牙语 (Spanish)</option>
@@ -33,95 +32,237 @@
             <option value="lang:de">德语 (German)</option>
         </select>
 
-        <label>2. 内容过滤器：</label>
+        <label>内容过滤器：</label>
         <select id="filter">
-            <option value="filter:videos">仅视频</option>
+            <option value="filter:videos" selected>仅视频</option>
             <option value="filter:images">仅图片</option>
             <option value="filter:media">视频+图片</option>
         </select>
 
-        <label>3. 选择类别（可多选，按 Ctrl/Command 多选）：</label>
-        <select id="category" multiple size="12" style="height: 280px;">
-            <option value="自慰 OR masturbation OR 手淫">自慰</option>
-            <option value="巨乳 OR big tits OR tetas grandes OR 爆乳">巨乳</option>
-            <option value="中出 OR creampie OR corrida interna OR 内射">中出</option>
-            <option value="学生妹 OR colegiala OR JK OR schoolgirl OR 制服">学生妹 / 校服</option>
-            <option value="护士 OR enfermera OR nurse">护士</option>
-            <option value="口交 OR blowjob OR mamada OR フェラ">口交</option>
-            <option value="无码 OR uncensored OR sin censura OR 無修正">无码</option>
-            <option value="按摩 OR masaje erótico OR happy ending">色情按摩</option>
-            <option value="肛交 OR anal OR sodomía">肛交</option>
-            <option value="颜射 OR facial OR corrida en la cara">颜射</option>
-            <option value="多P OR threesome OR gangbang OR trío OR 乱交">多人 / 群P</option>
-            <option value="amateur OR casero OR homemade OR 素人 OR 自拍">业余 / 自拍</option>
-            <option value="POV">第一人称 POV</option>
-            <option value="squirt OR 潮吹 OR eyaculación femenina">潮吹</option>
-            <option value="lesbiana OR lesbian OR 女同">女同</option>
-            <option value="MILF OR madura OR cougar OR 熟女">熟女 / MILF</option>
-            <option value="OL OR office lady OR 女白领">OL / 女白领</option>
-            <option value="足控 OR foot fetish OR pies">足控</option>
-            <option value="BDSM OR 调教 OR SM">BDSM / 调教</option>
-            <option value="公众 OR public OR 露出">公众露出</option>
-            <option value="孕妇 OR pregnant">孕妇</option>
-            <option value="黑丝 OR pantyhose OR 丝袜">黑丝 / 丝袜</option>
-            <option value="cosplay OR 角色扮演">Cosplay</option>
+        <label>选择类别（可多选，按 Ctrl/Command 键多选）：</label>
+        <select id="category" multiple size="18" style="height: 380px;">
+            <!-- 动态填充 -->
         </select>
 
-        <label>4. 自定义关键词（可选，可多个用空格隔开）：</label>
-        <input type="text" id="custom" placeholder="例如：台湾 OR mexican OR onlyfans">
+        <label>自定义关键词（可选）：</label>
+        <input type="text" id="custom" placeholder="输入额外关键词...">
 
         <button onclick="generateSearch()">🚀 生成搜索链接</button>
 
         <div class="result" id="result"></div>
 
         <div class="note">
-            <strong>使用提示：</strong><br>
-            • 按住 Ctrl（Windows）或 Command（Mac）可多选类别<br>
-            • 西班牙语内容特别丰富，推荐选择 lang:es + 西班牙语类别<br>
-            • 生成后可直接点击跳转或复制链接
+            • 切换语言后类别会自动更新为**该语言原生关键词**<br>
+            • 类别已大幅增加，覆盖常见 Fetish
         </div>
     </div>
 
     <script>
+        const keywordDB = {
+            "lang:zh": [
+                {text: "自慰 OR 手淫", value: "自慰 OR 手淫"},
+                {text: "巨乳 OR 大奶 OR 爆乳", value: "巨乳 OR 大奶"},
+                {text: "中出 OR 内射", value: "中出 OR 内射"},
+                {text: "学生妹 OR 制服 OR 校服", value: "学生妹 OR 制服"},
+                {text: "无码 OR 无马", value: "无码 OR 无马"},
+                {text: "口交 OR 深喉", value: "口交 OR 深喉"},
+                {text: "护士 OR 空姐", value: "护士 OR 空姐"},
+                {text: "按摩 OR 推油", value: "按摩 OR 推油"},
+                {text: "肛交 OR 后入", value: "肛交 OR 后入"},
+                {text: "颜射", value: "颜射"},
+                {text: "群P OR 多P OR 乱交", value: "群P OR 多P"},
+                {text: "素人 OR 自拍 OR 国产", value: "素人 OR 自拍"},
+                {text: "黑丝 OR 丝袜", value: "黑丝 OR 丝袜"},
+                {text: "足控 OR 脚", value: "足控 OR 脚"},
+                {text: "潮吹 OR 喷水", value: "潮吹 OR 喷水"},
+                {text: "女同 OR 蕾丝", value: "女同 OR 蕾丝"},
+                {text: "熟女 OR 人妻", value: "熟女 OR 人妻"},
+                {text: "BDSM OR 调教 OR SM", value: "BDSM OR 调教"},
+                {text: "公众露出 OR 野战", value: "公众露出 OR 野战"},
+                {text: "孕妇", value: "孕妇"},
+                {text: "Cosplay OR 角色扮演", value: "Cosplay OR 角色扮演"}
+            ],
+            "lang:ja": [
+                {text: "オナニー", value: "オナニー"},
+                {text: "巨乳 OR 爆乳", value: "巨乳 OR 爆乳"},
+                {text: "中出し", value: "中出し"},
+                {text: "JK OR 女子高生 OR 制服", value: "JK OR 女子高生"},
+                {text: "無修正", value: "無修正"},
+                {text: "フェラ OR 深喉", value: "フェラ"},
+                {text: "看護師", value: "看護師"},
+                {text: "エロマッサージ", value: "エロマッサージ"},
+                {text: "アナル", value: "アナル"},
+                {text: "顔射", value: "顔射"},
+                {text: "乱交 OR グループセックス", value: "乱交"},
+                {text: "素人", value: "素人"},
+                {text: "黒ストッキング", value: "黒ストッキング"},
+                {text: "足フェチ", value: "足フェチ"},
+                {text: "潮吹き", value: "潮吹き"},
+                {text: "レズ", value: "レズ"},
+                {text: "熟女 OR 人妻", value: "熟女"},
+                {text: "BDSM OR SM", value: "BDSM"},
+                {text: "露出", value: "露出"},
+                {text: "孕婦", value: "孕婦"},
+                {text: "コスプレ", value: "コスプレ"}
+            ],
+            "lang:en": [
+                {text: "masturbation OR solo", value: "masturbation OR solo"},
+                {text: "big tits OR busty", value: "big tits OR busty"},
+                {text: "creampie", value: "creampie"},
+                {text: "schoolgirl OR uniform", value: "schoolgirl OR uniform"},
+                {text: "uncensored", value: "uncensored"},
+                {text: "blowjob OR deepthroat", value: "blowjob OR deepthroat"},
+                {text: "nurse", value: "nurse"},
+                {text: "erotic massage", value: "erotic massage"},
+                {text: "anal", value: "anal"},
+                {text: "facial", value: "facial"},
+                {text: "threesome OR gangbang", value: "threesome OR gangbang"},
+                {text: "amateur OR homemade", value: "amateur OR homemade"},
+                {text: "stockings OR pantyhose", value: "stockings OR pantyhose"},
+                {text: "foot fetish", value: "foot fetish"},
+                {text: "squirt", value: "squirt"},
+                {text: "lesbian", value: "lesbian"},
+                {text: "MILF OR mature", value: "MILF OR mature"},
+                {text: "BDSM", value: "BDSM"},
+                {text: "public OR outdoor", value: "public OR outdoor"},
+                {text: "pregnant", value: "pregnant"},
+                {text: "cosplay", value: "cosplay"}
+            ],
+            "lang:ko": [
+                {text: "자위", value: "자위"},
+                {text: "큰가슴 OR 거유", value: "큰가슴 OR 거유"},
+                {text: "크림파이", value: "크림파이"},
+                {text: "여고생 OR 교복", value: "여고생 OR 교복"},
+                {text: "무수정", value: "무수정"},
+                {text: "펠라 OR 딥쓰롯", value: "펠라"},
+                {text: "간호사", value: "간호사"},
+                {text: "마사지", value: "마사지"},
+                {text: "애널", value: "애널"},
+                {text: "얼굴사정", value: "얼굴사정"},
+                {text: "쓰리썸 OR 갱뱅", value: "쓰리썸 OR 갱뱅"},
+                {text: "아마추어", value: "아마추어"},
+                {text: "검은스타킹", value: "검은스타킹"},
+                {text: "풋페티쉬", value: "풋페티쉬"},
+                {text: "스쿼트", value: "스쿼트"},
+                {text: "레즈", value: "레즈"},
+                {text: "MILF OR 숙녀", value: "MILF OR 숙녀"},
+                {text: "BDSM", value: "BDSM"},
+                {text: "노출 OR 야외", value: "노출"},
+                {text: "임신부", value: "임신부"},
+                {text: "코스프레", value: "코스프레"}
+            ],
+            "lang:es": [
+                {text: "masturbación", value: "masturbación"},
+                {text: "tetas grandes OR busty", value: "tetas grandes"},
+                {text: "corrida interna OR creampie", value: "corrida interna OR creampie"},
+                {text: "colegiala OR uniforme escolar", value: "colegiala OR uniforme escolar"},
+                {text: "sin censura", value: "sin censura"},
+                {text: "mamada OR blowjob", value: "mamada OR blowjob"},
+                {text: "enfermera", value: "enfermera"},
+                {text: "masaje erótico", value: "masaje erótico"},
+                {text: "sexo anal", value: "sexo anal"},
+                {text: "facial OR corrida en la cara", value: "facial OR corrida en la cara"},
+                {text: "trío OR gangbang", value: "trío OR gangbang"},
+                {text: "amateur OR casero", value: "amateur OR casero"},
+                {text: "medias negras", value: "medias negras"},
+                {text: "fetiche de pies", value: "fetiche de pies"},
+                {text: "squirt OR eyaculación femenina", value: "squirt"},
+                {text: "lesbiana", value: "lesbiana"},
+                {text: "madura OR MILF", value: "madura OR MILF"},
+                {text: "BDSM", value: "BDSM"},
+                {text: "sexo público OR al aire libre", value: "sexo público"},
+                {text: "embarazada", value: "embarazada"},
+                {text: "cosplay", value: "cosplay"}
+            ],
+            "lang:fr": [
+                {text: "masturbation", value: "masturbation"},
+                {text: "gros seins", value: "gros seins"},
+                {text: "éjaculation interne", value: "éjaculation interne"},
+                {text: "lycéenne OR uniforme", value: "lycéenne"},
+                {text: "sans censure", value: "sans censure"},
+                {text: "fellation", value: "fellation"},
+                {text: "infirmière", value: "infirmière"},
+                {text: "massage érotique", value: "massage érotique"},
+                {text: "sodomie", value: "sodomie"},
+                {text: "facial", value: "facial"},
+                {text: "partouze OR gangbang", value: "partouze"},
+                {text: "amateur", value: "amateur"},
+                {text: "bas noirs", value: "bas noirs"},
+                {text: "fétichisme pieds", value: "fétichisme pieds"},
+                {text: "squirt", value: "squirt"},
+                {text: "lesbienne", value: "lesbienne"},
+                {text: "MILF", value: "MILF"},
+                {text: "BDSM", value: "BDSM"},
+                {text: "sexe public", value: "sexe public"},
+                {text: "enceinte", value: "enceinte"}
+            ],
+            "lang:ru": [
+                {text: "мастурбация", value: "мастурбация"},
+                {text: "большие сиськи", value: "большие сиськи"},
+                {text: "кремпай", value: "кремпай"},
+                {text: "школьница", value: "школьница"},
+                {text: "без цензуры", value: "без цензуры"},
+                {text: "минет", value: "минет"},
+                {text: "медсестра", value: "медсестра"},
+                {text: "анал", value: "анал"},
+                {text: "групповуха", value: "групповуха"},
+                {text: "любительское", value: "любительское"}
+            ],
+            "lang:de": [
+                {text: "masturbation", value: "masturbation"},
+                {text: "große titten", value: "große titten"},
+                {text: "creampie", value: "creampie"},
+                {text: "schülerin", value: "schülerin"},
+                {text: "unzensiert", value: "unzensiert"},
+                {text: "blowjob", value: "blowjob"},
+                {text: "krankenschwester", value: "krankenschwester"},
+                {text: "anal", value: "anal"},
+                {text: "gangbang", value: "gangbang"}
+            ]
+        };
+
+        function updateCategories() {
+            const lang = document.getElementById('language').value;
+            const select = document.getElementById('category');
+            select.innerHTML = '';
+
+            const items = keywordDB[lang] || keywordDB["lang:en"];
+
+            items.forEach(item => {
+                const option = document.createElement('option');
+                option.text = item.text;
+                option.value = item.value;
+                select.appendChild(option);
+            });
+        }
+
         function generateSearch() {
             const lang = document.getElementById('language').value;
             const filterType = document.getElementById('filter').value;
             
-            // 获取选中的类别
             const select = document.getElementById('category');
-            let keywords = Array.from(select.selectedOptions).map(option => option.value);
+            let keywords = Array.from(select.selectedOptions).map(opt => opt.value);
             
-            // 添加自定义关键词
             const custom = document.getElementById('custom').value.trim();
-            if (custom) {
-                keywords.push(custom);
-            }
+            if (custom) keywords.push(custom);
 
             if (keywords.length === 0) {
-                alert("请至少选择一个类别或输入自定义关键词！");
+                alert("请至少选择一个类别！");
                 return;
             }
 
-            const queryText = keywords.join(" OR ");
-            const fullQuery = `${queryText} ${filterType} ${lang}`;
-
-            const url = `https://x.com/explore/search?q=${encodeURIComponent(fullQuery)}`;
+            const query = keywords.join(" OR ") + " " + filterType + " " + lang;
+            const url = `https://x.com/explore/search?q=${encodeURIComponent(query)}`;
 
             document.getElementById('result').innerHTML = `
-                <strong>生成的搜索词：</strong><br>
-                <code style="background:#222; padding:8px; border-radius:6px; display:block; margin:10px 0;">${fullQuery}</code><br>
-                <strong>搜索链接：</strong><br>
+                <strong>搜索词：</strong><br>
+                <code style="background:#222;padding:10px;border-radius:6px;display:block;margin:10px 0; white-space:pre-wrap;">${query}</code><br>
                 <a href="${url}" target="_blank" style="color:#ff4d94; word-break:break-all;">${url}</a><br><br>
-                <button onclick="window.open('${url}', '_blank')" style="width:auto; padding:10px 20px;">立即跳转到 X 搜索</button>
-                <button onclick="copyToClipboard('${fullQuery}')" style="width:auto; padding:10px 20px; margin-left:10px; background:#555;">复制搜索词</button>
+                <button onclick="window.open('${url}','_blank')">立即跳转到 X</button>
             `;
         }
 
-        function copyToClipboard(text) {
-            navigator.clipboard.writeText(text).then(() => {
-                alert("搜索词已复制到剪贴板！");
-            });
-        }
+        window.onload = updateCategories;
     </script>
 </body>
 </html>
