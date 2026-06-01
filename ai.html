@@ -36,244 +36,1207 @@
                     "Helvetica", "Arial", "Noto Sans SC", sans-serif;
             }
 
-            * { margin: 0; padding: 0; box-sizing: border-box; }
-            html { scroll-behavior: smooth; background: var(--bg); }
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+            html {
+                scroll-behavior: smooth;
+                background: var(--bg);
+            }
+
             body {
                 font-family: var(--font-apple);
-                background: var(--bg); color: var(--text);
+                background: var(--bg);
+                color: var(--text);
                 overflow-x: hidden;
                 -webkit-font-smoothing: antialiased;
                 -moz-osx-font-smoothing: grayscale;
                 text-rendering: optimizeLegibility;
-                cursor: none;
+                cursor: default;
                 letter-spacing: -0.022em;
             }
-            input, textarea, [contenteditable] { cursor: text; }
-            ::selection { background: var(--accent); color: white; }
 
-            .cursor-dot, .cursor-ring {
-                position: fixed; top: 0; left: 0;
-                pointer-events: none; z-index: 9999;
-                will-change: transform; mix-blend-mode: difference;
-            }
-            .cursor-dot { width: 6px; height: 6px; background: white; border-radius: 50%; }
-            .cursor-ring { width: 36px; height: 36px; border: 1.5px solid rgba(255,255,255,0.6); border-radius: 50%; }
-            .cursor-ring.expand { border-color: var(--accent-light); }
-            @media (max-width: 900px) { .cursor-dot, .cursor-ring { display: none; } body { cursor: auto; } }
-
-            .scroll-progress {
-                position: fixed; top: 0; left: 0; right: 0;
-                height: 2px; z-index: 200; background: transparent; pointer-events: none;
-            }
-            .scroll-progress::after {
-                content: ""; display: block; height: 100%;
-                width: var(--p, 0%);
-                background: linear-gradient(90deg, var(--accent), var(--rose));
-                box-shadow: 0 0 12px var(--accent-light);
+            ::selection {
+                background: var(--accent);
+                color: white;
             }
 
-            .loader {
-                position: fixed; inset: 0; z-index: 9000;
-                background: var(--bg);
-                display: flex; align-items: center; justify-content: center;
-                flex-direction: column; gap: 28px;
+            /* ─── Apple-style Mesh Gradient Background ─── */
+            .ambient-glow-wrapper {
+                position: fixed;
+                inset: 0;
+                z-index: 0;
+                overflow: hidden;
+                pointer-events: none;
             }
-            .loader-mark { display: flex; align-items: center; gap: 12px; font-size: 14px; font-weight: 600; letter-spacing: -0.01em; }
-            .loader-mark .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 24px var(--accent); animation: pulse 1.4s infinite; }
-            .loader-bar { width: 220px; height: 1px; background: rgba(255,255,255,0.08); overflow: hidden; border-radius: 2px; }
-            .loader-bar i { display: block; width: 100%; height: 100%; background: linear-gradient(90deg, var(--accent), var(--rose)); transform-origin: left; transform: scaleX(0); }
-            .loader-text { font-family: "JetBrains Mono", monospace; font-size: 10px; color: var(--text-30); letter-spacing: 0.3em; text-transform: uppercase; }
-            .loader-num { font-family: "JetBrains Mono", monospace; font-size: 32px; font-weight: 500; color: var(--text); letter-spacing: -0.02em; }
 
-            .ambient-glow-wrapper { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
-            .ambient-glow { position: absolute; border-radius: 50%; filter: blur(140px); opacity: 0.3; mix-blend-mode: screen; animation: drift 30s infinite alternate ease-in-out; will-change: transform; }
-            .glow-1 { width: 600px; height: 600px; background: radial-gradient(circle, rgba(94,67,243,0.4) 0%, transparent 80%); top: -10%; left: -10%; }
-            .glow-2 { width: 700px; height: 700px; background: radial-gradient(circle, rgba(255,69,58,0.25) 0%, transparent 80%); bottom: 20%; right: -10%; animation-duration: 35s; }
-            .glow-3 { width: 500px; height: 500px; background: radial-gradient(circle, rgba(10,132,255,0.3) 0%, transparent 80%); top: 40%; left: 25%; animation-duration: 30s; }
-            @keyframes drift { 0% { transform: translate(0, 0) rotate(0deg) scale(1); } 50% { transform: translate(80px, 50px) rotate(180deg) scale(1.1); } 100% { transform: translate(-40px, -80px) rotate(360deg) scale(0.9); } }
-            @keyframes pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(48, 209, 88, 0.4); } 50% { box-shadow: 0 0 0 5px rgba(48, 209, 88, 0); } }
+            .ambient-glow {
+                position: absolute;
+                border-radius: 50%;
+                filter: blur(140px);
+                opacity: 0.3;
+                mix-blend-mode: screen;
+                animation: drift 30s infinite alternate ease-in-out;
+                will-change: transform;
+            }
 
-            #bg-canvas { position: fixed; inset: 0; z-index: 1; pointer-events: none; opacity: 0.3; will-change: transform; }
-            .grain { position: fixed; inset: 0; z-index: 2; pointer-events: none; opacity: 0.015; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+            .glow-1 {
+                width: 600px;
+                height: 600px;
+                background: radial-gradient(
+                    circle,
+                    rgba(94, 67, 243, 0.4) 0%,
+                    transparent 80%
+                );
+                top: -10%;
+                left: -10%;
+            }
 
-            .nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; padding: 0 48px; height: 54px; display: flex; align-items: center; justify-content: space-between; background: rgba(0, 0, 0, 0.3); backdrop-filter: blur(20px) saturate(1.8); -webkit-backdrop-filter: blur(20px) saturate(1.8); border-bottom: 1px solid var(--border); transition: background 0.3s, border-color 0.3s; }
-            .nav.scrolled { background: rgba(0, 0, 0, 0.7); border-bottom: 1px solid rgba(255, 255, 255, 0.12); }
-            .nav-brand { display: flex; align-items: center; gap: 12px; font-weight: 600; font-size: 14px; letter-spacing: -0.01em; color: var(--text); }
-            .nav-icon { width: 24px; height: 24px; border-radius: 6px; display: grid; place-items: center; box-shadow: 0 4px 12px rgba(94, 67, 243, 0.3); overflow: hidden; }
-            .nav-icon img { width: 100%; height: 100%; object-fit: cover; }
-            .nav-links { display: flex; align-items: center; gap: 6px; list-style: none; position: relative; }
-            .nav-pill { position: absolute; top: 0; left: 0; height: 28px; border-radius: 8px; background: var(--surface-hover); border: 1px solid var(--border-light); z-index: -1; opacity: 0; }
-            .nav-links a { color: var(--text-60); text-decoration: none; font-size: 12px; font-weight: 400; padding: 6px 12px; border-radius: 6px; transition: color 0.2s cubic-bezier(0.25, 1, 0.5, 1); position: relative; z-index: 1; }
-            .nav-links a:hover { color: var(--text); }
-            .nav-links .cta { background: var(--text); color: var(--bg) !important; font-weight: 500; padding: 5px 14px; }
-            .nav-links .cta:hover { background: white; transform: scale(1.04); }
+            .glow-2 {
+                width: 700px;
+                height: 700px;
+                background: radial-gradient(
+                    circle,
+                    rgba(255, 69, 58, 0.25) 0%,
+                    transparent 80%
+                );
+                bottom: 20%;
+                right: -10%;
+                animation-duration: 35s;
+            }
 
-            section { position: relative; z-index: 3; }
-            .container { max-width: 1060px; margin: 0 auto; padding: 0 24px; }
+            .glow-3 {
+                width: 500px;
+                height: 500px;
+                background: radial-gradient(
+                    circle,
+                    rgba(10, 132, 255, 0.3) 0%,
+                    transparent 80%
+                );
+                top: 40%;
+                left: 25%;
+                animation-duration: 30s;
+            }
 
-            .hero { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 140px 24px 80px; position: relative; }
-            .hero-pill { display: inline-flex; align-items: center; gap: 8px; padding: 4px 4px 4px 10px; background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border); border-radius: 100px; font-size: 12px; color: var(--text-60); margin-bottom: 24px; opacity: 0; transform: translateY(20px) scale(0.96); }
-            .hero-pill span { padding: 2px 8px; background: var(--accent); border-radius: 100px; color: white; font-size: 10px; font-weight: 600; letter-spacing: 0.05em; }
-            .hero h1 { font-size: clamp(44px, 7vw, 84px); font-weight: 800; line-height: 1.08; letter-spacing: -0.035em; margin-bottom: 20px; overflow: hidden; }
-            .hero h1 .line { display: block; overflow: hidden; }
-            .hero h1 .line span { display: inline-block; }
-            .hero h1 .em { background: linear-gradient(135deg, #ffffff 30%, var(--accent-light) 70%, var(--rose) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-            .hero p { font-size: 18px; color: var(--text-60); max-width: 520px; line-height: 1.6; font-weight: 400; margin-bottom: 36px; opacity: 0; transform: translateY(20px); }
-            .hero-btns { display: flex; gap: 16px; margin-bottom: 60px; opacity: 0; transform: translateY(20px); }
-            .btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 24px; border-radius: 20px; font-size: 13px; font-weight: 500; text-decoration: none; border: none; cursor: pointer; transition: transform 0.3s cubic-bezier(0.15, 0.85, 0.45, 1), background 0.3s, box-shadow 0.3s, border-color 0.3s; will-change: transform; position: relative; overflow: hidden; }
-            .btn-fill { background: var(--text); color: var(--bg); box-shadow: 0 4px 20px rgba(255, 255, 255, 0.1); }
-            .btn-fill:hover { background: white; box-shadow: 0 8px 24px rgba(255, 255, 255, 0.2); transform: translateY(-2px); }
-            .btn-ghost { background: var(--surface); color: var(--text); border: 1px solid var(--border); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
-            .btn-ghost:hover { background: var(--surface-hover); border-color: var(--border-light); transform: translateY(-2px); }
-            .btn .btn-bg { position: absolute; inset: 0; background: linear-gradient(90deg, var(--accent), var(--rose)); opacity: 0; transition: opacity 0.4s; z-index: -1; border-radius: inherit; }
-            .btn:hover .btn-bg { opacity: 1; }
-            .btn:hover.btn-fill { color: white; }
-            .btn-fill .btn-bg { display: none; }
+            @keyframes drift {
+                0% {
+                    transform: translate(0, 0) rotate(0deg) scale(1);
+                }
+                50% {
+                    transform: translate(80px, 50px) rotate(180deg) scale(1.1);
+                }
+                100% {
+                    transform: translate(-40px, -80px) rotate(360deg) scale(0.9);
+                }
+            }
 
-            .hero-mock { width: 100%; max-width: 800px; opacity: 0; transform: scale(0.95) translateY(40px); perspective: 1200px; }
-            .mock-wrap { transform: rotateX(2deg); transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1); will-change: transform; }
-            .mock-wrap:hover { transform: rotateX(0deg) scale(1.005); }
-            .mock { background: rgba(13, 13, 17, 0.65); border-radius: 16px; border: 1px solid var(--border); overflow: hidden; backdrop-filter: blur(40px); -webkit-backdrop-filter: blur(40px); box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.02), 0 30px 70px -15px rgba(0, 0, 0, 0.8), 0 0 120px -30px var(--accent-glow); }
-            .mock-bar { display: flex; align-items: center; gap: 6px; padding: 12px 18px; background: rgba(255, 255, 255, 0.02); border-bottom: 1px solid var(--border); }
-            .mock-dot { width: 10px; height: 10px; border-radius: 50%; opacity: 0.75; }
-            .mock-dot.r { background: var(--rose); }
-            .mock-dot.y { background: var(--orange); }
-            .mock-dot.g { background: var(--green); }
-            .mock-title-bar { margin: 0 auto; font-size: 11px; color: var(--text-30); font-family: "Space Grotesk", sans-serif; font-weight: 500; }
-            .mock-body { padding: 24px; display: grid; gap: 16px; text-align: left; }
-            .mock-row { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 8px; font-size: 12px; font-weight: 500; width: fit-content; }
-            .mock-listening { background: rgba(48, 209, 88, 0.08); border: 1px solid rgba(48, 209, 88, 0.15); color: var(--green); transition: all 0.3s; }
-            .mock-listening.answering { background: rgba(94, 67, 243, 0.08); border-color: rgba(94, 67, 243, 0.15); color: var(--accent-light); }
-            .dot-live { width: 6px; height: 6px; background: var(--green); border-radius: 50%; animation: pulse 1.6s infinite; }
-            .mock-listening.answering .dot-live { background: var(--accent-light); }
-            .mock-bars { display: flex; align-items: center; gap: 2px; margin-left: 8px; height: 14px; }
-            .mock-bars i { display: block; width: 2px; background: var(--green); border-radius: 1px; animation: bar 1.2s ease-in-out infinite; }
-            .mock-listening.answering .mock-bars i { background: var(--accent-light); }
-            .mock-bars i:nth-child(1) { height: 4px;  animation-delay: 0s; }
-            .mock-bars i:nth-child(2) { height: 11px; animation-delay: 0.15s; }
-            .mock-bars i:nth-child(3) { height: 8px;  animation-delay: 0.3s; }
-            .mock-bars i:nth-child(4) { height: 13px; animation-delay: 0.1s; }
-            .mock-bars i:nth-child(5) { height: 6px;  animation-delay: 0.2s; }
-            @keyframes bar { 0%, 100% { transform: scaleY(0.4); opacity: 0.5; } 50% { transform: scaleY(1); opacity: 1; } }
-            .mock-card { padding: 18px; border-radius: 10px; transition: all 0.3s cubic-bezier(0.15, 0.85, 0.45, 1); }
-            .mock-card-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.15em; color: var(--text-30); margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
-            .mock-q { background: rgba(255, 255, 255, 0.015); border: 1px solid var(--border); }
-            .mock-q .text { font-size: 14px; color: var(--text); line-height: 1.5; min-height: 21px; }
-            .mock-a { background: rgba(94, 67, 243, 0.02); border: 1px solid rgba(94, 67, 243, 0.12); min-height: 140px; }
-            .mock-a .text { font-size: 13px; color: var(--text-60); line-height: 1.7; }
-            .mock-a .hl { color: var(--accent-light); font-weight: 500; }
-            .mock-a strong { color: var(--text); font-weight: 600; }
-            .cursor-blink { display: inline-block; width: 2px; height: 14px; background: var(--accent-light); margin-left: 2px; vertical-align: text-bottom; animation: blink 0.9s step-end infinite; }
-            @keyframes blink { 50% { opacity: 0; } }
+            #bg-canvas {
+                position: fixed;
+                inset: 0;
+                z-index: 1;
+                pointer-events: none;
+                opacity: 0.3;
+                will-change: transform;
+            }
 
-            .sec { padding: 120px 0; }
-            .sec-header { max-width: 500px; margin-bottom: 48px; }
-            .sec-label { font-family: "JetBrains Mono", monospace; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.25em; color: var(--accent-light); margin-bottom: 12px; display: inline-block; overflow: hidden; }
-            .sec-title { font-size: clamp(28px, 4.5vw, 42px); font-weight: 800; letter-spacing: -0.03em; line-height: 1.15; margin-bottom: 16px; overflow: hidden; }
-            .sec-title .line { display: block; overflow: hidden; }
-            .sec-title .line span { display: inline-block; }
-            .sec-desc { font-size: 15px; color: var(--text-60); line-height: 1.6; font-weight: 400; }
+            /* ─── Grain Noise ─── */
+            .grain {
+                position: fixed;
+                inset: 0;
+                z-index: 2;
+                pointer-events: none;
+                opacity: 0.015;
+                background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+            }
 
-            .bento-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 48px; }
-            .bento-card { background: rgba(13, 13, 17, 0.45); border: 1px solid var(--border); border-radius: 16px; padding: 32px; position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); transition: border-color 0.3s, background 0.3s; will-change: transform; transform-style: preserve-3d; }
-            .bento-card:hover { border-color: var(--border-light); background: rgba(255, 255, 255, 0.02); }
-            .bento-card.col-span-2 { grid-column: span 2; }
-            .bento-glow { position: absolute; inset: 0; background: radial-gradient(circle 280px at var(--mx, -1000px) var(--my, -1000px), rgba(94, 67, 243, 0.12), transparent 70%); pointer-events: none; z-index: 1; opacity: 0; transition: opacity 0.3s; }
-            .bento-card:hover .bento-glow { opacity: 1; }
-            .bento-content { position: relative; z-index: 2; height: 100%; display: flex; flex-direction: column; justify-content: space-between; transform: translateZ(20px); }
-            .bento-icon { width: 38px; height: 38px; border-radius: 8px; display: grid; place-items: center; font-size: 16px; margin-bottom: 24px; }
-            .bi-purple { background: rgba(94, 67, 243, 0.08);  border: 1px solid rgba(94, 67, 243, 0.15); }
-            .bi-green  { background: rgba(48, 209, 88, 0.08);  border: 1px solid rgba(48, 209, 88, 0.15); }
-            .bi-orange { background: rgba(255, 159, 10, 0.08); border: 1px solid rgba(255, 159, 10, 0.15); }
-            .bi-rose   { background: rgba(255, 69, 58, 0.08);  border: 1px solid rgba(255, 69, 58, 0.15); }
-            .bi-blue   { background: rgba(10, 132, 255, 0.08); border: 1px solid rgba(10, 132, 255, 0.15); }
-            .bento-card h3 { font-size: 16px; font-weight: 600; margin-bottom: 8px; letter-spacing: -0.01em; }
-            .bento-card p { font-size: 13px; color: var(--text-60); line-height: 1.55; font-weight: 400; }
-            .bento-preview { height: 120px; margin-bottom: 24px; border-radius: 8px; background: rgba(0, 0, 0, 0.3); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative; }
-            .audio-wave { display: flex; align-items: center; gap: 4px; }
-            .audio-wave span { width: 3px; height: 12px; background: var(--rose); border-radius: 2px; animation: bounceWave 0.8s ease-in-out infinite alternate; }
-            .audio-wave span:nth-child(2) { height: 28px; animation-delay: 0.15s; }
-            .audio-wave span:nth-child(3) { height: 18px; animation-delay: 0.3s; }
-            .audio-wave span:nth-child(4) { height: 42px; animation-delay: 0.05s; }
-            .audio-wave span:nth-child(5) { height: 24px; animation-delay: 0.25s; }
-            .audio-wave span:nth-child(6) { height: 10px; animation-delay: 0.4s; }
-            @keyframes bounceWave { 0% { transform: scaleY(0.3); } 100% { transform: scaleY(1.1); } }
-            .ghost-preview-toggle { display: flex; gap: 16px; align-items: center; z-index: 2; }
-            .mock-screen { width: 130px; height: 80px; background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border); border-radius: 6px; position: relative; display: flex; flex-direction: column; justify-content: flex-end; padding: 8px; }
-            .mock-screen .logo-mark { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); opacity: 0.1; font-size: 20px; }
-            .mock-screen-panel { width: 100%; height: 24px; background: rgba(94, 67, 243, 0.8); border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 8px; color: white; font-weight: 500; transition: all 0.4s cubic-bezier(0.15, 0.85, 0.45, 1); }
-            .toggle-btn { background: var(--surface); border: 1px solid var(--border); padding: 6px 12px; border-radius: 6px; font-size: 11px; cursor: pointer; color: var(--text-60); transition: all 0.2s; }
-            .toggle-btn:hover { color: var(--text); background: var(--surface-hover); }
-            .toggle-btn.active { background: var(--accent); color: white; border-color: var(--accent-light); }
+            /* ─── Nav ─── */
+            .nav {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                z-index: 100;
+                padding: 0 48px;
+                height: 54px;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                background: rgba(0, 0, 0, 0.3);
+                backdrop-filter: blur(20px) saturate(1.8);
+                -webkit-backdrop-filter: blur(20px) saturate(1.8);
+                border-bottom: 1px solid var(--border);
+                transition: all 0.3s;
+            }
 
-            .trans-layout { display: grid; grid-template-columns: 1fr 1.1fr; gap: 60px; align-items: center; }
-            .trans-demo { display: flex; flex-direction: column; gap: 12px; }
-            .trans-tab-group { display: flex; gap: 6px; margin-top: 24px; }
-            .trans-tab { padding: 6px 14px; border-radius: 20px; background: var(--surface); border: 1px solid var(--border); font-size: 12px; color: var(--text-60); cursor: pointer; transition: all 0.3s cubic-bezier(0.15, 0.85, 0.45, 1); }
-            .trans-tab:hover { color: var(--text); border-color: var(--border-light); }
-            .trans-tab.active { background: var(--text); color: var(--bg); border-color: white; }
-            .trans-card { padding: 18px 20px; border-radius: 12px; font-size: 13.5px; line-height: 1.6; position: relative; overflow: hidden; transition: opacity 0.25s, transform 0.25s; }
-            .trans-card .label { font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.15em; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
-            .trans-orig { background: rgba(255, 255, 255, 0.015); border: 1px solid var(--border); color: var(--text-60); }
-            .trans-orig .label { color: var(--accent-light); }
-            .trans-trans { background: rgba(94, 67, 243, 0.02); border: 1px solid rgba(94, 67, 243, 0.15); color: var(--text); }
-            .trans-trans .label { color: var(--accent-light); }
-            .trans-shimmer { position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.02), transparent); animation: shimmer 5s infinite; }
-            @keyframes shimmer { 0% { left: -100%; } 100% { left: 200%; } }
+            .nav.scrolled {
+                background: rgba(0, 0, 0, 0.7);
+                border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+            }
 
-            .sc-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 48px; }
-            .sc-item { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; background: rgba(13, 13, 17, 0.4); border: 1px solid var(--border); border-radius: 12px; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); transition: all 0.25s cubic-bezier(0.23, 1, 0.32, 1); }
-            .sc-item:hover { border-color: var(--border-light); background: rgba(255, 255, 255, 0.02); transform: translateY(-2px); }
-            .sc-label { font-size: 13px; color: var(--text-60); font-weight: 400; }
-            .sc-keys { display: flex; gap: 5px; }
-            .kbd { padding: 4px 10px; background: linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.03) 100%); border: 1px solid rgba(255, 255, 255, 0.12); border-bottom-color: rgba(255, 255, 255, 0.22); border-radius: 6px; font-family: "JetBrains Mono", monospace; font-size: 11px; font-weight: 500; color: var(--text); min-width: 28px; text-align: center; box-shadow: 0 1px 0 rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1); text-shadow: 0 1px 0 rgba(0, 0, 0, 0.5); transition: all 0.1s ease; }
-            .sc-item:hover .kbd { border-color: rgba(255, 255, 255, 0.2); border-bottom-color: rgba(255, 255, 255, 0.35); background: linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.05) 100%); }
+            .nav-brand {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                font-weight: 600;
+                font-size: 14px;
+                letter-spacing: -0.01em;
+                color: var(--text);
+            }
 
-            .stats { padding: 80px 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
-            .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 32px; }
-            .stat-item { text-align: center; }
-            .stat-num { font-family: "Space Grotesk", sans-serif; font-size: clamp(40px, 5vw, 64px); font-weight: 700; letter-spacing: -0.04em; line-height: 1; color: var(--text); margin-bottom: 8px; }
-            .stat-num .accent { background: linear-gradient(135deg, var(--accent-light), var(--rose)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-            .stat-label { font-size: 12px; color: var(--text-60); text-transform: uppercase; letter-spacing: 0.15em; font-family: "JetBrains Mono", monospace; }
+            .nav-icon {
+                width: 24px;
+                height: 24px;
+                border-radius: 6px;
+                display: grid;
+                place-items: center;
+                box-shadow: 0 4px 12px rgba(94, 67, 243, 0.3);
+                overflow: hidden;
+            }
 
-            .dl { text-align: center; padding: 120px 0; }
-            .dl-box { max-width: 580px; margin: 0 auto; padding: 60px 40px; background: radial-gradient(circle at top, rgba(94, 67, 243, 0.05) 0%, rgba(0, 0, 0, 0.4) 100%); border: 1px solid var(--border); border-radius: 24px; position: relative; overflow: hidden; backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px); }
-            .dl-box::before { content: ""; position: absolute; top: 0; left: 20%; right: 20%; height: 1px; background: linear-gradient(90deg, transparent, var(--accent-light), transparent); }
-            .dl-box h2 { font-size: 32px; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 8px; overflow: hidden; }
-            .dl-box h2 .line { display: block; overflow: hidden; }
-            .dl-box h2 .line span { display: inline-block; }
-            .dl-box p { color: var(--text-60); margin-bottom: 32px; font-weight: 400; font-size: 14px; }
-            .dl-box .btn { font-size: 14px; padding: 12px 32px; border-radius: 24px; }
-            .dl-meta { display: flex; justify-content: center; gap: 24px; margin-top: 24px; font-size: 11px; color: var(--text-30); font-family: "JetBrains Mono", monospace; }
+            .nav-icon img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+            }
 
-            .footer-marquee { overflow: hidden; padding: 40px 0 20px; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
-            .footer-marquee .track { display: flex; gap: 64px; white-space: nowrap; width: max-content; font-family: "Space Grotesk", sans-serif; font-size: clamp(56px, 10vw, 120px); font-weight: 700; letter-spacing: -0.04em; color: var(--text); -webkit-text-stroke: 1px var(--text-30); -webkit-text-fill-color: transparent; }
-            .footer-marquee .track span.filled { -webkit-text-fill-color: var(--text); }
-            .footer-marquee .track .star { color: var(--accent-light); -webkit-text-fill-color: var(--accent-light); }
-            footer { padding: 40px 24px; text-align: center; border-top: 1px solid var(--border); font-size: 11px; color: var(--text-30); background: rgba(0, 0, 0, 0.2); }
-            footer a { color: var(--text-60); text-decoration: none; transition: color 0.2s; }
-            footer a:hover { color: var(--accent-light); }
+            .nav-links {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                list-style: none;
+            }
 
-            .gsap-fade { opacity: 0; transform: translateY(40px); }
-            .gsap-up   { opacity: 0; transform: translateY(60px); }
-            .gsap-scale{ opacity: 0; transform: scale(0.92); }
+            .nav-links a {
+                color: var(--text-60);
+                text-decoration: none;
+                font-size: 12px;
+                font-weight: 400;
+                padding: 6px 12px;
+                border-radius: 6px;
+                transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+            }
 
-            @media (max-width: 900px) { .bento-grid { grid-template-columns: 1fr; } .bento-card.col-span-2 { grid-column: span 1; } .trans-layout { grid-template-columns: 1fr; gap: 40px; } .sc-grid { grid-template-columns: 1fr; } .stats-row { grid-template-columns: repeat(2, 1fr); } }
-            @media (max-width: 768px) { .nav { padding: 0 20px; } .nav-links { display: none; } .hero { padding: 120px 20px 60px; } .hero-btns { flex-direction: column; width: 100%; gap: 10px; } .btn { justify-content: center; width: 100%; } .container { padding: 0 20px; } .sec { padding: 80px 0; } .dl-box { padding: 48px 20px; } }
+            .nav-links a:hover {
+                color: var(--text);
+                background: var(--surface);
+            }
+
+            .nav-links .cta {
+                background: var(--text);
+                color: var(--bg) !important;
+                font-weight: 500;
+                padding: 5px 14px;
+            }
+
+            .nav-links .cta:hover {
+                background: white;
+                transform: scale(1.02);
+            }
+
+            /* ─── Base Content ─── */
+            section {
+                position: relative;
+                z-index: 3;
+            }
+
+            .container {
+                max-width: 1060px;
+                margin: 0 auto;
+                padding: 0 24px;
+            }
+
+            /* ─── Hero ─── */
+            .hero {
+                min-height: 100vh;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                text-align: center;
+                padding: 140px 24px 80px;
+                position: relative;
+            }
+
+            .hero-pill {
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                padding: 4px 4px 4px 10px;
+                background: rgba(255, 255, 255, 0.05);
+                border: 1px solid var(--border);
+                border-radius: 100px;
+                font-size: 12px;
+                color: var(--text-60);
+                margin-bottom: 24px;
+                opacity: 0;
+                transform: translateY(16px);
+                animation: appleFadeInUp 0.6s cubic-bezier(0.23, 1, 0.32, 1)
+                    forwards;
+            }
+
+            .hero-pill span {
+                padding: 2px 8px;
+                background: var(--accent);
+                border-radius: 100px;
+                color: white;
+                font-size: 10px;
+                font-weight: 600;
+                letter-spacing: 0.05em;
+            }
+
+            .hero h1 {
+                font-size: clamp(44px, 7vw, 84px);
+                font-weight: 800;
+                line-height: 1.08;
+                letter-spacing: -0.035em;
+                margin-bottom: 20px;
+                opacity: 0;
+                transform: translateY(16px);
+                animation: appleFadeInUp 0.6s cubic-bezier(0.23, 1, 0.32, 1)
+                    0.1s forwards;
+            }
+
+            .hero h1 .em {
+                background: linear-gradient(
+                    135deg,
+                    #ffffff 30%,
+                    var(--accent-light) 70%,
+                    var(--rose) 100%
+                );
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+            }
+
+            .hero p {
+                font-size: 18px;
+                color: var(--text-60);
+                max-width: 520px;
+                line-height: 1.6;
+                font-weight: 400;
+                margin-bottom: 36px;
+                opacity: 0;
+                transform: translateY(16px);
+                animation: appleFadeInUp 0.6s cubic-bezier(0.23, 1, 0.32, 1)
+                    0.2s forwards;
+            }
+
+            .hero-btns {
+                display: flex;
+                gap: 16px;
+                opacity: 0;
+                transform: translateY(16px);
+                animation: appleFadeInUp 0.6s cubic-bezier(0.23, 1, 0.32, 1)
+                    0.3s forwards;
+                margin-bottom: 60px;
+            }
+
+            .btn {
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                padding: 10px 24px;
+                border-radius: 20px;
+                font-size: 13px;
+                font-weight: 500;
+                text-decoration: none;
+                border: none;
+                cursor: pointer;
+                transition: all 0.3s cubic-bezier(0.15, 0.85, 0.45, 1);
+            }
+
+            .btn-fill {
+                background: var(--text);
+                color: var(--bg);
+                box-shadow: 0 4px 20px rgba(255, 255, 255, 0.1);
+            }
+
+            .btn-fill:hover {
+                background: white;
+                box-shadow: 0 8px 24px rgba(255, 255, 255, 0.2);
+                transform: translateY(-2px);
+            }
+
+            .btn-ghost {
+                background: var(--surface);
+                color: var(--text);
+                border: 1px solid var(--border);
+                backdrop-filter: blur(8px);
+                -webkit-backdrop-filter: blur(8px);
+            }
+
+            .btn-ghost:hover {
+                background: var(--surface-hover);
+                border-color: var(--border-light);
+                transform: translateY(-2px);
+            }
+
+            /* ─── Hero App Interface Mock ─── */
+            .hero-mock {
+                width: 100%;
+                max-width: 800px;
+                opacity: 0;
+                transform: scale(0.97) translateY(30px);
+                animation: appleZoomInUp 0.8s cubic-bezier(0.23, 1, 0.32, 1)
+                    0.4s forwards;
+                perspective: 1200px;
+            }
+
+            .mock-wrap {
+                transform: rotateX(2deg);
+                transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+                will-change: transform;
+            }
+
+            .mock-wrap:hover {
+                transform: rotateX(0deg) scale(1.005);
+            }
+
+            .mock {
+                background: rgba(13, 13, 17, 0.65);
+                border-radius: 16px;
+                border: 1px solid var(--border);
+                overflow: hidden;
+                backdrop-filter: blur(40px);
+                -webkit-backdrop-filter: blur(40px);
+                box-shadow:
+                    0 0 0 1px rgba(255, 255, 255, 0.02),
+                    0 30px 70px -15px rgba(0, 0, 0, 0.8),
+                    0 0 120px -30px var(--accent-glow);
+            }
+
+            .mock-bar {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                padding: 12px 18px;
+                background: rgba(255, 255, 255, 0.02);
+                border-bottom: 1px solid var(--border);
+            }
+
+            .mock-dot {
+                width: 10px;
+                height: 10px;
+                border-radius: 50%;
+                opacity: 0.75;
+            }
+            .mock-dot.r {
+                background: var(--rose);
+            }
+            .mock-dot.y {
+                background: var(--orange);
+            }
+            .mock-dot.g {
+                background: var(--green);
+            }
+
+            .mock-title-bar {
+                margin: 0 auto;
+                font-size: 11px;
+                color: var(--text-30);
+                font-family: "Space Grotesk", sans-serif;
+                font-weight: 500;
+            }
+
+            .mock-body {
+                padding: 24px;
+                display: grid;
+                gap: 16px;
+                text-align: left;
+            }
+
+            .mock-row {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                padding: 10px 14px;
+                border-radius: 8px;
+                font-size: 12px;
+                font-weight: 500;
+                width: fit-content;
+            }
+
+            .mock-listening {
+                background: rgba(48, 209, 88, 0.08);
+                border: 1px solid rgba(48, 209, 88, 0.15);
+                color: var(--green);
+                transition: all 0.3s;
+            }
+
+            .mock-listening.answering {
+                background: rgba(94, 67, 243, 0.08);
+                border-color: rgba(94, 67, 243, 0.15);
+                color: var(--accent-light);
+            }
+
+            .dot-live {
+                width: 6px;
+                height: 6px;
+                background: var(--green);
+                border-radius: 50%;
+                animation: pulse 1.6s infinite;
+            }
+
+            .mock-listening.answering .dot-live {
+                background: var(--accent-light);
+            }
+
+            @keyframes pulse {
+                0%,
+                100% {
+                    box-shadow: 0 0 0 0 rgba(48, 209, 88, 0.4);
+                }
+                50% {
+                    box-shadow: 0 0 0 5px rgba(48, 209, 88, 0);
+                }
+            }
+
+            .mock-bars {
+                display: flex;
+                align-items: center;
+                gap: 2px;
+                margin-left: 8px;
+                height: 14px;
+            }
+
+            .mock-bars i {
+                display: block;
+                width: 2px;
+                background: var(--green);
+                border-radius: 1px;
+                animation: bar 1.2s ease-in-out infinite;
+            }
+
+            .mock-listening.answering .mock-bars i {
+                background: var(--accent-light);
+            }
+
+            .mock-bars i:nth-child(1) {
+                height: 4px;
+                animation-delay: 0s;
+            }
+            .mock-bars i:nth-child(2) {
+                height: 11px;
+                animation-delay: 0.15s;
+            }
+            .mock-bars i:nth-child(3) {
+                height: 8px;
+                animation-delay: 0.3s;
+            }
+            .mock-bars i:nth-child(4) {
+                height: 13px;
+                animation-delay: 0.1s;
+            }
+            .mock-bars i:nth-child(5) {
+                height: 6px;
+                animation-delay: 0.2s;
+            }
+
+            @keyframes bar {
+                0%,
+                100% {
+                    transform: scaleY(0.4);
+                    opacity: 0.5;
+                }
+                50% {
+                    transform: scaleY(1);
+                    opacity: 1;
+                }
+            }
+
+            .mock-card {
+                padding: 18px;
+                border-radius: 10px;
+                transition: all 0.3s cubic-bezier(0.15, 0.85, 0.45, 1);
+            }
+
+            .mock-card-label {
+                font-size: 10px;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 0.15em;
+                color: var(--text-30);
+                margin-bottom: 12px;
+                display: flex;
+                align-items: center;
+                gap: 6px;
+            }
+
+            .mock-q {
+                background: rgba(255, 255, 255, 0.015);
+                border: 1px solid var(--border);
+            }
+
+            .mock-q .text {
+                font-size: 14px;
+                color: var(--text);
+                line-height: 1.5;
+                min-height: 21px;
+            }
+
+            .mock-a {
+                background: rgba(94, 67, 243, 0.02);
+                border: 1px solid rgba(94, 67, 243, 0.12);
+                min-height: 140px;
+            }
+
+            .mock-a .text {
+                font-size: 13px;
+                color: var(--text-60);
+                line-height: 1.7;
+            }
+
+            .mock-a .hl {
+                color: var(--accent-light);
+                font-weight: 500;
+            }
+            .mock-a strong {
+                color: var(--text);
+                font-weight: 600;
+            }
+
+            .cursor-blink {
+                display: inline-block;
+                width: 2px;
+                height: 14px;
+                background: var(--accent-light);
+                margin-left: 2px;
+                vertical-align: text-bottom;
+                animation: blink 0.9s step-end infinite;
+            }
+
+            @keyframes blink {
+                50% {
+                    opacity: 0;
+                }
+            }
+
+            /* ─── Headers & Section Info ─── */
+            .sec {
+                padding: 120px 0;
+            }
+
+            .sec-header {
+                max-width: 500px;
+                margin-bottom: 48px;
+            }
+
+            .sec-label {
+                font-family: "JetBrains Mono", monospace;
+                font-size: 10px;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 0.25em;
+                color: var(--accent-light);
+                margin-bottom: 12px;
+            }
+
+            .sec-title {
+                font-size: clamp(28px, 4.5vw, 42px);
+                font-weight: 800;
+                letter-spacing: -0.03em;
+                line-height: 1.15;
+                margin-bottom: 16px;
+            }
+
+            .sec-desc {
+                font-size: 15px;
+                color: var(--text-60);
+                line-height: 1.6;
+                font-weight: 400;
+            }
+
+            /* ─── Apple Bento Grid ─── */
+            .bento-grid {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 16px;
+                margin-top: 48px;
+            }
+
+            .bento-card {
+                background: rgba(13, 13, 17, 0.45);
+                border: 1px solid var(--border);
+                border-radius: 16px;
+                padding: 32px;
+                position: relative;
+                overflow: hidden;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+                backdrop-filter: blur(20px);
+                -webkit-backdrop-filter: blur(20px);
+                transition:
+                    border-color 0.25s,
+                    background 0.25s,
+                    transform 0.25s cubic-bezier(0.23, 1, 0.32, 1);
+                will-change: transform;
+            }
+
+            .bento-card:hover {
+                border-color: var(--border-light);
+                background: rgba(255, 255, 255, 0.02);
+                transform: translateY(-4px);
+            }
+
+            .bento-card.col-span-2 {
+                grid-column: span 2;
+            }
+
+            /* Mouse Glow Layer for Bento cards */
+            .bento-glow {
+                position: absolute;
+                inset: 0;
+                background: radial-gradient(
+                    circle 240px at var(--mx, -1000px) var(--my, -1000px),
+                    rgba(94, 67, 243, 0.08),
+                    transparent
+                );
+                pointer-events: none;
+                z-index: 1;
+            }
+
+            .bento-content {
+                position: relative;
+                z-index: 2;
+                height: 100%;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+            }
+
+            .bento-icon {
+                width: 38px;
+                height: 38px;
+                border-radius: 8px;
+                display: grid;
+                place-items: center;
+                font-size: 16px;
+                margin-bottom: 24px;
+            }
+
+            .bi-purple {
+                background: rgba(94, 67, 243, 0.08);
+                border: 1px solid rgba(94, 67, 243, 0.15);
+            }
+            .bi-green {
+                background: rgba(48, 209, 88, 0.08);
+                border: 1px solid rgba(48, 209, 88, 0.15);
+            }
+            .bi-orange {
+                background: rgba(255, 159, 10, 0.08);
+                border: 1px solid rgba(255, 159, 10, 0.15);
+            }
+            .bi-rose {
+                background: rgba(255, 69, 58, 0.08);
+                border: 1px solid rgba(255, 69, 58, 0.15);
+            }
+            .bi-blue {
+                background: rgba(10, 132, 255, 0.08);
+                border: 1px solid rgba(10, 132, 255, 0.15);
+            }
+
+            .bento-card h3 {
+                font-size: 16px;
+                font-weight: 600;
+                margin-bottom: 8px;
+                letter-spacing: -0.01em;
+            }
+
+            .bento-card p {
+                font-size: 13px;
+                color: var(--text-60);
+                line-height: 1.55;
+                font-weight: 400;
+            }
+
+            /* Interactive details inside bento grid */
+            .bento-preview {
+                height: 120px;
+                margin-bottom: 24px;
+                border-radius: 8px;
+                background: rgba(0, 0, 0, 0.3);
+                border: 1px solid var(--border);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                overflow: hidden;
+                position: relative;
+            }
+
+            /* Audio SCK preview visualizer */
+            .audio-wave {
+                display: flex;
+                align-items: center;
+                gap: 4px;
+            }
+
+            .audio-wave span {
+                width: 3px;
+                height: 12px;
+                background: var(--rose);
+                border-radius: 2px;
+                animation: bounceWave 0.8s ease-in-out infinite alternate;
+            }
+
+            .audio-wave span:nth-child(2) {
+                height: 28px;
+                animation-delay: 0.15s;
+            }
+            .audio-wave span:nth-child(3) {
+                height: 18px;
+                animation-delay: 0.3s;
+            }
+            .audio-wave span:nth-child(4) {
+                height: 42px;
+                animation-delay: 0.05s;
+            }
+            .audio-wave span:nth-child(5) {
+                height: 24px;
+                animation-delay: 0.25s;
+            }
+            .audio-wave span:nth-child(6) {
+                height: 10px;
+                animation-delay: 0.4s;
+            }
+
+            @keyframes bounceWave {
+                0% {
+                    transform: scaleY(0.3);
+                }
+                100% {
+                    transform: scaleY(1.1);
+                }
+            }
+
+            /* Screen capture invisible preview mock */
+            .ghost-preview-toggle {
+                display: flex;
+                gap: 16px;
+                align-items: center;
+                z-index: 2;
+            }
+
+            .mock-screen {
+                width: 130px;
+                height: 80px;
+                background: rgba(255, 255, 255, 0.02);
+                border: 1px solid var(--border);
+                border-radius: 6px;
+                position: relative;
+                display: flex;
+                flex-direction: column;
+                justify-content: flex-end;
+                padding: 8px;
+            }
+
+            .mock-screen .logo-mark {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                opacity: 0.1;
+                font-size: 20px;
+            }
+
+            .mock-screen-panel {
+                width: 100%;
+                height: 24px;
+                background: rgba(94, 67, 243, 0.8);
+                border-radius: 4px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 8px;
+                color: white;
+                font-weight: 500;
+                transition: all 0.4s cubic-bezier(0.15, 0.85, 0.45, 1);
+            }
+
+            .toggle-btn {
+                background: var(--surface);
+                border: 1px solid var(--border);
+                padding: 6px 12px;
+                border-radius: 6px;
+                font-size: 11px;
+                cursor: pointer;
+                color: var(--text-60);
+                transition: all 0.2s;
+            }
+
+            .toggle-btn:hover {
+                color: var(--text);
+                background: var(--surface-hover);
+            }
+
+            .toggle-btn.active {
+                background: var(--accent);
+                color: white;
+                border-color: var(--accent-light);
+            }
+
+            /* ─── Dynamic Translation Section ─── */
+            .trans-layout {
+                display: grid;
+                grid-template-columns: 1fr 1.1fr;
+                gap: 60px;
+                align-items: center;
+            }
+
+            .trans-demo {
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .trans-tab-group {
+                display: flex;
+                gap: 6px;
+                margin-bottom: 12px;
+            }
+
+            .trans-tab {
+                padding: 6px 14px;
+                border-radius: 20px;
+                background: var(--surface);
+                border: 1px solid var(--border);
+                font-size: 12px;
+                color: var(--text-60);
+                cursor: pointer;
+                transition: all 0.3s cubic-bezier(0.15, 0.85, 0.45, 1);
+            }
+
+            .trans-tab:hover {
+                color: var(--text);
+                border-color: var(--border-light);
+            }
+
+            .trans-tab.active {
+                background: var(--text);
+                color: var(--bg);
+                border-color: white;
+            }
+
+            .trans-card {
+                padding: 18px 20px;
+                border-radius: 12px;
+                font-size: 13.5px;
+                line-height: 1.6;
+                position: relative;
+                overflow: hidden;
+                transition: all 0.3s;
+            }
+
+            .trans-card .label {
+                font-size: 9px;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 0.15em;
+                margin-bottom: 8px;
+                display: flex;
+                align-items: center;
+                gap: 6px;
+            }
+
+            .trans-orig {
+                background: rgba(255, 255, 255, 0.015);
+                border: 1px solid var(--border);
+                color: var(--text-60);
+            }
+
+            .trans-orig .label {
+                color: var(--accent-light);
+            }
+
+            .trans-trans {
+                background: rgba(94, 67, 243, 0.02);
+                border: 1px solid rgba(94, 67, 243, 0.15);
+                color: var(--text);
+            }
+
+            .trans-trans .label {
+                color: var(--accent-light);
+            }
+
+            .trans-shimmer {
+                position: absolute;
+                top: 0;
+                left: -100%;
+                width: 100%;
+                height: 100%;
+                background: linear-gradient(
+                    90deg,
+                    transparent,
+                    rgba(255, 255, 255, 0.02),
+                    transparent
+                );
+                animation: shimmer 5s infinite;
+            }
+
+            @keyframes shimmer {
+                0% {
+                    left: -100%;
+                }
+                100% {
+                    left: 200%;
+                }
+            }
+
+            /* ─── Shortcuts Keyboard Layout ─── */
+            .sc-grid {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+                margin-top: 48px;
+            }
+
+            .sc-item {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 16px 20px;
+                background: rgba(13, 13, 17, 0.4);
+                border: 1px solid var(--border);
+                border-radius: 12px;
+                backdrop-filter: blur(10px);
+                -webkit-backdrop-filter: blur(10px);
+                transition: all 0.25s cubic-bezier(0.23, 1, 0.32, 1);
+            }
+
+            .sc-item:hover {
+                border-color: var(--border-light);
+                background: rgba(255, 255, 255, 0.02);
+                transform: translateY(-2px);
+            }
+
+            .sc-label {
+                font-size: 13px;
+                color: var(--text-60);
+                font-weight: 400;
+            }
+
+            .sc-keys {
+                display: flex;
+                gap: 5px;
+            }
+
+            /* Realistic Apple Magic Keyboard Keycap styling */
+            .kbd {
+                padding: 4px 10px;
+                background: linear-gradient(
+                    180deg,
+                    rgba(255, 255, 255, 0.08) 0%,
+                    rgba(255, 255, 255, 0.03) 100%
+                );
+                border: 1px solid rgba(255, 255, 255, 0.12);
+                border-bottom-color: rgba(255, 255, 255, 0.22);
+                border-radius: 6px;
+                font-family: "JetBrains Mono", monospace;
+                font-size: 11px;
+                font-weight: 500;
+                color: var(--text);
+                min-width: 28px;
+                text-align: center;
+                box-shadow:
+                    0 1px 0 rgba(0, 0, 0, 0.4),
+                    0 1px 2px rgba(0, 0, 0, 0.2),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+                text-shadow: 0 1px 0 rgba(0, 0, 0, 0.5);
+                transition: all 0.1s ease;
+            }
+
+            .sc-item:hover .kbd {
+                border-color: rgba(255, 255, 255, 0.2);
+                border-bottom-color: rgba(255, 255, 255, 0.35);
+                background: linear-gradient(
+                    180deg,
+                    rgba(255, 255, 255, 0.12) 0%,
+                    rgba(255, 255, 255, 0.05) 100%
+                );
+            }
+
+            /* ─── Download Premium Box ─── */
+            .dl {
+                text-align: center;
+                padding: 120px 0;
+            }
+
+            .dl-box {
+                max-width: 580px;
+                margin: 0 auto;
+                padding: 60px 40px;
+                background: radial-gradient(
+                    circle at top,
+                    rgba(94, 67, 243, 0.05) 0%,
+                    rgba(0, 0, 0, 0.4) 100%
+                );
+                border: 1px solid var(--border);
+                border-radius: 24px;
+                position: relative;
+                overflow: hidden;
+                backdrop-filter: blur(30px);
+                -webkit-backdrop-filter: blur(30px);
+            }
+
+            .dl-box::before {
+                content: "";
+                position: absolute;
+                top: 0;
+                left: 20%;
+                right: 20%;
+                height: 1px;
+                background: linear-gradient(
+                    90deg,
+                    transparent,
+                    var(--accent-light),
+                    transparent
+                );
+            }
+
+            .dl-box h2 {
+                font-size: 32px;
+                font-weight: 800;
+                letter-spacing: -0.02em;
+                margin-bottom: 8px;
+            }
+
+            .dl-box p {
+                color: var(--text-60);
+                margin-bottom: 32px;
+                font-weight: 400;
+                font-size: 14px;
+            }
+
+            .dl-box .btn {
+                font-size: 14px;
+                padding: 12px 32px;
+                border-radius: 24px;
+            }
+
+            .dl-meta {
+                display: flex;
+                justify-content: center;
+                gap: 24px;
+                margin-top: 24px;
+                font-size: 11px;
+                color: var(--text-30);
+                font-family: "JetBrains Mono", monospace;
+            }
+
+            /* ─── Footer ─── */
+            footer {
+                padding: 40px 24px;
+                text-align: center;
+                border-top: 1px solid var(--border);
+                font-size: 11px;
+                color: var(--text-30);
+                background: rgba(0, 0, 0, 0.2);
+            }
+
+            footer a {
+                color: var(--text-60);
+                text-decoration: none;
+                transition: color 0.2s;
+            }
+
+            footer a:hover {
+                color: var(--accent-light);
+            }
+
+            /* ─── Apple-style Smooth Reveal ─── */
+            @keyframes appleFadeInUp {
+                from {
+                    opacity: 0;
+                    transform: translateY(16px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            @keyframes appleZoomInUp {
+                from {
+                    opacity: 0;
+                    transform: scale(0.97) translateY(30px);
+                }
+                to {
+                    opacity: 1;
+                    transform: scale(1) translateY(0);
+                }
+            }
+
+            .reveal {
+                opacity: 0;
+                transform: translateY(24px);
+                transition:
+                    opacity 1s cubic-bezier(0.15, 0.85, 0.45, 1),
+                    transform 1s cubic-bezier(0.15, 0.85, 0.45, 1);
+            }
+
+            .reveal.visible {
+                opacity: 1;
+                transform: translateY(0);
+            }
+
+            .reveal-delay-1 {
+                transition-delay: 0.15s;
+            }
+            .reveal-delay-2 {
+                transition-delay: 0.3s;
+            }
+
+            /* ─── Responsive ─── */
+            @media (max-width: 900px) {
+                .bento-grid {
+                    grid-template-columns: 1fr;
+                }
+                .bento-card.col-span-2 {
+                    grid-column: span 1;
+                }
+                .trans-layout {
+                    grid-template-columns: 1fr;
+                    gap: 40px;
+                }
+                .sc-grid {
+                    grid-template-columns: 1fr;
+                }
+            }
+
+            @media (max-width: 768px) {
+                .nav {
+                    padding: 0 20px;
+                }
+                .nav-links {
+                    display: none;
+                }
+                .hero {
+                    padding: 120px 20px 60px;
+                }
+                .hero-btns {
+                    flex-direction: column;
+                    width: 100%;
+                    gap: 10px;
+                }
+                .btn {
+                    justify-content: center;
+                    width: 100%;
+                }
+                .container {
+                    padding: 0 20px;
+                }
+                .sec {
+                    padding: 80px 0;
+                }
+                .dl-box {
+                    padding: 48px 20px;
+                }
+            }
         </style>
     </head>
     <body>
-        <div class="cursor-dot"></div>
-        <div class="cursor-ring"></div>
-        <div class="scroll-progress"></div>
-
-        <div class="loader" id="loader">
-            <div class="loader-mark"><span class="dot"></span>Interview Assist</div>
-            <div class="loader-num" id="loader-num">0</div>
-            <div class="loader-bar"><i id="loader-bar"></i></div>
-            <div class="loader-text">Initializing · Loading assets</div>
-        </div>
-
         <div class="ambient-glow-wrapper">
             <div class="ambient-glow glow-1"></div>
             <div class="ambient-glow glow-2"></div>
@@ -287,8 +1250,7 @@
                 <div class="nav-icon"><img src="Resources/AppIcon.iconset/icon_128x128.png" alt="Interview Assist"></div>
                 Interview Assist
             </div>
-            <ul class="nav-links" id="nav-links">
-                <span class="nav-pill" id="nav-pill"></span>
+            <ul class="nav-links">
                 <li><a href="#features">功能</a></li>
                 <li><a href="#translation">翻译</a></li>
                 <li><a href="#shortcuts">快捷键</a></li>
@@ -297,30 +1259,126 @@
         </nav>
 
         <section class="hero">
-            <div class="hero-pill gsap-fade">v2.0 · 实时流式翻译面板上线 <span>NEW</span></div>
-            <h1>
-                <span class="line"><span>面试<span class="em">开挂</span></span></span>
-                <span class="line"><span>无感且无声</span></span>
-            </h1>
-            <p class="gsap-fade">实时捕获面试官系统声音与麦克风音频，AI 生成定制参考答案。专属悬浮窗仅你可见，共享屏幕完全隐形。</p>
-            <div class="hero-btns gsap-fade">
-                <a href="#download" class="btn btn-fill magnetic"><span class="btn-bg"></span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg><span class="magnet-text">下载 DMG 镜像包</span></a>
-                <a href="https://github.com/yueseqaz/interview-assist" class="btn btn-ghost magnetic" target="_blank"><span class="btn-bg"></span><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg><span class="magnet-text">GitHub 源码</span></a>
+            <div class="hero-pill">
+                v2.0 · 实时流式翻译面板上线 <span>NEW</span>
+            </div>
+            <h1>面试<span class="em">开挂</span><br />无感且无声</h1>
+            <p>
+                实时捕获面试官系统声音与麦克风音频，AI
+                生成定制参考答案。专属悬浮窗仅你可见，共享屏幕完全隐形。
+            </p>
+            <div class="hero-btns">
+                <a href="#download" class="btn btn-fill">
+                    <svg
+                        width="14"
+                        height="14"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2.5"
+                    >
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                        <polyline points="7 10 12 15 17 10" />
+                        <line x1="12" y1="15" x2="12" y2="3" />
+                    </svg>
+                    下载 DMG 镜像包
+                </a>
+                <a
+                    href="https://github.com/yueseqaz/interview-assist"
+                    class="btn btn-ghost"
+                    target="_blank"
+                >
+                    <svg
+                        width="14"
+                        height="14"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                    >
+                        <path
+                            d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"
+                        />
+                    </svg>
+                    GitHub 源码
+                </a>
             </div>
 
-            <div class="hero-mock gsap-scale" id="hero-mock">
-                <div class="mock-wrap" id="mock-wrap">
+            <div class="hero-mock">
+                <div class="mock-wrap">
                     <div class="mock">
-                        <div class="mock-bar"><div class="mock-dot r"></div><div class="mock-dot y"></div><div class="mock-dot g"></div><div class="mock-title-bar">Interview Assist Window</div></div>
+                        <div class="mock-bar">
+                            <div class="mock-dot r"></div>
+                            <div class="mock-dot y"></div>
+                            <div class="mock-dot g"></div>
+                            <div class="mock-title-bar">
+                                Interview Assist Window
+                            </div>
+                        </div>
                         <div class="mock-body">
-                            <div class="mock-row mock-listening" id="mock-status"><div class="dot-live"></div><span id="mock-status-text">正在捕获系统音频</span><div class="mock-bars" id="mock-visualizer"><i></i><i></i><i></i><i></i><i></i></div></div>
+                            <div
+                                class="mock-row mock-listening"
+                                id="mock-status"
+                            >
+                                <div class="dot-live"></div>
+                                <span id="mock-status-text"
+                                    >正在捕获系统音频</span
+                                >
+                                <div class="mock-bars" id="mock-visualizer">
+                                    <i></i><i></i><i></i><i></i><i></i>
+                                </div>
+                            </div>
                             <div class="mock-card mock-q">
-                                <div class="mock-card-label"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>语音问题识别</div>
-                                <div class="text" id="typewriter-q">请介绍一下 Redis 和 Memcached 的区别，什么场景下选择哪个？</div>
+                                <div class="mock-card-label">
+                                    <svg
+                                        width="10"
+                                        height="10"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        stroke-width="2.5"
+                                    >
+                                        <path
+                                            d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"
+                                        />
+                                        <circle cx="12" cy="7" r="4" />
+                                    </svg>
+                                    语音问题识别
+                                </div>
+                                <div class="text" id="typewriter-q">
+                                    请介绍一下 Redis 和 Memcached
+                                    的区别，什么场景下选择哪个？
+                                </div>
                             </div>
                             <div class="mock-card mock-a">
-                                <div class="mock-card-label"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>AI 生成参考回答</div>
-                                <div class="text" id="typewriter-a"><strong>数据结构：</strong>Redis 支持 <span class="hl">String、Hash、List、Set、Sorted Set</span> 等多种结构，Memcached 只支持简单的 KV。<br><br><strong>持久化：</strong>Redis 支持 RDB 和 AOF 两种持久化方式，Memcached 不支持。<br><br><strong>场景选择：</strong>需要复杂数据结构和持久化选 Redis，纯缓存且追求简单选 Memcached。<span class="cursor-blink"></span></div>
+                                <div class="mock-card-label">
+                                    <svg
+                                        width="10"
+                                        height="10"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        stroke-width="2.5"
+                                    >
+                                        <path
+                                            d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
+                                        />
+                                    </svg>
+                                    AI 生成参考回答
+                                </div>
+                                <div class="text" id="typewriter-a">
+                                    <strong>数据结构：</strong>Redis 支持
+                                    <span class="hl"
+                                        >String、Hash、List、Set、Sorted
+                                        Set</span
+                                    >
+                                    等多种结构，Memcached 只支持简单的 KV。<br /><br />
+                                    <strong>持久化：</strong>Redis 支持 RDB 和
+                                    AOF 两种持久化方式，Memcached 不支持。<br /><br />
+                                    <strong>场景选择：</strong
+                                    >需要复杂数据结构和持久化选
+                                    Redis，纯缓存且追求简单选 Memcached。<span
+                                        class="cursor-blink"
+                                    ></span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -330,29 +1388,147 @@
 
         <section class="sec" id="features">
             <div class="container">
-                <div class="sec-header">
-                    <div class="sec-label gsap-fade">功能特性 / Features</div>
-                    <h2 class="sec-title"><span class="line"><span>专为核心面试</span></span><span class="line"><span>精雕细琢的每个细节</span></span></h2>
-                    <p class="sec-desc gsap-fade">从硬件级音频捕获，到端到端的毫秒级文字输出，重塑您的求职体验。</p>
+                <div class="sec-header reveal">
+                    <div class="sec-label">功能特性</div>
+                    <h2 class="sec-title">
+                        专为核心面试<br />精雕细琢的每个细节
+                    </h2>
+                    <p class="sec-desc">
+                        从硬件级音频捕获，到端到端的毫秒级文字输出，重塑您的求职体验。
+                    </p>
                 </div>
-                <div class="bento-grid">
-                    <div class="bento-card col-span-2 gsap-up" data-tilt"><div class="bento-glow"></div><div class="bento-content"><div><div class="bento-preview"><div class="audio-wave"><span></span><span></span><span></span><span></span><span></span><span></span></div></div><h3>系统音频无驱捕获</h3><p>基于 macOS ScreenCaptureKit 框架。无需在系统中额外安装虚拟声卡驱动，不改变默认音频输出通道，直接在系统层纯净捕获视频会议软件播放的声音。</p></div></div></div>
-                    <div class="bento-card gsap-up" data-tilt><div class="bento-glow"></div><div class="bento-content"><div><div class="bento-preview"><div class="ghost-preview-toggle"><div class="mock-screen"><div class="logo-mark">🖥️</div><div class="mock-screen-panel" id="screen-panel">面试助手面板</div></div><button class="toggle-btn" id="ghost-toggle">隐藏悬浮窗</button></div></div><h3>屏幕共享完全不可见</h3><p>悬浮面板采用 NSPanel 深度底层属性，无论使用腾讯会议、Zoom 等会议进行屏幕共享或远程截图，面试官视角均完全隐形。</p></div></div></div>
-                    <div class="bento-card gsap-up" data-tilt"><div class="bento-glow"></div><div class="bento-content"><div><div class="bento-icon bi-purple">🎙️</div><h3>实时语音转文字</h3><p>集成 Deepgram Nova 3 流式引擎，识别延迟低于 1 秒，支持中英日韩等全球主流语言混合识别。</p></div></div></div>
-                    <div class="bento-card gsap-up" data-tilt><div class="bento-glow"></div><div class="bento-content"><div><div class="bento-icon bi-orange">🤖</div><h3>AI 结构化提炼</h3><p>结合 Deepseek、Claude 深度定制的 Prompt 体系。自动按 STAR 法则，生成口语化、极富逻辑的要点大纲。</p></div></div></div>
-                    <div class="bento-card gsap-up" data-tilt"><div class="bento-glow"></div><div class="bento-content"><div><div class="bento-icon bi-blue">📝</div><h3>简历集成与上下文关联</h3><p>支持将简历以纯文本集成到助手后台。AI 自动检索你的项目经验，并在回答中举例说明，完美融合背景。</p></div></div></div>
-                    <div class="bento-card col-span-2 gsap-up" data-tilt><div class="bento-glow"></div><div class="bento-content"><div><div class="bento-preview" style="gap: 20px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-60);"><div>🔒</div><div style="color: var(--green)">[硬件级安全]</div></div><h3>开发者密钥安全隔离</h3><p>你的 Deepgram & LLM API 秘钥完全保存在 macOS 本地 Keychain 安全硬件区域，不对外发送，保证个人数据和账户资产的安全。</p></div></div></div>
-                </div>
-            </div>
-        </section>
 
-        <section class="stats">
-            <div class="container">
-                <div class="stats-row">
-                    <div class="stat-item"><div class="stat-num"><span class="counter" data-target="800">0</span><span class="accent">ms</span></div><div class="stat-label">Voice → Text 延迟</div></div>
-                    <div class="stat-item"><div class="stat-num"><span class="counter" data-target="40">0</span><span class="accent">+</span></div><div class="stat-label">支持语种混合识别</div></div>
-                    <div class="stat-item"><div class="stat-num"><span class="counter" data-target="100">0</span><span class="accent">%</span></div><div class="stat-label">本地密钥隔离</div></div>
-                    <div class="stat-item"><div class="stat-num"><span class="counter" data-target="0">0</span><span class="accent">驱动</span></div><div class="stat-label">系统级音频捕获</div></div>
+                <div class="bento-grid reveal reveal-delay-1">
+                    <!-- Bento Card 1: 2-column wide for System Audio -->
+                    <div class="bento-card col-span-2">
+                        <div class="bento-glow"></div>
+                        <div class="bento-content">
+                            <div>
+                                <div class="bento-preview">
+                                    <div class="audio-wave">
+                                        <span></span><span></span><span></span
+                                        ><span></span><span></span><span></span>
+                                    </div>
+                                </div>
+                                <h3>系统音频无驱捕获</h3>
+                                <p>
+                                    基于 macOS ScreenCaptureKit
+                                    框架。无需在系统中额外安装虚拟声卡驱动，不改变默认音频输出通道，直接在系统层纯净捕获视频会议软件播放的声音。
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bento Card 2: 1-column Screen Capture Hidden -->
+                    <div class="bento-card">
+                        <div class="bento-glow"></div>
+                        <div class="bento-content">
+                            <div>
+                                <div class="bento-preview">
+                                    <div class="ghost-preview-toggle">
+                                        <div class="mock-screen">
+                                            <div class="logo-mark">🖥️</div>
+                                            <div
+                                                class="mock-screen-panel"
+                                                id="screen-panel"
+                                            >
+                                                面试助手面板
+                                            </div>
+                                        </div>
+                                        <button
+                                            class="toggle-btn"
+                                            id="ghost-toggle"
+                                        >
+                                            隐藏悬浮窗
+                                        </button>
+                                    </div>
+                                </div>
+                                <h3>屏幕共享完全不可见</h3>
+                                <p>
+                                    悬浮面板采用 NSPanel
+                                    深度底层属性，无论使用腾讯会议、Zoom
+                                    等会议进行屏幕共享或远程截图，面试官视角均完全隐形。
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bento Card 3: 1-column Voice to Text -->
+                    <div class="bento-card">
+                        <div class="bento-glow"></div>
+                        <div class="bento-content">
+                            <div>
+                                <div class="bento-icon bi-purple">🎙️</div>
+                                <h3>实时语音转文字</h3>
+                                <p>
+                                    集成 Deepgram Nova 3 流式引擎，识别延迟低于
+                                    1 秒，支持中英日韩等全球主流语言混合识别。
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bento Card 4: 1-column AI Answers -->
+                    <div class="bento-card">
+                        <div class="bento-glow"></div>
+                        <div class="bento-content">
+                            <div>
+                                <div class="bento-icon bi-orange">🤖</div>
+                                <h3>AI 结构化提炼</h3>
+                                <p>
+                                    结合 Deepseek、Claude 深度定制的 Prompt
+                                    体系。自动按 STAR
+                                    法则，生成口语化、极富逻辑的要点大纲。
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bento Card 5: 1-column Resume Context -->
+                    <div class="bento-card">
+                        <div class="bento-glow"></div>
+                        <div class="bento-content">
+                            <div>
+                                <div class="bento-icon bi-blue">📝</div>
+                                <h3>简历集成与上下文关联</h3>
+                                <p>
+                                    支持将简历以纯文本集成到助手后台。AI
+                                    自动检索你的项目经验，并在回答中举例说明，完美融合背景。
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bento Card 6: 2-column Secure storage -->
+                    <div class="bento-card col-span-2">
+                        <div class="bento-glow"></div>
+                        <div class="bento-content">
+                            <div>
+                                <div
+                                    class="bento-preview"
+                                    style="
+                                        gap: 20px;
+                                        font-family:
+                                            &quot;JetBrains Mono&quot;,
+                                            monospace;
+                                        font-size: 12px;
+                                        color: var(--text-60);
+                                    "
+                                >
+                                    <div>🔒</div>
+                                    <div style="color: var(--green)">
+                                        [硬件级安全]
+                                    </div>
+                                </div>
+                                <h3>开发者密钥安全隔离</h3>
+                                <p>
+                                    你的 Deepgram & LLM API 秘钥完全保存在 macOS
+                                    本地 Keychain
+                                    安全硬件区域，不对外发送，保证个人数据和账户资产的安全。
+                                </p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
@@ -360,15 +1536,82 @@
         <section class="sec" id="translation">
             <div class="container">
                 <div class="trans-layout">
-                    <div>
-                        <div class="sec-label gsap-fade">跨国沟通无虞</div>
-                        <h2 class="sec-title"><span class="line"><span>独立双语翻译板</span></span><span class="line"><span>实时洞悉外语发问</span></span></h2>
-                        <p class="sec-desc gsap-fade">针对非母语环境提供无延迟翻译面板，实时句子增量识别。只计算最新差异字，大幅节约你的 API Token 开销。</p>
-                        <div class="trans-tab-group gsap-fade" id="lang-switcher"><span class="trans-tab active" data-lang="en">英 ➔ 中</span><span class="trans-tab" data-lang="jp">日 ➔ 中</span><span class="trans-tab" data-lang="kr">韩 ➔ 中</span></div>
+                    <div class="reveal">
+                        <div class="sec-label">跨国沟通无虞</div>
+                        <h2 class="sec-title">
+                            独立双语翻译板<br />实时洞悉外语发问
+                        </h2>
+                        <p class="sec-desc">
+                            针对非母语环境提供无延迟翻译面板，实时句子增量识别。只计算最新差异字，大幅节约你的
+                            API Token 开销。
+                        </p>
+                        <div
+                            style="margin-top: 24px"
+                            class="trans-tab-group"
+                            id="lang-switcher"
+                        >
+                            <span class="trans-tab active" data-lang="en"
+                                >英 ➔ 中</span
+                            >
+                            <span class="trans-tab" data-lang="jp"
+                                >日 ➔ 中</span
+                            >
+                            <span class="trans-tab" data-lang="kr"
+                                >韩 ➔ 中</span
+                            >
+                        </div>
                     </div>
-                    <div class="trans-demo gsap-up">
-                        <div class="trans-card trans-orig" id="trans-orig-card"><div class="label"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg>识别原文</div><span id="trans-orig-text">Can you explain the difference between Redis and Memcached?</span><div class="trans-shimmer"></div></div>
-                        <div class="trans-card trans-trans" id="trans-target-card"><div class="label"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>即时译文</div><span id="trans-target-text">你能解释一下 Redis 和 Memcached 之间的区别吗？</span><div class="trans-shimmer" style="animation-delay: 1s"></div></div>
+                    <div class="trans-demo reveal reveal-delay-1">
+                        <div class="trans-card trans-orig">
+                            <div class="label">
+                                <svg
+                                    width="10"
+                                    height="10"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2.5"
+                                >
+                                    <path
+                                        d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"
+                                    />
+                                    <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+                                </svg>
+                                识别原文
+                            </div>
+                            <span id="trans-orig-text"
+                                >Can you explain the difference between Redis
+                                and Memcached?</span
+                            >
+                            <div class="trans-shimmer"></div>
+                        </div>
+                        <div class="trans-card trans-trans">
+                            <div class="label">
+                                <svg
+                                    width="10"
+                                    height="10"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2.5"
+                                >
+                                    <circle cx="12" cy="12" r="10" />
+                                    <line x1="2" y1="12" x2="22" y2="12" />
+                                    <path
+                                        d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"
+                                    />
+                                </svg>
+                                即时译文
+                            </div>
+                            <span id="trans-target-text"
+                                >你能解释一下 Redis 和 Memcached
+                                之间的区别吗？</span
+                            >
+                            <div
+                                class="trans-shimmer"
+                                style="animation-delay: 1s"
+                            ></div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -376,130 +1619,409 @@
 
         <section class="sec" id="shortcuts">
             <div class="container">
-                <div style="text-align: center; max-width: 600px; margin: 0 auto 36px;">
-                    <div class="sec-label gsap-fade">高频键盘流</div>
-                    <h2 class="sec-title" style="margin-left: auto; margin-right: auto;"><span class="line"><span>手无需离开键盘，胜券在握</span></span></h2>
+                <div
+                    class="reveal"
+                    style="
+                        text-align: center;
+                        max-width: 600px;
+                        margin: 0 auto 36px;
+                    "
+                >
+                    <div class="sec-label">高频键盘流</div>
+                    <h2 class="sec-title">手无需离开键盘，胜券在握</h2>
                 </div>
-                <div class="sc-grid">
-                    <div class="sc-item gsap-up"><span class="sc-label">开始收听 / 生成回答 / 切换下一题</span><div class="sc-keys"><span class="kbd">⌘</span><span class="kbd">⌘</span></div></div>
-                    <div class="sc-item gsap-up"><span class="sc-label">立即显示 / 隐藏助手面板</span><div class="sc-keys"><span class="kbd">⌘</span><span class="kbd">⇧</span><span class="kbd">H</span></div></div>
-                    <div class="sc-item gsap-up"><span class="sc-label">鼠标穿透模式 (避免遮挡底层窗口操作)</span><div class="sc-keys"><span class="kbd">⌥</span><span class="kbd">⌥</span></div></div>
-                    <div class="sc-item gsap-up"><span class="sc-label">贴附于窗口顶部边缘</span><div class="sc-keys"><span class="kbd">⌘</span><span class="kbd">⇧</span><span class="kbd">T</span></div></div>
-                    <div class="sc-item gsap-up"><span class="sc-label">导出当前整场面试记录</span><div class="sc-keys"><span class="kbd">⌘</span><span class="kbd">⇧</span><span class="kbd">E</span></div></div>
-                    <div class="sc-item gsap-up"><span class="sc-label">快速打开助手系统设置</span><div class="sc-keys"><span class="kbd">⌘</span><span class="kbd">,</span></div></div>
+                <div class="sc-grid reveal reveal-delay-1">
+                    <div class="sc-item">
+                        <span class="sc-label"
+                            >开始收听 / 生成回答 / 切换下一题</span
+                        >
+                        <div class="sc-keys">
+                            <span class="kbd">⌘</span><span class="kbd">⌘</span>
+                        </div>
+                    </div>
+                    <div class="sc-item">
+                        <span class="sc-label">立即显示 / 隐藏助手面板</span>
+                        <div class="sc-keys">
+                            <span class="kbd">⌘</span><span class="kbd">⇧</span
+                            ><span class="kbd">H</span>
+                        </div>
+                    </div>
+                    <div class="sc-item">
+                        <span class="sc-label"
+                            >鼠标穿透模式 (避免遮挡底层窗口操作)</span
+                        >
+                        <div class="sc-keys">
+                            <span class="kbd">⌥</span><span class="kbd">⌥</span>
+                        </div>
+                    </div>
+                    <div class="sc-item">
+                        <span class="sc-label">贴附于窗口顶部边缘</span>
+                        <div class="sc-keys">
+                            <span class="kbd">⌘</span><span class="kbd">⇧</span
+                            ><span class="kbd">T</span>
+                        </div>
+                    </div>
+                    <div class="sc-item">
+                        <span class="sc-label">导出当前整场面试记录</span>
+                        <div class="sc-keys">
+                            <span class="kbd">⌘</span><span class="kbd">⇧</span
+                            ><span class="kbd">E</span>
+                        </div>
+                    </div>
+                    <div class="sc-item">
+                        <span class="sc-label">快速打开助手系统设置</span>
+                        <div class="sc-keys">
+                            <span class="kbd">⌘</span><span class="kbd">,</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
 
         <section class="dl" id="download">
             <div class="container">
-                <div class="dl-box gsap-scale">
-                    <h2><span class="line"><span>极速开启，无暇应对每一关</span></span></h2>
-                    <p class="gsap-fade">完全免费、底层代码全面开源，支持 macOS 13.0 及其以上系统</p>
-                    <a href="https://github.com/yueseqaz/interview-assist/releases/latest" class="btn btn-fill magnetic" target="_blank"><span class="btn-bg"></span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg><span class="magnet-text">立即下载 DMG (macOS 13.0+)</span></a>
-                    <div class="dl-meta gsap-fade"><span>Universal Built</span><span>Apple Silicon / Intel</span><span>MIT License</span></div>
+                <div class="dl-box reveal">
+                    <h2>极速开启，无暇应对每一关</h2>
+                    <p>
+                        完全免费、底层代码全面开源，支持 macOS 13.0 及其以上系统
+                    </p>
+                    <a
+                        href="https://github.com/yueseqaz/interview-assist/releases/latest"
+                        class="btn btn-fill"
+                        target="_blank"
+                    >
+                        <svg
+                            width="15"
+                            height="15"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2.5"
+                        >
+                            <path
+                                d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"
+                            />
+                            <polyline points="7 10 12 15 17 10" />
+                            <line x1="12" y1="15" x2="12" y2="3" />
+                        </svg>
+                        立即下载 DMG (macOS 13.0+)
+                    </a>
+                    <div class="dl-meta">
+                        <span>Universal Built</span>
+                        <span>Apple Silicon / Intel</span>
+                        <span>MIT License</span>
+                    </div>
                 </div>
             </div>
         </section>
 
-        <div class="footer-marquee">
-            <div class="track" id="marquee-track">
-                <span class="filled">INTERVIEW</span><span>·</span><span class="star">★</span><span>ASSIST</span><span>·</span><span>OPEN</span><span>·</span><span class="star">★</span><span>SOURCE</span><span>·</span>
-                <span class="filled">INTERVIEW</span><span>·</span><span class="star">★</span><span>ASSIST</span><span>·</span><span>OPEN</span><span>·</span><span class="star">★</span><span>SOURCE</span><span>·</span>
-            </div>
-        </div>
-
         <footer>
             Interview Assist © 2026 ·
-            <a href="https://github.com/yueseqaz/interview-assist" target="_blank">GitHub</a>
-            · Made with 🎙️ by <a href="https://github.com/yueseqaz" target="_blank">yueseqaz</a>
+            <a
+                href="https://github.com/yueseqaz/interview-assist"
+                target="_blank"
+                >GitHub</a
+            >
+            · Made with 🎙️ by
+            <a href="https://github.com/yueseqaz" target="_blank">yueseqaz</a>
         </footer>
 
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
         <script>
-        const lenis = new Lenis({ duration: 1.2, easing: t => Math.min(1, 1.001 - Math.pow(2, -10 * t)), smoothWheel: true });
-        lenis.on('scroll', ScrollTrigger.update);
-        gsap.ticker.add(t => lenis.raf(t * 1000));
-        gsap.ticker.lagSmoothing(0);
+            // ─── Subtle Dynamic Starfield Dust Canvas ───
+            const canvas = document.getElementById("bg-canvas");
+            const ctx = canvas.getContext("2d");
+            let particles = [];
 
-        const loaderObj = { v: 0 };
-        const loaderNum = document.getElementById('loader-num');
-        const loaderBar = document.getElementById('loader-bar');
-        gsap.to(loaderObj, { v: 100, duration: 1.6, ease: 'power2.inOut', onUpdate: () => { const val = Math.round(loaderObj.v); loaderNum.textContent = val; loaderBar.style.transform = `scaleX(${val/100})`; }, onComplete: () => { gsap.to('#loader', { yPercent: -100, duration: 0.9, ease: 'expo.inOut', delay: 0.15, onComplete: () => { document.getElementById('loader').style.display = 'none'; playHeroIntro(); } }); } });
+            function resizeCanvas() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
+            resizeCanvas();
+            window.addEventListener("resize", resizeCanvas);
 
-        const $dot = document.querySelector('.cursor-dot');
-        const $ring = document.querySelector('.cursor-ring');
-        const mouse = { x: window.innerWidth/2, y: window.innerHeight/2 };
-        const dotPos = { x: mouse.x, y: mouse.y };
-        const ringPos = { x: mouse.x, y: mouse.y };
-        window.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; });
-        gsap.ticker.add(() => { dotPos.x += (mouse.x - dotPos.x) * 0.55; dotPos.y += (mouse.y - dotPos.y) * 0.55; ringPos.x += (mouse.x - ringPos.x) * 0.18; ringPos.y += (mouse.y - ringPos.y) * 0.18; gsap.set($dot, { x: dotPos.x, y: dotPos.y }); gsap.set($ring, { x: ringPos.x, y: ringPos.y }); });
-        document.querySelectorAll('a, button, .magnetic, .toggle-btn, .trans-tab').forEach(el => { el.addEventListener('mouseenter', () => $ring.classList.add('expand')); el.addEventListener('mouseleave', () => $ring.classList.remove('expand')); });
+            class Particle {
+                constructor() {
+                    this.reset();
+                }
+                reset() {
+                    this.x = Math.random() * canvas.width;
+                    this.y = Math.random() * canvas.height;
+                    this.size = Math.random() * 1.2 + 0.3;
+                    this.speedX = (Math.random() - 0.5) * 0.15;
+                    this.speedY = (Math.random() - 0.5) * 0.15;
+                    this.opacity = Math.random() * 0.2 + 0.05;
+                }
+                update() {
+                    this.x += this.speedX;
+                    this.y += this.speedY;
+                    if (
+                        this.x < 0 ||
+                        this.x > canvas.width ||
+                        this.y < 0 ||
+                        this.y > canvas.height
+                    )
+                        this.reset();
+                }
+                draw() {
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(255, 255, 255, ${this.opacity})`;
+                    ctx.fill();
+                }
+            }
 
-        document.querySelectorAll('.magnetic').forEach(btn => { btn.addEventListener('mousemove', e => { const r = btn.getBoundingClientRect(); const x = e.clientX - r.left - r.width/2; const y = e.clientY - r.top - r.height/2; gsap.to(btn, { x: x * 0.25, y: y * 0.35, duration: 0.4, ease: 'power3.out' }); }); btn.addEventListener('mouseleave', () => gsap.to(btn, { x: 0, y: 0, duration: 0.7, ease: 'elastic.out(1, 0.4)' })); });
+            for (let i = 0; i < 25; i++) particles.push(new Particle());
 
-        const canvas = document.getElementById('bg-canvas');
-        const ctx = canvas.getContext('2d');
-        let particles = [];
-        function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
-        resizeCanvas();
-        window.addEventListener('resize', resizeCanvas);
-        class Particle { constructor() { this.reset(); } reset() { this.x = Math.random() * canvas.width; this.y = Math.random() * canvas.height; this.size = Math.random() * 1.2 + 0.3; this.speedX = (Math.random() - 0.5) * 0.15; this.speedY = (Math.random() - 0.5) * 0.15; this.opacity = Math.random() * 0.2 + 0.05; } update() { this.x += this.speedX; this.y += this.speedY; if (this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height) this.reset(); } draw() { ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI*2); ctx.fillStyle = `rgba(255, 255, 255, ${this.opacity})`; ctx.fill(); } }
-        for (let i = 0; i < 25; i++) particles.push(new Particle());
-        function animateParticles() { ctx.clearRect(0, 0, canvas.width, canvas.height); particles.forEach(p => { p.update(); p.draw(); }); requestAnimationFrame(animateParticles); }
-        animateParticles();
+            function animateParticles() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                particles.forEach((p) => {
+                    p.update();
+                    p.draw();
+                });
+                requestAnimationFrame(animateParticles);
+            }
+            animateParticles();
 
-        document.querySelectorAll('[data-tilt]').forEach(card => { card.addEventListener('mousemove', e => { const r = card.getBoundingClientRect(); const x = e.clientX - r.left; const y = e.clientY - r.top; const cx = r.width/2, cy = r.height/2; const rotX = ((y - cy) / cy) * -6; const rotY = ((x - cx) / cx) * 6; card.style.setProperty('--mx', x + 'px'); card.style.setProperty('--my', y + 'px'); gsap.to(card, { rotationX: rotX, rotationY: rotY, transformPerspective: 1000, duration: 0.5, ease: 'power2.out' }); }); card.addEventListener('mouseleave', () => gsap.to(card, { rotationX: 0, rotationY: 0, duration: 0.8, ease: 'elastic.out(1, 0.5)' })); });
+            // ─── Adaptive Mouse Tracking Bento Glow (Smooth tilt-less light effect) ───
+            document.querySelectorAll(".bento-card").forEach((card) => {
+                card.addEventListener("mousemove", (e) => {
+                    const r = card.getBoundingClientRect();
+                    card.style.setProperty("--mx", e.clientX - r.left + "px");
+                    card.style.setProperty("--my", e.clientY - r.top + "px");
+                });
+            });
 
-        const mockWrap = document.getElementById('mock-wrap');
-        const heroMock = document.getElementById('hero-mock');
-        heroMock.addEventListener('mousemove', e => { const r = heroMock.getBoundingClientRect(); const x = (e.clientX - r.left) / r.width - 0.5; const y = (e.clientY - r.top) / r.height - 0.5; gsap.to(mockWrap, { rotationY: x * 6, rotationX: -y * 4, duration: 0.6, ease: 'power2.out' }); });
-        heroMock.addEventListener('mouseleave', () => gsap.to(mockWrap, { rotationY: 0, rotationX: 2, duration: 0.8, ease: 'elastic.out(1, 0.5)' }));
+            // ─── Intersection Observer (Standard Apple Easing) ───
+            const obs = new IntersectionObserver(
+                (entries) => {
+                    entries.forEach((e) => {
+                        if (e.isIntersecting) e.target.classList.add("visible");
+                    });
+                },
+                { threshold: 0.08 },
+            );
 
-        gsap.to(heroMock, { yPercent: -10, scale: 0.95, ease: 'none', scrollTrigger: { trigger: '.hero', start: 'top top', end: 'bottom top', scrub: 0.8 } });
+            document
+                .querySelectorAll(".reveal")
+                .forEach((el) => obs.observe(el));
 
-        function playHeroIntro() { const tl = gsap.timeline({ defaults: { ease: 'expo.out' } }); tl.from('.hero-pill', { y: 30, opacity: 0, scale: 0.95, duration: 0.9 }).from('.hero h1 .line > span', { yPercent: 110, duration: 1.1, stagger: 0.12 }, '-=0.6').from('.hero p', { y: 20, opacity: 0, duration: 0.8 }, '-=0.7').from('.hero-btns', { y: 20, opacity: 0, duration: 0.8 }, '-=0.6').from('.hero-mock', { y: 60, scale: 0.92, opacity: 0, duration: 1.2 }, '-=0.5'); }
+            // ─── Nav Scroll Visual Effect ───
+            window.addEventListener("scroll", () => {
+                document
+                    .getElementById("nav")
+                    .classList.toggle("scrolled", window.scrollY > 40);
+            });
 
-        gsap.utils.toArray('.sec .sec-label').forEach(el => gsap.from(el, { y: 20, opacity: 0, duration: 0.8, ease: 'power3.out', scrollTrigger: { trigger: el, start: 'top 88%' } }));
-        gsap.utils.toArray('.sec .sec-title .line > span').forEach(el => gsap.from(el, { yPercent: 110, duration: 1, ease: 'expo.out', scrollTrigger: { trigger: el, start: 'top 90%' } }));
-        gsap.utils.toArray('.sec .sec-desc').forEach(el => gsap.from(el, { y: 20, opacity: 0, duration: 0.8, ease: 'power3.out', scrollTrigger: { trigger: el, start: 'top 90%' } }));
-        gsap.utils.toArray('.gsap-up').forEach((el, i) => gsap.from(el, { y: 60, opacity: 0, duration: 0.9, ease: 'expo.out', delay: (i % 3) * 0.08, scrollTrigger: { trigger: el, start: 'top 88%' } }));
-        gsap.utils.toArray('.gsap-fade').forEach((el, i) => gsap.from(el, { y: 20, opacity: 0, duration: 0.8, ease: 'power3.out', delay: i * 0.05, scrollTrigger: { trigger: el, start: 'top 92%' } }));
-        gsap.utils.toArray('.gsap-scale').forEach(el => gsap.from(el, { scale: 0.92, opacity: 0, duration: 1, ease: 'expo.out', scrollTrigger: { trigger: el, start: 'top 88%' } }));
+            // ─── Smooth Scroll ───
+            document.querySelectorAll('a[href^="#"]').forEach((a) => {
+                a.addEventListener("click", (e) => {
+                    e.preventDefault();
+                    const t = document.querySelector(a.getAttribute("href"));
+                    if (t)
+                        t.scrollIntoView({
+                            behavior: "smooth",
+                            block: "start",
+                        });
+                });
+            });
 
-        gsap.utils.toArray('.counter').forEach(counter => { const target = +counter.dataset.target; const obj = { v: 0 }; gsap.to(obj, { v: target, duration: 2.2, ease: 'expo.out', scrollTrigger: { trigger: counter, start: 'top 85%' }, onUpdate: () => counter.textContent = Math.round(obj.v) }); });
-        gsap.to('#marquee-track', { xPercent: -50, duration: 18, ease: 'none', repeat: -1 });
+            // ─── Mock Panel Dynamic Typewriter Simulation ───
+            const qaPairs = [
+                {
+                    q: "请介绍一下 Redis 和 Memcached 的区别，什么场景下选择哪个？",
+                    statusListen: "已收到面试官发问",
+                    statusAnswer: "正在生成 AI 结构化答案...",
+                    aLines: [
+                        "<strong>数据结构：</strong>Redis 支持 <span>String、Hash、List、Set、Sorted Set</span> 等多种结构，Memcached 只支持简单的 KV。<br><br>",
+                        "<strong>持久化：</strong>Redis 支持 RDB 和 AOF 两种持久化，Memcached 完全不支持持久化。<br><br>",
+                        "<strong>场景建议：</strong>需要复杂多维数据、需要持久化、需要发布订阅等复杂操作首选 Redis；纯缓存极速读取且场景极简单选用 Memcached。",
+                    ],
+                },
+                {
+                    q: "如何定位和排查高并发系统中的慢 SQL？",
+                    statusListen: "已收到面试官发问",
+                    statusAnswer: "正在生成 AI 结构化答案...",
+                    aLines: [
+                        "<strong>定位手段：</strong>开启 MySQL <span>Slow Query Log</span> 慢查询日志，设定合理阈值，或使用 APM 系统监控。<br><br>",
+                        "<strong>核心排查：</strong>使用 <span>EXPLAIN</span> 分析 SQL 执行计划，着重排查是否触发全表扫描、索引失效或外部排序。<br><br>",
+                        "<strong>优化解决：</strong>按需追加联合索引、重构不合理关联查询，若数据量级过大则考虑冷热分离或分库分表。",
+                    ],
+                },
+                {
+                    q: "能解释一下你的项目中是如何做高可用和削峰处理的吗？",
+                    statusListen: "已收到面试官发问",
+                    statusAnswer: "正在生成 AI 结构化答案...",
+                    aLines: [
+                        "<strong>削峰层：</strong>通过 <span>RabbitMQ/RocketMQ</span> 做异步解耦与缓冲，将瞬时高峰流量有序消费，保护核心库。<br><br>",
+                        "<strong>高可用：</strong>服务侧全面微服务无状态化部署，配合 Nginx 负载均衡和多节点，利用 <span>Sentinel</span> 做集群限流、熔断降级。<br><br>",
+                        "<strong>降级机制：</strong>优先关闭非核心旁路业务，保障主链路核心交易能够降级流式处理。",
+                    ],
+                },
+            ];
 
-        const progressBar = document.querySelector('.scroll-progress');
-        ScrollTrigger.create({ start: 0, end: 'max', onUpdate: self => { document.getElementById('nav').classList.toggle('scrolled', self.scroll() > 40); progressBar.style.setProperty('--p', (self.progress * 100) + '%'); } });
+            let currentIdx = 0;
+            let typingTimeout;
 
-        const pill = document.getElementById('nav-pill');
-        document.querySelectorAll('#nav-links a').forEach(a => { a.addEventListener('mouseenter', () => { const r = a.getBoundingClientRect(); const parentR = a.parentElement.getBoundingClientRect(); gsap.to(pill, { x: r.left - parentR.left, y: r.top - parentR.top, width: r.width, height: r.height, opacity: 1, duration: 0.4, ease: 'power3.out' }); }); });
-        document.getElementById('nav-links').addEventListener('mouseleave', () => gsap.to(pill, { opacity: 0, duration: 0.3 }));
+            function runMockSimulation() {
+                const data = qaPairs[currentIdx];
+                const qEl = document.getElementById("typewriter-q");
+                const aEl = document.getElementById("typewriter-a");
+                const statusEl = document.getElementById("mock-status");
+                const statusTextEl =
+                    document.getElementById("mock-status-text");
 
-        document.querySelectorAll('a[href^="#"]').forEach(a => { a.addEventListener('click', e => { e.preventDefault(); const t = document.querySelector(a.getAttribute('href')); if (t) lenis.scrollTo(t, { offset: -20 }); }); });
+                // Set state 1: Listening / Capturing
+                statusEl.classList.remove("answering");
+                statusTextEl.textContent = "正在捕获系统音频";
+                qEl.innerHTML = "";
+                aEl.innerHTML = "";
 
-        const qaPairs = [
-            { q: "请介绍一下 Redis 和 Memcached 的区别，什么场景下选择哪个？", statusListen: "已收到面试官发问", statusAnswer: "正在生成 AI 结构化答案...", aLines: ["<strong>数据结构：</strong>Redis 支持 <span>String、Hash、List、Set、Sorted Set</span> 等多种结构，Memcached 只支持简单的 KV。<br><br>", "<strong>持久化：</strong>Redis 支持 RDB 和 AOF 两种持久化，Memcached 完全不支持持久化。<br><br>", "<strong>场景建议：</strong>需要复杂多维数据、需要持久化、需要发布订阅等复杂操作首选 Redis；纯缓存极速读取且场景极简单选用 Memcached。"] },
-            { q: "如何定位和排查高并发系统中的慢 SQL？", statusListen: "已收到面试官发问", statusAnswer: "正在生成 AI 结构化答案...", aLines: ["<strong>定位手段：</strong>开启 MySQL <span>Slow Query Log</span> 慢查询日志，设定合理阈值，或使用 APM 系统监控。<br><br>", "<strong>核心排查：</strong>使用 <span>EXPLAIN</span> 分析 SQL 执行计划，着重排查是否触发全表扫描、索引失效或外部排序。<br><br>", "<strong>优化解决：</strong>按需追加联合索引、重构不合理关联查询，若数据量级过大则考虑冷热分离或分库分表。"] },
-            { q: "能解释一下你的项目中是如何做高可用和削峰处理的吗？", statusListen: "已收到面试官发问", statusAnswer: "正在生成 AI 结构化答案...", aLines: ["<strong>削峰层：</strong>通过 <span>RabbitMQ/RocketMQ</span> 做异步解耦与缓冲，将瞬时高峰流量有序消费，保护核心库。<br><br>", "<strong>高可用：</strong>服务侧全面微服务无状态化部署，配合 Nginx 负载均衡和多节点，利用 <span>Sentinel</span> 做集群限流、熔断降级。<br><br>", "<strong>降级机制：</strong>优先关闭非核心旁路业务，保障主链路核心交易能够降级流式处理。"] }
-        ];
-        let currentIdx = 0;
-        let typingTimeout;
-        function runMockSimulation() { const data = qaPairs[currentIdx]; const qEl = document.getElementById("typewriter-q"); const aEl = document.getElementById("typewriter-a"); const statusEl = document.getElementById("mock-status"); const statusTextEl = document.getElementById("mock-status-text"); statusEl.classList.remove("answering"); statusTextEl.textContent = "正在捕获系统音频"; qEl.innerHTML = ""; aEl.innerHTML = ""; let qCharIdx = 0; function typeQ() { if (qCharIdx < data.q.length) { qEl.innerHTML = data.q.substring(0, qCharIdx + 1) + '<span class="cursor-blink"></span>'; qCharIdx++; typingTimeout = setTimeout(typeQ, 55); } else { qEl.innerHTML = data.q; setTimeout(() => { statusEl.classList.add("answering"); statusTextEl.textContent = data.statusAnswer; typeALines(); }, 800); } } function typeALines() { let currentLineIdx = 0; let currentStr = ""; function typeNextLine() { if (currentLineIdx < data.aLines.length) { let tempLine = data.aLines[currentLineIdx]; let lineCharIdx = 0; function typeLineChar() { if (tempLine[lineCharIdx] === "<") { while (lineCharIdx < tempLine.length && tempLine[lineCharIdx] !== ">") { currentStr += tempLine[lineCharIdx]; lineCharIdx++; } if (lineCharIdx < tempLine.length) { currentStr += tempLine[lineCharIdx]; lineCharIdx++; } } if (lineCharIdx < tempLine.length) { aEl.innerHTML = currentStr + tempLine.substring(lineCharIdx, lineCharIdx + 1) + '<span class="cursor-blink"></span>'; currentStr += tempLine[lineCharIdx]; lineCharIdx++; typingTimeout = setTimeout(typeLineChar, 18); } else { currentLineIdx++; setTimeout(typeNextLine, 250); } } typeLineChar(); } else { aEl.innerHTML = currentStr; statusTextEl.textContent = "回答生成完毕"; setTimeout(() => { currentIdx = (currentIdx + 1) % qaPairs.length; runMockSimulation(); }, 5000); } } typeNextLine(); } typeQ(); }
-        setTimeout(runMockSimulation, 1200);
+                // Type question
+                let qCharIdx = 0;
+                function typeQ() {
+                    if (qCharIdx < data.q.length) {
+                        qEl.innerHTML =
+                            data.q.substring(0, qCharIdx + 1) +
+                            '<span class="cursor-blink"></span>';
+                        qCharIdx++;
+                        typingTimeout = setTimeout(typeQ, 55);
+                    } else {
+                        qEl.innerHTML = data.q;
+                        // Transition state after brief interval
+                        setTimeout(() => {
+                            statusEl.classList.add("answering");
+                            statusTextEl.textContent = data.statusAnswer;
+                            typeALines();
+                        }, 800);
+                    }
+                }
 
-        const ghostToggle = document.getElementById("ghost-toggle");
-        const screenPanel = document.getElementById("screen-panel");
-        let isHidden = false;
-        ghostToggle.addEventListener("click", () => { isHidden = !isHidden; if (isHidden) { gsap.to(screenPanel, { opacity: 0, scale: 0.8, duration: 0.4, ease: 'power2.out' }); ghostToggle.textContent = "显示悬浮窗"; ghostToggle.classList.add("active"); } else { gsap.to(screenPanel, { opacity: 1, scale: 1, duration: 0.4, ease: 'power2.out' }); ghostToggle.textContent = "隐藏悬浮窗"; ghostToggle.classList.remove("active"); } });
+                // Type structured answer block by block
+                function typeALines() {
+                    let currentLineIdx = 0;
+                    let currentStr = "";
 
-        const transOrig = document.getElementById("trans-orig-text");
-        const transTarget = document.getElementById("trans-target-text");
-        const transData = { en: { orig: "Can you explain the difference between Redis and Memcached?", trans: "你能解释一下 Redis 和 Memcached 之间的区别吗？" }, jp: { orig: "RedisとMemcachedの違いを説明していただけますか？", trans: "你能向我解释一下 Redis 和 Memcached 的区别吗？" }, kr: { orig: "Redis와 Memcached의 차이점을 설명해 주실 수 있나요?", trans: "你能为我讲解一下 Redis 与 Memcached 之间的区别吗？" } };
-        document.querySelectorAll("#lang-switcher .trans-tab").forEach(tab => { tab.addEventListener("click", () => { document.querySelector("#lang-switcher .trans-tab.active").classList.remove("active"); tab.classList.add("active"); const lang = tab.getAttribute("data-lang"); const origCard = document.getElementById('trans-orig-card'); const targetCard = document.getElementById('trans-target-card'); gsap.to([origCard, targetCard], { y: -8, opacity: 0, duration: 0.2, ease: 'power2.in', stagger: 0.05, onComplete: () => { transOrig.textContent = transData[lang].orig; transTarget.textContent = transData[lang].trans; gsap.fromTo([origCard, targetCard], { y: 12, opacity: 0 }, { y: 0, opacity: 1, duration: 0.4, ease: 'power3.out', stagger: 0.05 }); } }); });
+                    function typeNextLine() {
+                        if (currentLineIdx < data.aLines.length) {
+                            let tempLine = data.aLines[currentLineIdx];
+                            let tagCount = 0;
+                            let lineCharIdx = 0;
+
+                            function typeLineChar() {
+                                // Quick scan to bypass HTML tags so typewriter displays correctly
+                                if (tempLine[lineCharIdx] === "<") {
+                                    while (
+                                        lineCharIdx < tempLine.length &&
+                                        tempLine[lineCharIdx] !== ">"
+                                    ) {
+                                        currentStr += tempLine[lineCharIdx];
+                                        lineCharIdx++;
+                                    }
+                                    if (lineCharIdx < tempLine.length) {
+                                        currentStr += tempLine[lineCharIdx];
+                                        lineCharIdx++;
+                                    }
+                                }
+
+                                if (lineCharIdx < tempLine.length) {
+                                    aEl.innerHTML =
+                                        currentStr +
+                                        tempLine.substring(
+                                            lineCharIdx,
+                                            lineCharIdx + 1,
+                                        ) +
+                                        '<span class="cursor-blink"></span>';
+                                    currentStr += tempLine[lineCharIdx];
+                                    lineCharIdx++;
+                                    typingTimeout = setTimeout(
+                                        typeLineChar,
+                                        18,
+                                    );
+                                } else {
+                                    currentLineIdx++;
+                                    setTimeout(typeNextLine, 250);
+                                }
+                            }
+                            typeLineChar();
+                        } else {
+                            // All typed, hold on view, loop to next
+                            aEl.innerHTML = currentStr;
+                            statusTextEl.textContent = "回答生成完毕";
+                            setTimeout(() => {
+                                currentIdx = (currentIdx + 1) % qaPairs.length;
+                                runMockSimulation();
+                            }, 5000);
+                        }
+                    }
+                    typeNextLine();
+                }
+
+                typeQ();
+            }
+
+            // Initialize typing engine
+            setTimeout(runMockSimulation, 1200);
+
+            // ─── Interactive Screen Hiding Demo ───
+            const ghostToggle = document.getElementById("ghost-toggle");
+            const screenPanel = document.getElementById("screen-panel");
+            let isHidden = false;
+
+            ghostToggle.addEventListener("click", () => {
+                isHidden = !isHidden;
+                if (isHidden) {
+                    screenPanel.style.opacity = "0";
+                    screenPanel.style.transform = "scale(0.8)";
+                    ghostToggle.textContent = "显示悬浮窗";
+                    ghostToggle.classList.add("active");
+                } else {
+                    screenPanel.style.opacity = "1";
+                    screenPanel.style.transform = "scale(1)";
+                    ghostToggle.textContent = "隐藏悬浮窗";
+                    ghostToggle.classList.remove("active");
+                }
+            });
+
+            // ─── Dynamic Language Translation Switcher ───
+            const transOrig = document.getElementById("trans-orig-text");
+            const transTarget = document.getElementById("trans-target-text");
+
+            const transData = {
+                en: {
+                    orig: "Can you explain the difference between Redis and Memcached?",
+                    trans: "你能解释一下 Redis 和 Memcached 之间的区别吗？",
+                },
+                jp: {
+                    orig: "RedisとMemcachedの違いを説明していただけますか？",
+                    trans: "你能向我解释一下 Redis 和 Memcached 的区别吗？",
+                },
+                kr: {
+                    orig: "Redis와 Memcached의 차이점을 설명해 주실 수 있나요?",
+                    trans: "你能为我讲解一下 Redis 与 Memcached 之间的区别吗？",
+                },
+            };
+
+            document
+                .querySelectorAll("#lang-switcher .trans-tab")
+                .forEach((tab) => {
+                    tab.addEventListener("click", () => {
+                        document
+                            .querySelector("#lang-switcher .trans-tab.active")
+                            .classList.remove("active");
+                        tab.classList.add("active");
+
+                        const lang = tab.getAttribute("data-lang");
+                        transOrig.style.opacity = "0.3";
+                        transTarget.style.opacity = "0.3";
+
+                        setTimeout(() => {
+                            transOrig.textContent = transData[lang].orig;
+                            transTarget.textContent = transData[lang].trans;
+                            transOrig.style.opacity = "1";
+                            transTarget.style.opacity = "1";
+                        }, 200);
+                    });
+                });
         </script>
     </body>
 </html>
