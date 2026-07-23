@@ -1,0 +1,1522 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>凯格尔运动训练 - 盆底肌科学训练</title>
+    <style>
+        :root {
+            --bg: #0f0e17;
+            --surface: #1a1932;
+            --surface-light: #222142;
+            --text: #e0def4;
+            --text-secondary: #9893c7;
+            --contract-color: #ff6b7f;
+            --contract-glow: #ff3d5c;
+            --relax-color: #5ec4d0;
+            --relax-glow: #3db8c9;
+            --gold: #f0c060;
+            --danger: #e0556a;
+            --success: #5ec49e;
+            --radius: 20px;
+            --radius-sm: 12px;
+            --transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            --font-mono: 'SF Mono', 'Cascadia Code', 'Consolas', monospace;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            min-height: 100dvh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-user-select: none;
+            user-select: none;
+            -webkit-font-smoothing: antialiased;
+            background-image:
+                radial-gradient(ellipse at 50% 30%, rgba(94, 196, 208, 0.06) 0%, transparent 60%),
+                radial-gradient(ellipse at 50% 70%, rgba(255, 107, 127, 0.05) 0%, transparent 60%),
+                radial-gradient(ellipse at 20% 50%, rgba(150, 130, 200, 0.04) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 50%, rgba(150, 130, 200, 0.04) 0%, transparent 50%);
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 480px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            padding: 4px 0;
+        }
+        .header .icon-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 2px;
+        }
+        .header .logo-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--relax-color), var(--contract-color));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            box-shadow: 0 4px 20px rgba(94, 196, 208, 0.3);
+        }
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            background: linear-gradient(135deg, #e0def4, #c4bff0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .header .subtitle {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            letter-spacing: 0.04em;
+            margin-top: -2px;
+        }
+
+        /* Main Circle Area */
+        .circle-stage {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 280px;
+            flex-shrink: 0;
+        }
+        .breath-circle-wrapper {
+            position: relative;
+            width: 220px;
+            height: 220px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .breath-circle {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: radial-gradient(circle at 40% 35%, #2a2855, #1a1932 70%);
+            transition: transform var(--transition), box-shadow var(--transition),
+                background var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            position: relative;
+            z-index: 2;
+            box-shadow:
+                0 0 0 2px rgba(255, 255, 255, 0.04),
+                0 0 60px rgba(94, 196, 208, 0.12),
+                inset 0 0 40px rgba(0, 0, 0, 0.2);
+        }
+        .breath-circle.contracting {
+            transform: scale(0.62);
+            background: radial-gradient(circle at 40% 35%, #4a2030, #2a1020 70%);
+            box-shadow:
+                0 0 0 3px rgba(255, 107, 127, 0.35),
+                0 0 80px rgba(255, 61, 92, 0.35),
+                0 0 140px rgba(255, 61, 92, 0.18),
+                inset 0 0 30px rgba(255, 80, 100, 0.1);
+        }
+        .breath-circle.relaxing {
+            transform: scale(1);
+            background: radial-gradient(circle at 40% 35%, #2a4050, #1a2835 70%);
+            box-shadow:
+                0 0 0 2px rgba(94, 196, 208, 0.3),
+                0 0 80px rgba(62, 180, 200, 0.3),
+                0 0 150px rgba(62, 180, 200, 0.15),
+                inset 0 0 50px rgba(60, 180, 200, 0.06);
+        }
+        .breath-circle.prep {
+            transform: scale(0.85);
+            background: radial-gradient(circle at 40% 35%, #2a3550, #1a2535 70%);
+            box-shadow:
+                0 0 0 2px rgba(200, 180, 140, 0.25),
+                0 0 60px rgba(240, 192, 96, 0.2),
+                0 0 100px rgba(240, 192, 96, 0.1),
+                inset 0 0 40px rgba(200, 160, 80, 0.04);
+        }
+        .breath-circle .phase-label {
+            font-size: 1.1rem;
+            font-weight: 600;
+            letter-spacing: 0.06em;
+            color: var(--text);
+            transition: color var(--transition);
+            text-align: center;
+            line-height: 1.3;
+        }
+        .breath-circle .countdown-num {
+            font-size: 3.2rem;
+            font-weight: 700;
+            font-family: var(--font-mono);
+            letter-spacing: -0.03em;
+            transition: color var(--transition);
+            line-height: 1;
+            margin-top: 2px;
+        }
+        .breath-circle.contracting .phase-label {
+            color: #ffb3bf;
+        }
+        .breath-circle.contracting .countdown-num {
+            color: #ff6b7f;
+        }
+        .breath-circle.relaxing .phase-label {
+            color: #a8e4ec;
+        }
+        .breath-circle.relaxing .countdown-num {
+            color: #5ec4d0;
+        }
+        .breath-circle.prep .phase-label {
+            color: #f0d890;
+        }
+        .breath-circle.prep .countdown-num {
+            color: #f0c060;
+        }
+
+        /* Ripple rings */
+        .ripple-ring {
+            position: absolute;
+            border-radius: 50%;
+            border: 1.5px solid rgba(255, 255, 255, 0.08);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            z-index: 1;
+            transition: all var(--transition);
+        }
+        .ripple-ring.r1 {
+            width: 260px;
+            height: 260px;
+            border-color: rgba(94, 196, 208, 0.1);
+        }
+        .ripple-ring.r2 {
+            width: 300px;
+            height: 300px;
+            border-color: rgba(255, 255, 255, 0.04);
+        }
+        .breath-circle.contracting~.ripple-ring.r1 {
+            width: 180px;
+            height: 180px;
+            border-color: rgba(255, 107, 127, 0.3);
+            border-width: 2px;
+        }
+        .breath-circle.contracting~.ripple-ring.r2 {
+            width: 210px;
+            height: 210px;
+            border-color: rgba(255, 107, 127, 0.15);
+            border-width: 1.5px;
+        }
+
+        /* Progress bar */
+        .progress-section {
+            padding: 0 4px;
+        }
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+            letter-spacing: 0.03em;
+        }
+        .progress-info .cycle-count {
+            font-weight: 600;
+            color: var(--text);
+            font-variant-numeric: tabular-nums;
+            font-family: var(--font-mono);
+        }
+        .progress-bar-outer {
+            height: 6px;
+            background: rgba(255, 255, 255, 0.06);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .progress-bar-inner {
+            height: 100%;
+            border-radius: 10px;
+            background: linear-gradient(90deg, var(--relax-color), var(--contract-color));
+            transition: width 0.4s ease;
+            width: 0%;
+            box-shadow: 0 0 10px rgba(94, 196, 208, 0.4);
+        }
+
+        /* Controls */
+        .controls-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .btn {
+            padding: 14px 20px;
+            border-radius: var(--radius-sm);
+            font-size: 0.95rem;
+            font-weight: 600;
+            letter-spacing: 0.03em;
+            cursor: pointer;
+            border: none;
+            outline: none;
+            transition: all 0.25s ease;
+            flex: 1;
+            min-width: 100px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            -webkit-tap-highlight-color: transparent;
+            font-family: inherit;
+        }
+        .btn:active {
+            transform: scale(0.96);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #6a5acd, #7b6fe0);
+            color: #fff;
+            box-shadow: 0 6px 24px rgba(106, 90, 205, 0.35);
+            font-size: 1.05rem;
+            padding: 16px 24px;
+        }
+        .btn-primary:hover {
+            box-shadow: 0 8px 30px rgba(106, 90, 205, 0.5);
+            transform: translateY(-1px);
+        }
+        .btn-primary:active {
+            transform: scale(0.95) translateY(0);
+        }
+        .btn-stop {
+            background: rgba(220, 80, 100, 0.2);
+            color: #e0556a;
+            border: 1.5px solid rgba(220, 80, 100, 0.4);
+            flex: 0.5;
+            min-width: 60px;
+        }
+        .btn-stop:hover {
+            background: rgba(220, 80, 100, 0.3);
+            border-color: rgba(220, 80, 100, 0.6);
+        }
+        .btn-outline {
+            background: transparent;
+            color: var(--text);
+            border: 1.5px solid rgba(255, 255, 255, 0.2);
+            flex: 0.7;
+            min-width: 70px;
+            font-size: 0.85rem;
+            padding: 12px 14px;
+        }
+        .btn-outline:hover {
+            border-color: rgba(255, 255, 255, 0.4);
+            background: rgba(255, 255, 255, 0.04);
+        }
+        .btn-small {
+            padding: 8px 14px;
+            font-size: 0.78rem;
+            border-radius: 8px;
+            flex: 0;
+            min-width: auto;
+            letter-spacing: 0.02em;
+        }
+        .btn:disabled {
+            opacity: 0.4;
+            pointer-events: none;
+            filter: grayscale(30%);
+        }
+
+        /* Settings panel */
+        .settings-panel {
+            background: var(--surface);
+            border-radius: var(--radius);
+            padding: 18px 16px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            transition: all 0.4s ease;
+        }
+        .settings-panel.collapsed {
+            max-height: 0;
+            overflow: hidden;
+            padding-top: 0;
+            padding-bottom: 0;
+            border-width: 0;
+            margin: 0;
+            opacity: 0;
+            pointer-events: none;
+        }
+        .settings-panel:not(.collapsed) {
+            max-height: 600px;
+            opacity: 1;
+        }
+        .preset-chips {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .preset-chip {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: 1.5px solid rgba(255, 255, 255, 0.2);
+            background: transparent;
+            color: var(--text-secondary);
+            transition: all 0.2s ease;
+            letter-spacing: 0.03em;
+            white-space: nowrap;
+            font-family: inherit;
+        }
+        .preset-chip.active {
+            background: rgba(106, 90, 205, 0.3);
+            border-color: #7b6fe0;
+            color: #fff;
+            box-shadow: 0 0 16px rgba(106, 90, 205, 0.25);
+        }
+        .preset-chip:hover {
+            border-color: rgba(255, 255, 255, 0.5);
+            color: #fff;
+        }
+        .slider-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .slider-group label {
+            font-size: 0.78rem;
+            color: var(--text-secondary);
+            letter-spacing: 0.03em;
+            display: flex;
+            justify-content: space-between;
+        }
+        .slider-group label span.val {
+            color: var(--text);
+            font-weight: 600;
+            font-family: var(--font-mono);
+        }
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 6px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            outline: none;
+            cursor: pointer;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            background: #7b6fe0;
+            cursor: pointer;
+            border: 3px solid #fff;
+            box-shadow: 0 4px 16px rgba(106, 90, 205, 0.4);
+            transition: transform 0.15s ease;
+        }
+        input[type="range"]::-webkit-slider-thumb:active {
+            transform: scale(1.2);
+        }
+
+        /* History */
+        .history-panel {
+            background: var(--surface);
+            border-radius: var(--radius);
+            padding: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            max-height: 300px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            transition: all 0.4s ease;
+        }
+        .history-panel.collapsed {
+            max-height: 0;
+            overflow: hidden;
+            padding-top: 0;
+            padding-bottom: 0;
+            border-width: 0;
+            margin: 0;
+            opacity: 0;
+            pointer-events: none;
+        }
+        .history-panel:not(.collapsed) {
+            max-height: 350px;
+            opacity: 1;
+        }
+        .history-panel h3 {
+            font-size: 0.9rem;
+            letter-spacing: 0.04em;
+            color: var(--text-secondary);
+            margin-bottom: 2px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 12px;
+            border-radius: var(--radius-sm);
+            background: var(--surface-light);
+            font-size: 0.8rem;
+            gap: 8px;
+            flex-wrap: wrap;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+        }
+        .history-item .hi-date {
+            color: var(--text-secondary);
+            font-size: 0.72rem;
+            white-space: nowrap;
+        }
+        .history-item .hi-detail {
+            color: var(--text);
+            font-weight: 500;
+            font-size: 0.78rem;
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+        .history-item .hi-badge {
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 0.68rem;
+            font-weight: 600;
+            letter-spacing: 0.03em;
+            background: rgba(94, 196, 208, 0.2);
+            color: #5ec4d0;
+            white-space: nowrap;
+        }
+        .history-item .hi-duration {
+            color: var(--text-secondary);
+            font-size: 0.72rem;
+            white-space: nowrap;
+            font-family: var(--font-mono);
+        }
+        .empty-history {
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.82rem;
+            padding: 20px 0;
+            letter-spacing: 0.03em;
+        }
+        .stats-row {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 4px;
+        }
+        .stat-card {
+            flex: 1;
+            min-width: 60px;
+            background: var(--surface-light);
+            border-radius: var(--radius-sm);
+            padding: 10px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+        }
+        .stat-card .stat-val {
+            font-size: 1.3rem;
+            font-weight: 700;
+            font-family: var(--font-mono);
+            color: #c4bff0;
+        }
+        .stat-card .stat-label {
+            font-size: 0.65rem;
+            color: var(--text-secondary);
+            letter-spacing: 0.04em;
+            margin-top: 2px;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--surface-light);
+            color: var(--text);
+            padding: 12px 22px;
+            border-radius: 25px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            letter-spacing: 0.03em;
+            z-index: 100;
+            transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            pointer-events: none;
+        }
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* Scrollbar */
+        .history-panel::-webkit-scrollbar {
+            width: 3px;
+        }
+        .history-panel::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .history-panel::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        @media (max-width: 380px) {
+            .breath-circle-wrapper {
+                width: 180px;
+                height: 180px;
+            }
+            .circle-stage {
+                height: 230px;
+            }
+            .breath-circle .countdown-num {
+                font-size: 2.5rem;
+            }
+            .breath-circle .phase-label {
+                font-size: 0.95rem;
+            }
+            .ripple-ring.r1 {
+                width: 210px;
+                height: 210px;
+            }
+            .ripple-ring.r2 {
+                width: 240px;
+                height: 240px;
+            }
+            .breath-circle.contracting~.ripple-ring.r1 {
+                width: 150px;
+                height: 150px;
+            }
+            .breath-circle.contracting~.ripple-ring.r2 {
+                width: 175px;
+                height: 175px;
+            }
+            .btn {
+                padding: 12px 14px;
+                font-size: 0.85rem;
+            }
+            .btn-primary {
+                font-size: 0.95rem;
+                padding: 14px 18px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <div class="header">
+            <div class="icon-row">
+                <div class="logo-icon">🧘</div>
+                <h1>凯格尔训练</h1>
+            </div>
+            <p class="subtitle">盆底肌科学节奏训练 · 沉浸式指导</p>
+        </div>
+
+        <!-- Circle Stage -->
+        <div class="circle-stage" id="circleStage">
+            <div class="breath-circle-wrapper">
+                <div class="breath-circle prep" id="breathCircle">
+                    <span class="phase-label" id="phaseLabel">准备开始</span>
+                    <span class="countdown-num" id="countdownNum">--</span>
+                </div>
+                <div class="ripple-ring r1"></div>
+                <div class="ripple-ring r2"></div>
+            </div>
+        </div>
+
+        <!-- Progress -->
+        <div class="progress-section" id="progressSection">
+            <div class="progress-info">
+                <span>训练进度</span>
+                <span class="cycle-count" id="cycleCount">0 / 0 次</span>
+            </div>
+            <div class="progress-bar-outer">
+                <div class="progress-bar-inner" id="progressBar" style="width: 0%;"></div>
+            </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="controls-row" id="controlsRow">
+            <button class="btn btn-primary" id="btnStart" title="开始训练">▶ 开始训练</button>
+            <button class="btn btn-stop" id="btnStop" title="停止训练" disabled>⏹ 停止</button>
+        </div>
+        <div class="controls-row" style="gap:8px;">
+            <button class="btn btn-outline btn-small" id="btnToggleSettings">⚙ 设置</button>
+            <button class="btn btn-outline btn-small" id="btnToggleHistory">📋 记录</button>
+        </div>
+
+        <!-- Settings -->
+        <div class="settings-panel" id="settingsPanel">
+            <div class="preset-chips" id="presetChips">
+                <button class="preset-chip" data-preset="beginner">🌱 初级 (3s/3s ×10)</button>
+                <button class="preset-chip active" data-preset="intermediate">🌿 中级 (5s/5s ×15)</button>
+                <button class="preset-chip" data-preset="advanced">🌳 高级 (8s/8s ×20)</button>
+                <button class="preset-chip" data-preset="custom">🔧 自定义</button>
+            </div>
+            <div class="slider-group">
+                <label>收紧时间 <span class="val" id="valContract">5秒</span></label>
+                <input type="range" id="sliderContract" min="1" max="15" value="5" step="1">
+            </div>
+            <div class="slider-group">
+                <label>放松时间 <span class="val" id="valRelax">5秒</span></label>
+                <input type="range" id="sliderRelax" min="1" max="15" value="5" step="1">
+            </div>
+            <div class="slider-group">
+                <label>循环次数 <span class="val" id="valCycles">15次</span></label>
+                <input type="range" id="sliderCycles" min="5" max="40" value="15" step="1">
+            </div>
+        </div>
+
+        <!-- History -->
+        <div class="history-panel collapsed" id="historyPanel">
+            <h3>📋 训练记录</h3>
+            <div class="stats-row" id="statsRow">
+                <div class="stat-card"><div class="stat-val" id="statTotal">0</div><div class="stat-label">总次数</div></div>
+                <div class="stat-card"><div class="stat-val" id="statWeek">0</div><div class="stat-label">本周</div></div>
+                <div class="stat-card"><div class="stat-val" id="statMinutes">0</div><div class="stat-label">总分钟</div></div>
+                <div class="stat-card"><div class="stat-val" id="statStreak">0</div><div class="stat-label">连续天</div></div>
+            </div>
+            <div id="historyList">
+                <p class="empty-history">暂无训练记录，开始你的第一次训练吧 ✨</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+        (function() {
+            // ──────────────────────────────────────
+            // DOM Elements
+            // ──────────────────────────────────────
+            const breathCircle = document.getElementById('breathCircle');
+            const phaseLabel = document.getElementById('phaseLabel');
+            const countdownNum = document.getElementById('countdownNum');
+            const cycleCount = document.getElementById('cycleCount');
+            const progressBar = document.getElementById('progressBar');
+            const btnStart = document.getElementById('btnStart');
+            const btnStop = document.getElementById('btnStop');
+            const btnToggleSettings = document.getElementById('btnToggleSettings');
+            const btnToggleHistory = document.getElementById('btnToggleHistory');
+            const settingsPanel = document.getElementById('settingsPanel');
+            const historyPanel = document.getElementById('historyPanel');
+            const historyList = document.getElementById('historyList');
+            const statsRow = document.getElementById('statsRow');
+            const toast = document.getElementById('toast');
+            const presetChips = document.getElementById('presetChips');
+            const sliderContract = document.getElementById('sliderContract');
+            const sliderRelax = document.getElementById('sliderRelax');
+            const sliderCycles = document.getElementById('sliderCycles');
+            const valContract = document.getElementById('valContract');
+            const valRelax = document.getElementById('valRelax');
+            const valCycles = document.getElementById('valCycles');
+            const circleStage = document.getElementById('circleStage');
+
+            // ──────────────────────────────────────
+            // State
+            // ──────────────────────────────────────
+            let contractTime = 5;
+            let relaxTime = 5;
+            let totalCycles = 15;
+            let currentPreset = 'intermediate';
+            let isTraining = false;
+            let trainingAborted = false;
+            let currentCycle = 0;
+            let phaseTimeoutId = null;
+            let countdownIntervalId = null;
+            let wakeLock = null;
+            let phaseStartTime = 0;
+            let phaseDuration = 0;
+            let currentPhase = null; // 'contract' | 'relax' | 'prep'
+
+            // ──────────────────────────────────────
+            // Audio Engine (Web Audio API)
+            // ──────────────────────────────────────
+            let audioCtx = null;
+            let contractOsc = null;
+            let contractGain = null;
+            let relaxOsc = null;
+            let relaxGain = null;
+            let bgOsc = null;
+            let bgGain = null;
+
+            function initAudioContext() {
+                if (!audioCtx) {
+                    try {
+                        audioCtx = new(window.AudioContext || window.webkitAudioContext)();
+                    } catch (e) {
+                        console.warn('Web Audio API 不可用');
+                        return false;
+                    }
+                }
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+                return true;
+            }
+
+            function createSoftOscillator(freq, type = 'sine') {
+                if (!audioCtx) return null;
+                const osc = audioCtx.createOscillator();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                const gain = audioCtx.createGain();
+                gain.gain.setValueAtTime(0, audioCtx.currentTime);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                return { osc, gain };
+            }
+
+            function startContractSound() {
+                if (!audioCtx || contractOsc) return;
+                const result = createSoftOscillator(68, 'sine');
+                if (!result) return;
+                contractOsc = result.osc;
+                contractGain = result.gain;
+                // 添加谐波让声音更温暖
+                const harmOsc = audioCtx.createOscillator();
+                harmOsc.type = 'sine';
+                harmOsc.frequency.setValueAtTime(136, audioCtx.currentTime);
+                const harmGain = audioCtx.createGain();
+                harmGain.gain.setValueAtTime(0, audioCtx.currentTime);
+                harmOsc.connect(harmGain);
+                harmGain.connect(audioCtx.destination);
+                harmOsc.start();
+                // 存储以便清理
+                contractOsc._harmOsc = harmOsc;
+                contractOsc._harmGain = harmGain;
+                // 淡入
+                const now = audioCtx.currentTime;
+                contractGain.gain.linearRampToValueAtTime(0.18, now + 0.4);
+                harmGain.gain.linearRampToValueAtTime(0.06, now + 0.4);
+                // 轻微频率调制带来呼吸感
+                contractOsc.frequency.setValueAtTime(68, now);
+                contractOsc.frequency.linearRampToValueAtTime(72, now + contractTime * 0.5);
+                contractOsc.frequency.linearRampToValueAtTime(66, now + contractTime);
+            }
+
+            function stopContractSound() {
+                if (!contractGain || !audioCtx) return;
+                const now = audioCtx.currentTime;
+                contractGain.gain.linearRampToValueAtTime(0, now + 0.3);
+                if (contractOsc._harmGain) {
+                    contractOsc._harmGain.gain.linearRampToValueAtTime(0, now + 0.3);
+                }
+                const oscRef = contractOsc;
+                const harmOscRef = contractOsc._harmOsc;
+                const harmGainRef = contractOsc._harmGain;
+                setTimeout(() => {
+                    try { oscRef.stop();
+                        oscRef.disconnect(); } catch (e) {}
+                    if (harmOscRef) try { harmOscRef.stop();
+                        harmOscRef.disconnect(); } catch (e) {}
+                    if (harmGainRef) try { harmGainRef.disconnect(); } catch (e) {}
+                }, 400);
+                contractOsc = null;
+                contractGain = null;
+            }
+
+            function startRelaxSound() {
+                if (!audioCtx || relaxOsc) return;
+                const result = createSoftOscillator(110, 'sine');
+                if (!result) return;
+                relaxOsc = result.osc;
+                relaxGain = result.gain;
+                const now = audioCtx.currentTime;
+                relaxGain.gain.linearRampToValueAtTime(0.08, now + 0.5);
+                relaxOsc.frequency.setValueAtTime(110, now);
+                relaxOsc.frequency.linearRampToValueAtTime(106, now + relaxTime);
+            }
+
+            function stopRelaxSound() {
+                if (!relaxGain || !audioCtx) return;
+                const now = audioCtx.currentTime;
+                relaxGain.gain.linearRampToValueAtTime(0, now + 0.5);
+                const oscRef = relaxOsc;
+                setTimeout(() => {
+                    try { oscRef.stop();
+                        oscRef.disconnect(); } catch (e) {}
+                }, 600);
+                relaxOsc = null;
+                relaxGain = null;
+            }
+
+            function playTransitionTone(freqStart, freqEnd, duration = 0.25, vol = 0.25) {
+                if (!audioCtx) return;
+                const osc = audioCtx.createOscillator();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freqStart, audioCtx.currentTime);
+                osc.frequency.linearRampToValueAtTime(freqEnd, audioCtx.currentTime + duration);
+                const gain = audioCtx.createGain();
+                gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+                gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration + 0.05);
+                setTimeout(() => { try { osc.disconnect();
+                        gain.disconnect(); } catch (e) {} }, duration * 1000 + 100);
+            }
+
+            function playCompletionSound() {
+                if (!audioCtx) return;
+                const notes = [523, 659, 784]; // C5, E5, G5
+                notes.forEach((freq, i) => {
+                    const delay = i * 0.18;
+                    const osc = audioCtx.createOscillator();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(freq, audioCtx.currentTime + delay);
+                    const gain = audioCtx.createGain();
+                    gain.gain.setValueAtTime(0, audioCtx.currentTime + delay);
+                    gain.gain.linearRampToValueAtTime(0.3, audioCtx.currentTime + delay + 0.08);
+                    gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + delay + 0.55);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(audioCtx.currentTime + delay);
+                    osc.stop(audioCtx.currentTime + delay + 0.6);
+                    setTimeout(() => { try { osc.disconnect();
+                            gain.disconnect(); } catch (e) {} }, delay * 1000 + 700);
+                });
+                // 添加一个温暖的低音垫底
+                const bassOsc = audioCtx.createOscillator();
+                bassOsc.type = 'triangle';
+                bassOsc.frequency.setValueAtTime(261, audioCtx.currentTime);
+                const bassGain = audioCtx.createGain();
+                bassGain.gain.setValueAtTime(0, audioCtx.currentTime);
+                bassGain.gain.linearRampToValueAtTime(0.15, audioCtx.currentTime + 0.1);
+                bassGain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.8);
+                bassOsc.connect(bassGain);
+                bassGain.connect(audioCtx.destination);
+                bassOsc.start();
+                bassOsc.stop(audioCtx.currentTime + 0.9);
+                setTimeout(() => { try { bassOsc.disconnect();
+                        bassGain.disconnect(); } catch (e) {} }, 1000);
+            }
+
+            function playCountdownTick() {
+                if (!audioCtx) return;
+                const osc = audioCtx.createOscillator();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(880, audioCtx.currentTime);
+                const gain = audioCtx.createGain();
+                gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.12);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.15);
+                setTimeout(() => { try { osc.disconnect();
+                        gain.disconnect(); } catch (e) {} }, 200);
+            }
+
+            function stopAllAudio() {
+                stopContractSound();
+                stopRelaxSound();
+                if (bgOsc) { try { bgOsc.stop();
+                        bgOsc.disconnect(); } catch (e) {}
+                    bgOsc = null;
+                    bgGain = null; }
+            }
+
+            // ──────────────────────────────────────
+            // Wake Lock
+            // ──────────────────────────────────────
+            async function requestWakeLock() {
+                try {
+                    if ('wakeLock' in navigator && navigator.wakeLock) {
+                        wakeLock = await navigator.wakeLock.request('screen');
+                        wakeLock.addEventListener('release', () => { wakeLock = null; });
+                    }
+                } catch (e) {
+                    // Wake Lock not supported or denied
+                }
+            }
+            async function releaseWakeLock() {
+                if (wakeLock) {
+                    try { await wakeLock.release();
+                        wakeLock = null; } catch (e) {}
+                }
+            }
+
+            // ──────────────────────────────────────
+            // Page Visibility
+            // ──────────────────────────────────────
+            document.addEventListener('visibilitychange', () => {
+                if (document.hidden && isTraining && audioCtx) {
+                    // 页面隐藏时降低音频
+                    if (contractGain) contractGain.gain.value = Math.min(contractGain.gain.value,
+                    0.04);
+                    if (relaxGain) relaxGain.gain.value = Math.min(relaxGain.gain.value, 0.03);
+                } else if (!document.hidden && isTraining && audioCtx) {
+                    // 恢复音频
+                    if (contractGain && currentPhase === 'contract') contractGain.gain.value = 0.18;
+                    if (relaxGain && currentPhase === 'relax') relaxGain.gain.value = 0.08;
+                }
+            });
+
+            // ──────────────────────────────────────
+            // Toast
+            // ──────────────────────────────────────
+            let toastTimer;
+            function showToast(msg) {
+                clearTimeout(toastTimer);
+                toast.textContent = msg;
+                toast.classList.add('show');
+                toastTimer = setTimeout(() => {
+                    toast.classList.remove('show');
+                }, 2200);
+            }
+
+            // ──────────────────────────────────────
+            // History Management
+            // ──────────────────────────────────────
+            const STORAGE_KEY = 'kegel_training_records';
+
+            function getRecords() {
+                try {
+                    const raw = localStorage.getItem(STORAGE_KEY);
+                    return raw ? JSON.parse(raw) : [];
+                } catch (e) {
+                    return [];
+                }
+            }
+
+            function saveRecord(record) {
+                const records = getRecords();
+                records.unshift(record);
+                // 只保留最近100条
+                const trimmed = records.slice(0, 100);
+                try {
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(trimmed));
+                } catch (e) {
+                    showToast('⚠ 存储空间不足，请清理记录');
+                }
+                renderHistory();
+            }
+
+            function clearAllRecords() {
+                if (confirm('确定要清除所有训练记录吗？此操作不可恢复。')) {
+                    localStorage.removeItem(STORAGE_KEY);
+                    renderHistory();
+                    showToast('记录已清除');
+                }
+            }
+
+            function getStats(records) {
+                const now = new Date();
+                const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+                const totalCount = records.length;
+                const weekCount = records.filter(r => new Date(r.date) >= weekAgo).length;
+                const totalMinutes = Math.round(records.reduce((sum, r) => sum + (r.totalDuration || 0), 0) /
+                60);
+                // 连续天数
+                let streak = 0;
+                const dates = records.map(r => {
+                    const d = new Date(r.date);
+                    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+                });
+                const uniqueDates = [...new Set(dates)].sort().reverse();
+                const today = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+                const yesterdayDate = new Date(now);
+                yesterdayDate.setDate(yesterdayDate.getDate() - 1);
+                const yesterday = `${yesterdayDate.getFullYear()}-${String(yesterdayDate.getMonth()+1).padStart(2,'0')}-${String(yesterdayDate.getDate()).padStart(2,'0')}`;
+                if (uniqueDates[0] === today || uniqueDates[0] === yesterday) {
+                    streak = 1;
+                    for (let i = 1; i < uniqueDates.length; i++) {
+                        const prev = new Date(uniqueDates[i - 1]);
+                        prev.setDate(prev.getDate() - 1);
+                        const prevStr =
+                            `${prev.getFullYear()}-${String(prev.getMonth()+1).padStart(2,'0')}-${String(prev.getDate()).padStart(2,'0')}`;
+                        if (uniqueDates[i] === prevStr) {
+                            streak++;
+                        } else {
+                            break;
+                        }
+                    }
+                }
+                return { totalCount, weekCount, totalMinutes, streak };
+            }
+
+            function renderHistory() {
+                const records = getRecords();
+                const stats = getStats(records);
+                document.getElementById('statTotal').textContent = stats.totalCount;
+                document.getElementById('statWeek').textContent = stats.weekCount;
+                document.getElementById('statMinutes').textContent = stats.totalMinutes;
+                document.getElementById('statStreak').textContent = stats.streak;
+
+                if (records.length === 0) {
+                    historyList.innerHTML = '<p class="empty-history">暂无训练记录，开始你的第一次训练吧 ✨</p>';
+                } else {
+                    historyList.innerHTML = records.slice(0, 20).map(r => {
+                        const d = new Date(r.date);
+                        const dateStr =
+                            `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+                        const durMin = Math.round((r.totalDuration || 0) / 60);
+                        const badgeText = r.preset === 'custom' ? '自定义' :
+                            r.preset === 'beginner' ? '初级' :
+                            r.preset === 'advanced' ? '高级' : '中级';
+                        const completedText = r.completed ? '✅完成' : '⏹中断';
+                        return `
+                  <div class="history-item">
+                    <span class="hi-date">${dateStr}</span>
+                    <span class="hi-detail">${r.contractTime}s/${r.relaxTime}s ×${r.completedCycles || r.cycles}</span>
+                    <span class="hi-badge">${badgeText}</span>
+                    <span class="hi-duration">${durMin}分钟</span>
+                    <span style="font-size:0.7rem;">${completedText}</span>
+                  </div>`;
+                    }).join('');
+                    if (records.length > 20) {
+                        historyList.innerHTML +=
+                            `<p style="text-align:center;color:var(--text-secondary);font-size:0.7rem;margin-top:4px;">仅显示最近20条记录（共${records.length}条）</p>`;
+                    }
+                }
+            }
+
+            // ──────────────────────────────────────
+            // UI Updates
+            // ──────────────────────────────────────
+            function updateCirclePhase(phase) {
+                breathCircle.classList.remove('contracting', 'relaxing', 'prep');
+                currentPhase = phase;
+                if (phase === 'contract') {
+                    breathCircle.classList.add('contracting');
+                    phaseLabel.textContent = '收 紧';
+                } else if (phase === 'relax') {
+                    breathCircle.classList.add('relaxing');
+                    phaseLabel.textContent = '放 松';
+                } else if (phase === 'prep') {
+                    breathCircle.classList.add('prep');
+                    phaseLabel.textContent = '准备';
+                } else {
+                    breathCircle.classList.add('prep');
+                    phaseLabel.textContent = '准备开始';
+                }
+            }
+
+            function updateCountdown(seconds) {
+                countdownNum.textContent = seconds > 0 ? seconds : '--';
+            }
+
+            function updateProgress(cycle, total) {
+                cycleCount.textContent = `${cycle} / ${total} 次`;
+                const pct = total > 0 ? Math.round((cycle / total) * 100) : 0;
+                progressBar.style.width = pct + '%';
+            }
+
+            function setControlsEnabled(enabled) {
+                btnStart.disabled = !enabled;
+                btnStop.disabled = enabled;
+                sliderContract.disabled = !enabled;
+                sliderRelax.disabled = !enabled;
+                sliderCycles.disabled = !enabled;
+                presetChips.querySelectorAll('button').forEach(b => b.disabled = !enabled);
+                if (!enabled) {
+                    btnStart.textContent = '⏳ 训练中...';
+                } else {
+                    btnStart.textContent = '▶ 开始训练';
+                }
+            }
+
+            // ──────────────────────────────────────
+            // Training Core
+            // ──────────────────────────────────────
+            function clearAllTimers() {
+                if (phaseTimeoutId) clearTimeout(phaseTimeoutId);
+                if (countdownIntervalId) clearInterval(countdownIntervalId);
+                phaseTimeoutId = null;
+                countdownIntervalId = null;
+            }
+
+            function runPhase(phase, durationSeconds, onTick, onComplete) {
+                clearAllTimers();
+                phaseStartTime = Date.now();
+                phaseDuration = durationSeconds * 1000;
+                const endTime = phaseStartTime + phaseDuration;
+
+                function tick() {
+                    const elapsed = Date.now() - phaseStartTime;
+                    const remaining = Math.max(0, Math.ceil((endTime - Date.now()) / 1000));
+                    if (onTick) onTick(remaining, elapsed);
+                    if (Date.now() >= endTime) {
+                        clearInterval(countdownIntervalId);
+                        countdownIntervalId = null;
+                        if (onComplete) onComplete();
+                    }
+                }
+                tick();
+                countdownIntervalId = setInterval(tick, 250);
+            }
+
+            function startTraining() {
+                if (isTraining) return;
+                if (!initAudioContext()) {
+                    showToast('⚠ 无法初始化音频，请检查浏览器设置');
+                    return;
+                }
+                isTraining = true;
+                trainingAborted = false;
+                currentCycle = 0;
+                updateProgress(0, totalCycles);
+                setControlsEnabled(false);
+                requestWakeLock();
+                updateCirclePhase('prep');
+                updateCountdown(3);
+                phaseLabel.textContent = '准备';
+                showToast('🎯 准备开始，跟随节奏练习...');
+
+                // 3秒准备倒计时
+                let prepRemaining = 3;
+                function prepTick(remaining) {
+                    const displayRemaining = Math.ceil(remaining);
+                    if (displayRemaining !== prepRemaining) {
+                        prepRemaining = displayRemaining;
+                        updateCountdown(prepRemaining);
+                        if (prepRemaining > 0) playCountdownTick();
+                    }
+                }
+                function prepComplete() {
+                    updateCountdown(0);
+                    runTrainingCycle(1);
+                }
+                runPhase('prep', 3, prepTick, prepComplete);
+            }
+
+            function runTrainingCycle(cycle) {
+                if (trainingAborted || cycle > totalCycles) {
+                    finishTraining(cycle - 1);
+                    return;
+                }
+                currentCycle = cycle;
+                updateProgress(cycle - 1, totalCycles);
+                updateCirclePhase('contract');
+                updateCountdown(contractTime);
+                playTransitionTone(440, 300, 0.2, 0.2);
+                startContractSound();
+                if (relaxOsc) stopRelaxSound();
+                phaseLabel.textContent = '收 紧';
+
+                let lastDisplayed = contractTime;
+
+                function contractTick(remaining) {
+                    const displayRemaining = Math.ceil(remaining);
+                    if (displayRemaining !== lastDisplayed) {
+                        lastDisplayed = displayRemaining;
+                        updateCountdown(displayRemaining);
+                    }
+                }
+
+                function contractComplete() {
+                    stopContractSound();
+                    updateCountdown(0);
+                    updateProgress(cycle, totalCycles);
+                    // 进入放松阶段
+                    updateCirclePhase('relax');
+                    updateCountdown(relaxTime);
+                    playTransitionTone(300, 500, 0.25, 0.18);
+                    startRelaxSound();
+                    phaseLabel.textContent = '放 松';
+                    let lastRelaxDisplayed = relaxTime;
+
+                    function relaxTick(remaining) {
+                        const displayRemaining = Math.ceil(remaining);
+                        if (displayRemaining !== lastRelaxDisplayed) {
+                            lastRelaxDisplayed = displayRemaining;
+                            updateCountdown(displayRemaining);
+                        }
+                    }
+
+                    function relaxComplete() {
+                        stopRelaxSound();
+                        updateCountdown(0);
+                        updateProgress(cycle, totalCycles);
+                        runTrainingCycle(cycle + 1);
+                    }
+                    runPhase('relax', relaxTime, relaxTick, relaxComplete);
+                }
+                runPhase('contract', contractTime, contractTick, contractComplete);
+            }
+
+            function stopTraining() {
+                if (!isTraining) return;
+                trainingAborted = true;
+                clearAllTimers();
+                stopAllAudio();
+                updateCirclePhase('prep');
+                updateCountdown(0);
+                phaseLabel.textContent = '已停止';
+                updateProgress(currentCycle, totalCycles);
+                const completedCycles = Math.max(0, currentCycle - 1);
+                // 保存中断记录
+                const totalDuration = (completedCycles * (contractTime + relaxTime)) +
+                    (currentPhase === 'contract' ? Math.min(contractTime, Math.floor((Date.now() - phaseStartTime) /
+                        1000)) : 0);
+                saveRecord({
+                    date: new Date().toISOString(),
+                    contractTime,
+                    relaxTime,
+                    cycles: totalCycles,
+                    completedCycles,
+                    totalDuration: Math.max(0, totalDuration),
+                    completed: false,
+                    preset: currentPreset,
+                });
+                isTraining = false;
+                setControlsEnabled(true);
+                releaseWakeLock();
+                showToast('训练已停止');
+                updateCirclePhase('prep');
+                updateCountdown(0);
+                phaseLabel.textContent = '准备开始';
+                countdownNum.textContent = '--';
+                updateProgress(0, totalCycles);
+                progressBar.style.width = '0%';
+                cycleCount.textContent = '0 / ' + totalCycles + ' 次';
+            }
+
+            function finishTraining(completedCycles) {
+                clearAllTimers();
+                stopAllAudio();
+                playCompletionSound();
+                updateCirclePhase('prep');
+                updateCountdown(0);
+                phaseLabel.textContent = '完成！';
+                countdownNum.textContent = '🎉';
+                updateProgress(totalCycles, totalCycles);
+                progressBar.style.width = '100%';
+                const totalDuration = completedCycles * (contractTime + relaxTime);
+                saveRecord({
+                    date: new Date().toISOString(),
+                    contractTime,
+                    relaxTime,
+                    cycles: totalCycles,
+                    completedCycles,
+                    totalDuration,
+                    completed: true,
+                    preset: currentPreset,
+                });
+                isTraining = false;
+                setControlsEnabled(true);
+                releaseWakeLock();
+                const minTotal = Math.round(totalDuration / 60);
+                showToast(`✨ 训练完成！共${completedCycles}次循环，约${minTotal}分钟`);
+                // 3秒后恢复显示
+                setTimeout(() => {
+                    if (!isTraining) {
+                        updateCirclePhase('prep');
+                        countdownNum.textContent = '--';
+                        phaseLabel.textContent = '准备开始';
+                        updateProgress(0, totalCycles);
+                        progressBar.style.width = '0%';
+                        cycleCount.textContent = '0 / ' + totalCycles + ' 次';
+                    }
+                }, 3000);
+            }
+
+            // ──────────────────────────────────────
+            // Settings
+            // ──────────────────────────────────────
+            function applyPreset(preset) {
+                currentPreset = preset;
+                switch (preset) {
+                    case 'beginner':
+                        contractTime = 3;
+                        relaxTime = 3;
+                        totalCycles = 10;
+                        break;
+                    case 'intermediate':
+                        contractTime = 5;
+                        relaxTime = 5;
+                        totalCycles = 15;
+                        break;
+                    case 'advanced':
+                        contractTime = 8;
+                        relaxTime = 8;
+                        totalCycles = 20;
+                        break;
+                    case 'custom':
+                        // 保持当前滑块值
+                        break;
+                }
+                updateSlidersFromState();
+                updatePresetChips();
+            }
+
+            function updateSlidersFromState() {
+                sliderContract.value = contractTime;
+                sliderRelax.value = relaxTime;
+                sliderCycles.value = totalCycles;
+                valContract.textContent = contractTime + '秒';
+                valRelax.textContent = relaxTime + '秒';
+                valCycles.textContent = totalCycles + '次';
+            }
+
+            function updatePresetChips() {
+                presetChips.querySelectorAll('button').forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.preset === currentPreset);
+                });
+            }
+
+            function readStateFromSliders() {
+                contractTime = parseInt(sliderContract.value);
+                relaxTime = parseInt(sliderRelax.value);
+                totalCycles = parseInt(sliderCycles.value);
+                valContract.textContent = contractTime + '秒';
+                valRelax.textContent = relaxTime + '秒';
+                valCycles.textContent = totalCycles + '次';
+            }
+
+            // ──────────────────────────────────────
+            // Event Listeners
+            // ──────────────────────────────────────
+            btnStart.addEventListener('click', () => {
+                if (!isTraining) {
+                    readStateFromSliders();
+                    // 检查当前预设是否匹配
+                    checkPresetMatch();
+                    updateProgress(0, totalCycles);
+                    cycleCount.textContent = '0 / ' + totalCycles + ' 次';
+                    progressBar.style.width = '0%';
+                    startTraining();
+                }
+            });
+
+            btnStop.addEventListener('click', () => {
+                if (isTraining) {
+                    stopTraining();
+                }
+            });
+
+            btnToggleSettings.addEventListener('click', () => {
+                settingsPanel.classList.toggle('collapsed');
+                if (!settingsPanel.classList.contains('collapsed')) {
+                    historyPanel.classList.add('collapsed');
+                }
+            });
+
+            btnToggleHistory.addEventListener('click', () => {
+                historyPanel.classList.toggle('collapsed');
+                if (!historyPanel.classList.contains('collapsed')) {
+                    settingsPanel.classList.add('collapsed');
+                    renderHistory();
+                }
+            });
+
+            presetChips.addEventListener('click', (e) => {
+                if (e.target.classList.contains('preset-chip') && !isTraining) {
+                    const preset = e.target.dataset.preset;
+                    applyPreset(preset);
+                }
+            });
+
+            sliderContract.addEventListener('input', () => {
+                valContract.textContent = sliderContract.value + '秒';
+                contractTime = parseInt(sliderContract.value);
+                currentPreset = 'custom';
+                updatePresetChips();
+            });
+            sliderRelax.addEventListener('input', () => {
+                valRelax.textContent = sliderRelax.value + '秒';
+                relaxTime = parseInt(sliderRelax.value);
+                currentPreset = 'custom';
+                updatePresetChips();
+            });
+            sliderCycles.addEventListener('input', () => {
+                valCycles.textContent = sliderCycles.value + '次';
+                totalCycles = parseInt(sliderCycles.value);
+                currentPreset = 'custom';
+                updatePresetChips();
+            });
+
+            function checkPresetMatch() {
+                if (contractTime === 3 && relaxTime === 3 && totalCycles === 10) {
+                    currentPreset = 'beginner';
+                } else if (contractTime === 5 && relaxTime === 5 && totalCycles === 15) {
+                    currentPreset = 'intermediate';
+                } else if (contractTime === 8 && relaxTime === 8 && totalCycles === 20) {
+                    currentPreset = 'advanced';
+                } else {
+                    currentPreset = 'custom';
+                }
+                updatePresetChips();
+            }
+
+            // 键盘快捷键
+            document.addEventListener('keydown', (e) => {
+                if (e.key === ' ' && !isTraining && document.activeElement === document.body) {
+                    e.preventDefault();
+                    btnStart.click();
+                } else if (e.key === 'Escape' && isTraining) {
+                    e.preventDefault();
+                    btnStop.click();
+                }
+            });
+
+            // ──────────────────────────────────────
+            // Initialization
+            // ──────────────────────────────────────
+            function init() {
+                applyPreset('intermediate');
+                updateProgress(0, totalCycles);
+                cycleCount.textContent = '0 / ' + totalCycles + ' 次';
+                progressBar.style.width = '0%';
+                updateCirclePhase('prep');
+                countdownNum.textContent = '--';
+                phaseLabel.textContent = '准备开始';
+                setControlsEnabled(true);
+                renderHistory();
+                // 初始显示设置面板
+                settingsPanel.classList.remove('collapsed');
+                historyPanel.classList.add('collapsed');
+            }
+
+            init();
+
+            // ──────────────────────────────────────
+            // Expose clear records globally for potential use
+            // ──────────────────────────────────────
+            window.clearKegelRecords = clearAllRecords;
+
+            console.log('🧘 凯格尔运动训练工具已就绪');
+            console.log('  🎵 音效引擎: Web Audio API');
+            console.log('  💾 记录存储: localStorage');
+            console.log('  ⌨ 快捷键: 空格键开始 | Esc停止');
+            console.log('  📋 清除记录: clearKegelRecords()');
+            console.log('  🎯 科学节奏: 收紧-放松循环训练');
+            console.log('  🌿 祝训练愉快！');
+        })();
+    </script>
+</body>
+</html>
