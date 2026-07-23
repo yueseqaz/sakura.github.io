@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>沉浸式凯格尔训练助手</title>
+  <style>
+    :root {
+      --primary: #6C5CE7;
+      --relax: #A8A5E6;
+      --bg: #121212;
+      --card-bg: #1E1E2E;
+      --text: #E0E0E0;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 480px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 24px;
+    }
+
+    header {
+      text-align: center;
+      margin-top: 10px;
+    }
+
+    header h1 {
+      font-size: 1.5rem;
+      color: #FFF;
+      letter-spacing: 1px;
+    }
+
+    /* 模式选择 */
+    .mode-selector {
+      display: flex;
+      gap: 10px;
+      background: var(--card-bg);
+      padding: 6px;
+      border-radius: 12px;
+    }
+
+    .mode-btn {
+      background: transparent;
+      border: none;
+      color: #888;
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+
+    .mode-btn.active {
+      background: var(--primary);
+      color: #FFF;
+    }
+
+    /* 核心动画圆环 */
+    .timer-display {
+      position: relative;
+      width: 240px;
+      height: 240px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 20px 0;
+    }
+
+    .circle-outer {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(108,92,231,0.2) 0%, rgba(0,0,0,0) 70%);
+      transition: transform 1s ease-in-out, background 1s ease-in-out;
+      transform: scale(0.8);
+    }
+
+    .circle-inner {
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      background: var(--card-bg);
+      border: 3px solid var(--primary);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 2;
+      box-shadow: 0 0 20px rgba(108,92,231,0.3);
+    }
+
+    .status-text {
+      font-size: 1.4rem;
+      font-weight: bold;
+      color: #FFF;
+      margin-bottom: 6px;
+    }
+
+    .countdown-text {
+      font-size: 2.5rem;
+      font-weight: 800;
+      color: var(--primary);
+    }
+
+    /* 呼吸态动画样式 */
+    .tighten .circle-outer {
+      transform: scale(1.15);
+      background: radial-gradient(circle, rgba(108,92,231,0.6) 0%, rgba(0,0,0,0) 70%);
+    }
+
+    .relax .circle-outer {
+      transform: scale(0.85);
+      background: radial-gradient(circle, rgba(168,165,230,0.3) 0%, rgba(0,0,0,0) 70%);
+    }
+
+    /* 控制按纽 */
+    .controls {
+      display: flex;
+      gap: 15px;
+      width: 100%;
+    }
+
+    .btn {
+      flex: 1;
+      padding: 14px;
+      border: none;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+
+    .btn-primary { background: var(--primary); color: #FFF; }
+    .btn-secondary { background: var(--card-bg); color: var(--text); }
+    .btn:active { opacity: 0.8; }
+
+    /* 数据统计卡片 */
+    .stats-card {
+      width: 100%;
+      background: var(--card-bg);
+      border-radius: 16px;
+      padding: 20px;
+      display: flex;
+      justify-content: space-around;
+      text-align: center;
+    }
+
+    .stat-item .val {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #FFF;
+      margin-top: 4px;
+    }
+
+    .stat-item .lbl {
+      font-size: 0.8rem;
+      color: #888;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <h1>盆底肌沉浸训练</h1>
+  </header>
+
+  <!-- 难度切换 -->
+  <div class="mode-selector">
+    <button class="mode-btn active" onclick="setMode('easy')">初级 (3s)</button>
+    <button class="mode-btn" onclick="setMode('medium')">进阶 (5s)</button>
+    <button class="mode-btn" onclick="setMode('hard')">高阶 (10s)</button>
+  </div>
+
+  <!-- 视觉呼吸圈 -->
+  <div class="timer-display" id="timerDisplay">
+    <div class="circle-outer"></div>
+    <div class="circle-inner">
+      <div class="status-text" id="statusText">准备</div>
+      <div class="countdown-text" id="countdownText">0</div>
+    </div>
+  </div>
+
+  <!-- 控制按钮 -->
+  <div class="controls">
+    <button class="btn btn-primary" id="startBtn" onclick="toggleTimer()">开始练习</button>
+    <button class="btn btn-secondary" onclick="resetTimer()">重置</button>
+  </div>
+
+  <!-- 记录卡片 -->
+  <div class="stats-card">
+    <div class="stat-item">
+      <div class="lbl">今日完成(次)</div>
+      <div class="val" id="todayReps">0</div>
+    </div>
+    <div class="stat-item">
+      <div class="lbl">本次时长(秒)</div>
+      <div class="val" id="currentDuration">0</div>
+    </div>
+    <div class="stat-item">
+      <div class="lbl">累计天数</div>
+      <div class="val" id="totalDays">0</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // 配置参数
+  const MODES = {
+    easy: { hold: 3, relax: 3, name: '初级' },
+    medium: { hold: 5, relax: 5, name: '进阶' },
+    hard: { hold: 10, relax: 10, name: '高阶' }
+  };
+
+  let currentMode = 'easy';
+  let isRunning = false;
+  let phase = 'idle'; // 'hold' | 'relax' | 'idle'
+  let timer = null;
+  let phaseTimeLeft = 0;
+  let sessionSeconds = 0;
+  let completedReps = 0;
+
+  // Web Audio 音效生成器（无需外部资源）
+  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+  function playTone(type) {
+    if (audioCtx.state === 'suspended') {
+      audioCtx.resume();
+    }
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+
+    const now = audioCtx.currentTime;
+
+    if (type === 'hold') {
+      // 收紧音效：向上扬起的舒缓高音
+      osc.frequency.setValueAtTime(300, now);
+      osc.frequency.exponentialRampToValueAtTime(600, now + 0.4);
+      gain.gain.setValueAtTime(0.1, now);
+      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+      osc.start(now);
+      osc.stop(now + 0.4);
+    } else if (type === 'relax') {
+      // 放松音效：下沉的低柔音
+      osc.frequency.setValueAtTime(500, now);
+      osc.frequency.exponentialRampToValueAtTime(250, now + 0.5);
+      gain.gain.setValueAtTime(0.1, now);
+      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+      osc.start(now);
+      osc.stop(now + 0.5);
+    }
+  }
+
+  // 模式切换
+  function setMode(modeKey) {
+    if (isRunning) resetTimer();
+    currentMode = modeKey;
+    document.querySelectorAll('.mode-btn').forEach((btn, idx) => {
+      btn.classList.toggle('active', Object.keys(MODES)[idx] === modeKey);
+    });
+  }
+
+  // 切换开始/暂停
+  function toggleTimer() {
+    if (!isRunning) {
+      startTraining();
+    } else {
+      pauseTraining();
+    }
+  }
+
+  function startTraining() {
+    isRunning = true;
+    document.getElementById('startBtn').innerText = '暂停';
+    if (phase === 'idle') {
+      switchPhase('hold');
+    }
+    timer = setInterval(tick, 1000);
+  }
+
+  function pauseTraining() {
+    isRunning = false;
+    document.getElementById('startBtn').innerText = '继续';
+    clearInterval(timer);
+  }
+
+  function resetTimer() {
+    pauseTraining();
+    phase = 'idle';
+    phaseTimeLeft = 0;
+    sessionSeconds = 0;
+    document.getElementById('startBtn').innerText = '开始练习';
+    document.getElementById('statusText').innerText = '准备';
+    document.getElementById('countdownText').innerText = '0';
+    document.getElementById('timerDisplay').className = 'timer-display';
+  }
+
+  // 核心计时循环
+  function tick() {
+    sessionSeconds++;
+    phaseTimeLeft--;
+
+    document.getElementById('currentDuration').innerText = sessionSeconds;
+
+    if (phaseTimeLeft <= 0) {
+      if (phase === 'hold') {
+        completedReps++;
+        saveRecord();
+        switchPhase('relax');
+      } else {
+        switchPhase('hold');
+      }
+    } else {
+      document.getElementById('countdownText').innerText = phaseTimeLeft;
+    }
+  }
+
+  // 切换阶段（收紧 / 放松）
+  function switchPhase(newPhase) {
+    phase = newPhase;
+    const config = MODES[currentMode];
+    const display = document.getElementById('timerDisplay');
+    const statusText = document.getElementById('statusText');
+
+    if (phase === 'hold') {
+      phaseTimeLeft = config.hold;
+      statusText.innerText = '紧缩';
+      display.className = 'timer-display tighten';
+      playTone('hold');
+    } else if (phase === 'relax') {
+      phaseTimeLeft = config.relax;
+      statusText.innerText = '放松';
+      display.className = 'timer-display relax';
+      playTone('relax');
+    }
+    document.getElementById('countdownText').innerText = phaseTimeLeft;
+  }
+
+  // 本地持久化记录
+  function saveRecord() {
+    const today = new Date().toISOString().split('T')[0];
+    let records = JSON.parse(localStorage.getItem('kegel_records') || '{}');
+    
+    records[today] = (records[today] || 0) + 1;
+    localStorage.setItem('kegel_records', JSON.stringify(records));
+    
+    updateStatsDisplay();
+  }
+
+  function updateStatsDisplay() {
+    const today = new Date().toISOString().split('T')[0];
+    let records = JSON.parse(localStorage.getItem('kegel_records') || '{}');
+    
+    document.getElementById('todayReps').innerText = records[today] || 0;
+    document.getElementById('totalDays').innerText = Object.keys(records).length;
+  }
+
+  // 初始化加载
+  updateStatsDisplay();
+</script>
+</body>
+</html>
