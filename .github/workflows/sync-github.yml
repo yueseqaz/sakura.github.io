@@ -1,0 +1,83 @@
+name: Sync GitHub portfolio
+
+on:
+  schedule:
+    # Every six hours, at minute 17 (UTC).
+    - cron: '17 */6 * * *'
+  workflow_dispatch:
+  push:
+    paths:
+      - projects.config.json
+      - scripts/sync_github.py
+      - tests/**
+      - .github/workflows/sync-github.yml
+      - index.html
+      - assets/app.js
+      - assets/workshop.svg
+      - assets/favicon.svg
+
+permissions:
+  contents: write
+
+concurrency:
+  group: portfolio-sync-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    if: github.event_name != 'push' || github.ref_name == github.event.repository.default_branch
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Run sync tests
+        run: python -m unittest discover -s tests -v
+      - name: Fetch public GitHub data
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python scripts/sync_github.py
+      - name: Save updated snapshot
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data.json assets/data.js assets/avatar.png
+          if ! git diff --cached --quiet; then
+            git commit -m "chore: sync GitHub portfolio data"
+            git push origin "HEAD:${{ github.event.repository.default_branch }}"
+          fi
+
+  publish-pages:
+    needs: sync
+    if: vars.DEPLOY_GITHUB_PAGES == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    concurrency:
+      group: portfolio-pages
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+      - name: Prepare static files
+        run: |
+          mkdir -p _site
+          cp ./*.html data.json _site/
+          cp -R assets _site/
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4

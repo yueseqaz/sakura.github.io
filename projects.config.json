@@ -1,0 +1,207 @@
+{
+  "username": "yueseqaz",
+  "exclude": [
+    "yueseqaz",
+    "sakura.github.io"
+  ],
+  "includeForks": false,
+  "includeArchived": false,
+  "order": [
+    "SakuraGit",
+    "Sakura-Cap",
+    "SakuraWallpaper",
+    "SakuraClipboard",
+    "SakuraTranslator",
+    "MultiOut",
+    "todobar",
+    "PayTick",
+    "SakuraAppEraser",
+    "interview-assist",
+    "SakuraObserver",
+    "sakura-database-skill",
+    "sakura-Auto-test-skill",
+    "Sakura-Code",
+    "X-agentStudy",
+    "ScriptHub"
+  ],
+  "overrides": {
+    "SakuraGit": {
+      "name": "SakuraGit",
+      "category": "mac",
+      "icon": "git",
+      "description": "轻量 Git 桌面客户端。清晰的代码差异、可视化历史，让本地版本管理更直观。",
+      "tags": [
+        "Go",
+        "TypeScript",
+        "Git"
+      ],
+      "badge": "EARLY DEVELOPMENT"
+    },
+    "Sakura-Cap": {
+      "name": "Sakura Cap",
+      "category": "mac",
+      "icon": "capture",
+      "description": "住在菜单栏里的录屏与截图工具。录制、裁剪、标注和 OCR，顺手完成。",
+      "tags": [
+        "Swift",
+        "ScreenCaptureKit"
+      ]
+    },
+    "SakuraWallpaper": {
+      "name": "SakuraWallpaper",
+      "category": "mac",
+      "icon": "wallpaper",
+      "description": "让桌面有一点生机。轻量的 macOS 动态壁纸应用，把喜欢的视频留在桌面。",
+      "tags": [
+        "Swift",
+        "macOS",
+        "动态壁纸"
+      ],
+      "website": "https://sakura-github-io.vercel.app/Sakurawallpaper.html"
+    },
+    "SakuraClipboard": {
+      "name": "SakuraClipboard",
+      "category": "mac",
+      "icon": "clipboard",
+      "description": "轻量、快速、可检索的剪贴板历史。找回刚刚复制的内容，让工作流少一点打断。",
+      "tags": [
+        "Swift",
+        "macOS",
+        "效率工具"
+      ],
+      "website": "https://sakura-github-io.vercel.app/SakuraClipboard.html"
+    },
+    "SakuraTranslator": {
+      "name": "SakuraTranslator",
+      "category": "mac",
+      "icon": "translate",
+      "description": "菜单栏里的 AI 翻译助手。支持 DeepSeek、MiMo、GLM，也可以接入自定义 API。",
+      "tags": [
+        "Swift",
+        "AI",
+        "翻译"
+      ]
+    },
+    "MultiOut": {
+      "name": "MultiOut",
+      "category": "mac",
+      "icon": "audio",
+      "description": "一份声音，多个设备。有线、蓝牙与外接设备同时播放，每路音量独立控制。",
+      "tags": [
+        "Swift",
+        "音频",
+        "菜单栏"
+      ]
+    },
+    "todobar": {
+      "name": "TodoBar",
+      "category": "mac",
+      "icon": "todo",
+      "description": "随手记下待办，回到眼前的事。支持全局快速输入、本地提醒和优先级管理。",
+      "tags": [
+        "Swift",
+        "待办",
+        "菜单栏"
+      ]
+    },
+    "PayTick": {
+      "name": "PayTick",
+      "category": "mac",
+      "icon": "clock",
+      "description": "让工作时间里的收入一秒秒可见。菜单栏实时计薪，也记得提醒你准时下班。",
+      "tags": [
+        "Swift",
+        "菜单栏",
+        "日常"
+      ]
+    },
+    "SakuraAppEraser": {
+      "name": "SakuraAppEraser",
+      "category": "mac",
+      "icon": "eraser",
+      "description": "为 macOS 应用做一次彻底清理。卸载应用，也处理留下的相关文件。",
+      "tags": [
+        "Swift",
+        "macOS",
+        "卸载工具"
+      ]
+    },
+    "interview-assist": {
+      "name": "Interview Assist",
+      "category": "mac",
+      "icon": "chat",
+      "description": "macOS 面试辅助工具，将实时语音转成文字，并借助 AI 生成回答参考。",
+      "tags": [
+        "Swift",
+        "AI",
+        "语音转写"
+      ],
+      "website": "https://sakura-github-io.vercel.app/interview-assist.html"
+    },
+    "SakuraObserver": {
+      "name": "SakuraObserver",
+      "category": "mac",
+      "icon": "observe",
+      "description": "原生行为观测工具，支持事件日志、定时截图与人脸触发抓拍，数据保存在本地。",
+      "tags": [
+        "Swift",
+        "本地记录",
+        "macOS"
+      ],
+      "website": "https://sakura-github-io.vercel.app/SakuraObserver.html"
+    },
+    "sakura-database-skill": {
+      "name": "Database Skill",
+      "category": "dev",
+      "icon": "database",
+      "description": "为 AI Agent 连接 MySQL。通过结构化计划完成查询、变更预览与可审计的执行。",
+      "tags": [
+        "TypeScript",
+        "MySQL",
+        "AI Agent"
+      ]
+    },
+    "sakura-Auto-test-skill": {
+      "name": "Auto Test Skill",
+      "category": "dev",
+      "icon": "test",
+      "description": "面向 AI 编程工作流的自动化测试 Skill，让测试步骤和验证结果更容易复用。",
+      "tags": [
+        "Python",
+        "AI Agent",
+        "测试"
+      ]
+    },
+    "Sakura-Code": {
+      "name": "Sakura Code",
+      "category": "dev",
+      "icon": "code",
+      "description": "围绕 AI 编程与 MCP 接入展开的开发工具，支持配置不同模型服务。",
+      "tags": [
+        "TypeScript",
+        "AI",
+        "MCP"
+      ]
+    },
+    "X-agentStudy": {
+      "name": "X-agentStudy",
+      "category": "lab",
+      "icon": "study",
+      "description": "基于 Spring Boot 与 Spring AI 的智慧学习项目，探索 AI 与学习场景的结合。",
+      "tags": [
+        "Java",
+        "Spring AI"
+      ]
+    },
+    "ScriptHub": {
+      "name": "ScriptHub",
+      "category": "lab",
+      "icon": "code",
+      "description": "一个 JavaScript 脚本项目。更多内容与使用方式，见项目仓库。",
+      "tags": [
+        "JavaScript",
+        "实验项目"
+      ]
+    }
+  }
+}

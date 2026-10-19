@@ -1,0 +1,301 @@
+window.PORTFOLIO_DATA = {
+  "schemaVersion": 1,
+  "syncedAt": "2026-10-19T05:56:10+00:00",
+  "profile": {
+    "login": "yueseqaz",
+    "name": "Sakura",
+    "bio": "Plan to be a lovely person",
+    "location": "Tokyo",
+    "htmlUrl": "https://github.com/yueseqaz",
+    "avatarUrl": "https://avatars.githubusercontent.com/u/140417996?v=4",
+    "avatarPath": "assets/avatar.png",
+    "followers": 2
+  },
+  "projects": [
+    {
+      "name": "SakuraGit",
+      "repo": "SakuraGit",
+      "repository": "https://github.com/yueseqaz/SakuraGit",
+      "website": "",
+      "category": "mac",
+      "icon": "git",
+      "description": "轻量 Git 桌面客户端。清晰的代码差异、可视化历史，让本地版本管理更直观。",
+      "tags": [
+        "Go",
+        "TypeScript",
+        "Git"
+      ],
+      "stars": 0,
+      "language": "TypeScript",
+      "updatedAt": "2026-10-18T17:14:49Z",
+      "badge": "EARLY DEVELOPMENT"
+    },
+    {
+      "name": "Sakura Cap",
+      "repo": "Sakura-Cap",
+      "repository": "https://github.com/yueseqaz/Sakura-Cap",
+      "website": "",
+      "category": "mac",
+      "icon": "capture",
+      "description": "住在菜单栏里的录屏与截图工具。录制、裁剪、标注和 OCR，顺手完成。",
+      "tags": [
+        "Swift",
+        "ScreenCaptureKit"
+      ],
+      "stars": 2,
+      "language": "Swift",
+      "updatedAt": "2026-10-18T12:00:58Z",
+      "badge": ""
+    },
+    {
+      "name": "SakuraWallpaper",
+      "repo": "SakuraWallpaper",
+      "repository": "https://github.com/yueseqaz/SakuraWallpaper",
+      "website": "https://sakura-github-io.vercel.app/Sakurawallpaper.html",
+      "category": "mac",
+      "icon": "wallpaper",
+      "description": "让桌面有一点生机。轻量的 macOS 动态壁纸应用，把喜欢的视频留在桌面。",
+      "tags": [
+        "Swift",
+        "macOS",
+        "动态壁纸"
+      ],
+      "stars": 16,
+      "language": "Swift",
+      "updatedAt": "2026-08-11T05:10:34Z",
+      "badge": ""
+    },
+    {
+      "name": "SakuraClipboard",
+      "repo": "SakuraClipboard",
+      "repository": "https://github.com/yueseqaz/SakuraClipboard",
+      "website": "https://sakura-github-io.vercel.app/SakuraClipboard.html",
+      "category": "mac",
+      "icon": "clipboard",
+      "description": "轻量、快速、可检索的剪贴板历史。找回刚刚复制的内容，让工作流少一点打断。",
+      "tags": [
+        "Swift",
+        "macOS",
+        "效率工具"
+      ],
+      "stars": 1,
+      "language": "Swift",
+      "updatedAt": "2026-10-16T06:57:17Z",
+      "badge": ""
+    },
+    {
+      "name": "SakuraTranslator",
+      "repo": "SakuraTranslator",
+      "repository": "https://github.com/yueseqaz/SakuraTranslator",
+      "website": "",
+      "category": "mac",
+      "icon": "translate",
+      "description": "菜单栏里的 AI 翻译助手。支持 DeepSeek、MiMo、GLM，也可以接入自定义 API。",
+      "tags": [
+        "Swift",
+        "AI",
+        "翻译"
+      ],
+      "stars": 0,
+      "language": "Swift",
+      "updatedAt": "2026-09-19T14:50:02Z",
+      "badge": ""
+    },
+    {
+      "name": "MultiOut",
+      "repo": "MultiOut",
+      "repository": "https://github.com/yueseqaz/MultiOut",
+      "website": "",
+      "category": "mac",
+      "icon": "audio",
+      "description": "一份声音，多个设备。有线、蓝牙与外接设备同时播放，每路音量独立控制。",
+      "tags": [
+        "Swift",
+        "音频",
+        "菜单栏"
+      ],
+      "stars": 0,
+      "language": "Swift",
+      "updatedAt": "2026-10-07T14:58:25Z",
+      "badge": ""
+    },
+    {
+      "name": "TodoBar",
+      "repo": "todobar",
+      "repository": "https://github.com/yueseqaz/todobar",
+      "website": "",
+      "category": "mac",
+      "icon": "todo",
+      "description": "随手记下待办，回到眼前的事。支持全局快速输入、本地提醒和优先级管理。",
+      "tags": [
+        "Swift",
+        "待办",
+        "菜单栏"
+      ],
+      "stars": 0,
+      "language": "Swift",
+      "updatedAt": "2026-08-15T07:41:46Z",
+      "badge": ""
+    },
+    {
+      "name": "PayTick",
+      "repo": "PayTick",
+      "repository": "https://github.com/yueseqaz/PayTick",
+      "website": "",
+      "category": "mac",
+      "icon": "clock",
+      "description": "让工作时间里的收入一秒秒可见。菜单栏实时计薪，也记得提醒你准时下班。",
+      "tags": [
+        "Swift",
+        "菜单栏",
+        "日常"
+      ],
+      "stars": 0,
+      "language": "Swift",
+      "updatedAt": "2026-08-05T15:27:07Z",
+      "badge": ""
+    },
+    {
+      "name": "SakuraAppEraser",
+      "repo": "SakuraAppEraser",
+      "repository": "https://github.com/yueseqaz/SakuraAppEraser",
+      "website": "",
+      "category": "mac",
+      "icon": "eraser",
+      "description": "为 macOS 应用做一次彻底清理。卸载应用，也处理留下的相关文件。",
+      "tags": [
+        "Swift",
+        "macOS",
+        "卸载工具"
+      ],
+      "stars": 0,
+      "language": "Swift",
+      "updatedAt": "2026-06-14T08:00:57Z",
+      "badge": ""
+    },
+    {
+      "name": "Interview Assist",
+      "repo": "interview-assist",
+      "repository": "https://github.com/yueseqaz/interview-assist",
+      "website": "https://sakura-github-io.vercel.app/interview-assist.html",
+      "category": "mac",
+      "icon": "chat",
+      "description": "macOS 面试辅助工具，将实时语音转成文字，并借助 AI 生成回答参考。",
+      "tags": [
+        "Swift",
+        "AI",
+        "语音转写"
+      ],
+      "stars": 0,
+      "language": "Swift",
+      "updatedAt": "2026-07-16T03:54:49Z",
+      "badge": ""
+    },
+    {
+      "name": "SakuraObserver",
+      "repo": "SakuraObserver",
+      "repository": "https://github.com/yueseqaz/SakuraObserver",
+      "website": "https://sakura-github-io.vercel.app/SakuraObserver.html",
+      "category": "mac",
+      "icon": "observe",
+      "description": "原生行为观测工具，支持事件日志、定时截图与人脸触发抓拍，数据保存在本地。",
+      "tags": [
+        "Swift",
+        "本地记录",
+        "macOS"
+      ],
+      "stars": 0,
+      "language": "Swift",
+      "updatedAt": "2026-06-08T08:57:00Z",
+      "badge": ""
+    },
+    {
+      "name": "Database Skill",
+      "repo": "sakura-database-skill",
+      "repository": "https://github.com/yueseqaz/sakura-database-skill",
+      "website": "",
+      "category": "dev",
+      "icon": "database",
+      "description": "为 AI Agent 连接 MySQL。通过结构化计划完成查询、变更预览与可审计的执行。",
+      "tags": [
+        "TypeScript",
+        "MySQL",
+        "AI Agent"
+      ],
+      "stars": 0,
+      "language": "TypeScript",
+      "updatedAt": "2026-09-03T02:47:09Z",
+      "badge": ""
+    },
+    {
+      "name": "Auto Test Skill",
+      "repo": "sakura-Auto-test-skill",
+      "repository": "https://github.com/yueseqaz/sakura-Auto-test-skill",
+      "website": "",
+      "category": "dev",
+      "icon": "test",
+      "description": "面向 AI 编程工作流的自动化测试 Skill，让测试步骤和验证结果更容易复用。",
+      "tags": [
+        "Python",
+        "AI Agent",
+        "测试"
+      ],
+      "stars": 0,
+      "language": "Python",
+      "updatedAt": "2026-08-13T12:54:27Z",
+      "badge": ""
+    },
+    {
+      "name": "Sakura Code",
+      "repo": "Sakura-Code",
+      "repository": "https://github.com/yueseqaz/Sakura-Code",
+      "website": "",
+      "category": "dev",
+      "icon": "code",
+      "description": "围绕 AI 编程与 MCP 接入展开的开发工具，支持配置不同模型服务。",
+      "tags": [
+        "TypeScript",
+        "AI",
+        "MCP"
+      ],
+      "stars": 1,
+      "language": "TypeScript",
+      "updatedAt": "2026-06-11T08:24:08Z",
+      "badge": ""
+    },
+    {
+      "name": "X-agentStudy",
+      "repo": "X-agentStudy",
+      "repository": "https://github.com/yueseqaz/X-agentStudy",
+      "website": "",
+      "category": "lab",
+      "icon": "study",
+      "description": "基于 Spring Boot 与 Spring AI 的智慧学习项目，探索 AI 与学习场景的结合。",
+      "tags": [
+        "Java",
+        "Spring AI"
+      ],
+      "stars": 0,
+      "language": "Java",
+      "updatedAt": "2026-05-29T17:19:58Z",
+      "badge": ""
+    },
+    {
+      "name": "ScriptHub",
+      "repo": "ScriptHub",
+      "repository": "https://github.com/yueseqaz/ScriptHub",
+      "website": "",
+      "category": "lab",
+      "icon": "code",
+      "description": "一个 JavaScript 脚本项目。更多内容与使用方式，见项目仓库。",
+      "tags": [
+        "JavaScript",
+        "实验项目"
+      ],
+      "stars": 0,
+      "language": "JavaScript",
+      "updatedAt": "2026-04-12T05:32:18Z",
+      "badge": ""
+    }
+  ]
+};
