@@ -84,6 +84,7 @@
       const repository = safeURL(project.repository) || github + encodeURIComponent(project.repo);
       const destination = safeURL(project.website) || repository;
       const card = element('article','project' + (index < 3 ? ' featured' : ''));
+      card.style.setProperty('--card-index', index);
       const top = element('div','project-top');
       const icon = element('div','project-icon');
       icon.setAttribute('aria-hidden','true');
@@ -158,4 +159,28 @@
     document.querySelectorAll('[data-count]').forEach(node => { node.textContent = String(projects.filter(project => node.dataset.count === 'all' || project.category === node.dataset.count).length).padStart(2,'0'); });
     document.querySelector('#total-projects').textContent = String(projects.length);
     render();
+
+    // Keep the page feeling alive without making the content compete for attention.
+    const revealObserver = 'IntersectionObserver' in window ? new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+          revealObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: .12 }) : null;
+    if (revealObserver) document.querySelectorAll('.work, .about, footer').forEach(node => {
+      node.classList.add('scroll-reveal');
+      revealObserver.observe(node);
+    });
+    const scene = document.querySelector('.scene');
+    if (scene && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      scene.addEventListener('pointermove', event => {
+        const rect = scene.getBoundingClientRect();
+        const x = ((event.clientX - rect.left) / rect.width - .5) * 4;
+        const y = ((event.clientY - rect.top) / rect.height - .5) * 4;
+        scene.style.transform = `translate(${x}px, ${y}px)`;
+      });
+      scene.addEventListener('pointerleave', () => { scene.style.transform = ''; });
+    }
 })();
