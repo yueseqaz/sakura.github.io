@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "syncedAt": "2026-10-26T04:41:15+00:00",
+  "syncedAt": "2026-10-26T12:54:36+00:00",
   "profile": {
     "login": "yueseqaz",
     "name": "Sakura",
@@ -44,7 +44,7 @@
       ],
       "stars": 2,
       "language": "Swift",
-      "updatedAt": "2026-10-26T03:25:42Z",
+      "updatedAt": "2026-10-26T06:45:13Z",
       "badge": ""
     },
     {
@@ -295,6 +295,22 @@
       "stars": 0,
       "language": "JavaScript",
       "updatedAt": "2026-04-12T05:32:18Z",
+      "badge": ""
+    },
+    {
+      "name": "sakura-capture",
+      "repo": "sakura-capture",
+      "repository": "https://github.com/yueseqaz/sakura-capture",
+      "website": "",
+      "category": "lab",
+      "icon": "code",
+      "description": "Lightweight Windows screenshot and screen recorder. Native Go/MyGo UI with Windows Media Foundation recording.",
+      "tags": [
+        "C++"
+      ],
+      "stars": 0,
+      "language": "C++",
+      "updatedAt": "2026-10-26T12:37:16Z",
       "badge": ""
     }
   ]
