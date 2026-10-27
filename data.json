@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "syncedAt": "2026-10-27T17:58:22+00:00",
+  "syncedAt": "2026-10-27T22:09:40+00:00",
   "profile": {
     "login": "yueseqaz",
     "name": "Sakura",
@@ -44,7 +44,7 @@
       ],
       "stars": 2,
       "language": "Swift",
-      "updatedAt": "2026-10-27T17:57:33Z",
+      "updatedAt": "2026-10-27T18:00:07Z",
       "badge": ""
     },
     {
@@ -295,6 +295,22 @@
       "stars": 0,
       "language": "JavaScript",
       "updatedAt": "2026-04-12T05:32:18Z",
+      "badge": ""
+    },
+    {
+      "name": "Sakuraviewer",
+      "repo": "Sakuraviewer",
+      "repository": "https://github.com/yueseqaz/Sakuraviewer",
+      "website": "",
+      "category": "mac",
+      "icon": "code",
+      "description": "🌸 Sakura-Viewer — 原生 macOS 统一文件查看器（图片/视频/音频/PDF/代码/文本/Markdown），纯 SwiftUI + 零第三方依赖，无需 Xcode GUI 命令行构建",
+      "tags": [
+        "Swift"
+      ],
+      "stars": 0,
+      "language": "Swift",
+      "updatedAt": "2026-10-27T19:20:14Z",
       "badge": ""
     },
     {
