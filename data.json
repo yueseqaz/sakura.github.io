@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "syncedAt": "2026-10-28T12:47:04+00:00",
+  "syncedAt": "2026-10-28T22:31:37+00:00",
   "profile": {
     "login": "yueseqaz",
     "name": "Sakura",
@@ -44,7 +44,7 @@
       ],
       "stars": 2,
       "language": "Swift",
-      "updatedAt": "2026-10-27T18:00:07Z",
+      "updatedAt": "2026-10-28T14:50:19Z",
       "badge": ""
     },
     {
@@ -134,7 +134,7 @@
       ],
       "stars": 0,
       "language": "Swift",
-      "updatedAt": "2026-10-28T00:48:16Z",
+      "updatedAt": "2026-10-28T16:15:54Z",
       "badge": ""
     },
     {
@@ -298,6 +298,22 @@
       "badge": ""
     },
     {
+      "name": "bastion-pilot",
+      "repo": "bastion-pilot",
+      "repository": "https://github.com/yueseqaz/bastion-pilot",
+      "website": "",
+      "category": "dev",
+      "icon": "code",
+      "description": "Bring AI agents (Claude Code, Codex, any OpenAI-compatible provider) to bastion-host web terminals — browser extension + local MCP bridge. 把 AI Agent 带进堡垒机 Web 终端。",
+      "tags": [
+        "TypeScript"
+      ],
+      "stars": 0,
+      "language": "TypeScript",
+      "updatedAt": "2026-10-28T17:52:16Z",
+      "badge": ""
+    },
+    {
       "name": "sakura-player",
       "repo": "sakura-player",
       "repository": "https://github.com/yueseqaz/sakura-player",
@@ -310,7 +326,7 @@
       ],
       "stars": 0,
       "language": "Swift",
-      "updatedAt": "2026-10-28T12:31:33Z",
+      "updatedAt": "2026-10-28T16:20:14Z",
       "badge": ""
     },
     {
@@ -326,7 +342,7 @@
       ],
       "stars": 0,
       "language": "Swift",
-      "updatedAt": "2026-10-28T08:03:29Z",
+      "updatedAt": "2026-10-28T14:00:54Z",
       "badge": ""
     },
     {
