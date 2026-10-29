@@ -1,6 +1,6 @@
 window.PORTFOLIO_DATA = {
   "schemaVersion": 1,
-  "syncedAt": "2026-10-29T12:54:54+00:00",
+  "syncedAt": "2026-10-29T22:43:00+00:00",
   "profile": {
     "login": "yueseqaz",
     "name": "Sakura",
@@ -44,7 +44,7 @@ window.PORTFOLIO_DATA = {
       ],
       "stars": 2,
       "language": "Swift",
-      "updatedAt": "2026-10-28T14:50:19Z",
+      "updatedAt": "2026-10-29T16:49:00Z",
       "badge": ""
     },
     {
@@ -298,6 +298,24 @@ window.PORTFOLIO_DATA = {
       "badge": ""
     },
     {
+      "name": "sakura-notes",
+      "repo": "sakura-notes",
+      "repository": "https://github.com/yueseqaz/sakura-notes",
+      "website": "",
+      "category": "mac",
+      "icon": "code",
+      "description": "A native macOS Markdown notebook with local-first storage, powerful full-text search, linked notes, and an optional AI writing assistant.",
+      "tags": [
+        "Swift",
+        "knowledge-base",
+        "macos"
+      ],
+      "stars": 0,
+      "language": "Swift",
+      "updatedAt": "2026-10-29T19:42:36Z",
+      "badge": ""
+    },
+    {
       "name": "bastion-pilot",
       "repo": "bastion-pilot",
       "repository": "https://github.com/yueseqaz/bastion-pilot",
@@ -310,7 +328,7 @@ window.PORTFOLIO_DATA = {
       ],
       "stars": 0,
       "language": "TypeScript",
-      "updatedAt": "2026-10-29T00:44:24Z",
+      "updatedAt": "2026-10-29T17:08:00Z",
       "badge": ""
     },
     {
