@@ -1,6 +1,6 @@
 window.PORTFOLIO_DATA = {
   "schemaVersion": 1,
-  "syncedAt": "2026-11-01T13:15:34+00:00",
+  "syncedAt": "2026-11-01T21:58:39+00:00",
   "profile": {
     "login": "yueseqaz",
     "name": "Sakura",
@@ -44,7 +44,7 @@ window.PORTFOLIO_DATA = {
       ],
       "stars": 2,
       "language": "Swift",
-      "updatedAt": "2026-10-31T13:18:29Z",
+      "updatedAt": "2026-11-01T16:58:36Z",
       "badge": ""
     },
     {
@@ -295,6 +295,22 @@ window.PORTFOLIO_DATA = {
       "stars": 0,
       "language": "JavaScript",
       "updatedAt": "2026-04-12T05:32:18Z",
+      "badge": ""
+    },
+    {
+      "name": "sakura-switch",
+      "repo": "sakura-switch",
+      "repository": "https://github.com/yueseqaz/sakura-switch",
+      "website": "",
+      "category": "mac",
+      "icon": "code",
+      "description": "Sakura Switch — an open-source macOS window switcher, Alt-Tab replacement",
+      "tags": [
+        "Swift"
+      ],
+      "stars": 0,
+      "language": "Swift",
+      "updatedAt": "2026-11-01T18:36:22Z",
       "badge": ""
     },
     {
