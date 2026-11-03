@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "syncedAt": "2026-11-03T14:06:14+00:00",
+  "syncedAt": "2026-11-03T23:17:06+00:00",
   "profile": {
     "login": "yueseqaz",
     "name": "Sakura",
@@ -44,7 +44,7 @@
       ],
       "stars": 2,
       "language": "Swift",
-      "updatedAt": "2026-11-02T17:29:18Z",
+      "updatedAt": "2026-11-03T15:33:52Z",
       "badge": ""
     },
     {
@@ -295,6 +295,22 @@
       "stars": 0,
       "language": "JavaScript",
       "updatedAt": "2026-04-12T05:32:18Z",
+      "badge": ""
+    },
+    {
+      "name": "SakuraVeil",
+      "repo": "SakuraVeil",
+      "repository": "https://github.com/yueseqaz/SakuraVeil",
+      "website": "",
+      "category": "mac",
+      "icon": "code",
+      "description": "macOS 菜单栏隐私遮屏工具：一键幕布盖住屏幕，任务照常跑，快捷键/密码解锁 · Menu-bar privacy curtain for macOS",
+      "tags": [
+        "Swift"
+      ],
+      "stars": 0,
+      "language": "Swift",
+      "updatedAt": "2026-11-03T17:09:18Z",
       "badge": ""
     },
     {
