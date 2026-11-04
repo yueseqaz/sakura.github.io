@@ -1,6 +1,6 @@
 window.PORTFOLIO_DATA = {
   "schemaVersion": 1,
-  "syncedAt": "2026-11-04T14:27:01+00:00",
+  "syncedAt": "2026-11-04T23:37:40+00:00",
   "profile": {
     "login": "yueseqaz",
     "name": "Sakura",
@@ -304,13 +304,13 @@ window.PORTFOLIO_DATA = {
       "website": "",
       "category": "mac",
       "icon": "code",
-      "description": "macOS 菜单栏隐私遮屏工具：一键幕布盖住屏幕，任务照常跑，快捷键/密码解锁 · Menu-bar privacy curtain for macOS",
+      "description": "macOS 菜单栏防休眠工具：一键保持清醒跑通宵，可选隐私幕布护屏 · Stay-awake-first menu bar tool with an optional privacy curtain",
       "tags": [
         "Swift"
       ],
       "stars": 0,
       "language": "Swift",
-      "updatedAt": "2026-11-03T17:09:18Z",
+      "updatedAt": "2026-11-04T17:12:40Z",
       "badge": ""
     },
     {
