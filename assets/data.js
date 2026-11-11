@@ -1,6 +1,6 @@
 window.PORTFOLIO_DATA = {
   "schemaVersion": 1,
-  "syncedAt": "2026-11-11T06:07:52+00:00",
+  "syncedAt": "2026-11-11T14:14:06+00:00",
   "profile": {
     "login": "yueseqaz",
     "name": "Sakura",
@@ -295,6 +295,22 @@ window.PORTFOLIO_DATA = {
       "stars": 0,
       "language": "JavaScript",
       "updatedAt": "2026-04-12T05:32:18Z",
+      "badge": ""
+    },
+    {
+      "name": "SakuraMirror",
+      "repo": "SakuraMirror",
+      "repository": "https://github.com/yueseqaz/SakuraMirror",
+      "website": "",
+      "category": "lab",
+      "icon": "code",
+      "description": "项目详情与使用方式，见项目仓库。",
+      "tags": [
+        "Kotlin"
+      ],
+      "stars": 0,
+      "language": "Kotlin",
+      "updatedAt": "2026-11-11T13:48:00Z",
       "badge": ""
     },
     {
