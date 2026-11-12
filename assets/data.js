@@ -1,6 +1,6 @@
 window.PORTFOLIO_DATA = {
   "schemaVersion": 1,
-  "syncedAt": "2026-11-12T00:37:40+00:00",
+  "syncedAt": "2026-11-12T15:06:23+00:00",
   "profile": {
     "login": "yueseqaz",
     "name": "Sakura",
@@ -12,24 +12,6 @@ window.PORTFOLIO_DATA = {
     "followers": 2
   },
   "projects": [
-    {
-      "name": "SakuraGit",
-      "repo": "SakuraGit",
-      "repository": "https://github.com/yueseqaz/SakuraGit",
-      "website": "",
-      "category": "mac",
-      "icon": "git",
-      "description": "轻量 Git 桌面客户端。清晰的代码差异、可视化历史，让本地版本管理更直观。",
-      "tags": [
-        "Go",
-        "TypeScript",
-        "Git"
-      ],
-      "stars": 0,
-      "language": "TypeScript",
-      "updatedAt": "2026-10-25T03:59:18Z",
-      "badge": "EARLY DEVELOPMENT"
-    },
     {
       "name": "Sakura Cap",
       "repo": "Sakura-Cap",
